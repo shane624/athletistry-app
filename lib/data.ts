@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase-server";
-import { weekFromStartDate, resolveRx, type ResolvedRx } from "@/lib/program";
+import { weekFromStartDate, resolveRx, SLOT_CATEGORIES, type ResolvedRx } from "@/lib/program";
 import { getProgram, DEFAULT_PROGRAM_ID, type Program } from "@/lib/programs";
 import type { ExerciseRow, TodayData, WorkoutStyle } from "@/lib/types";
 
@@ -215,39 +215,22 @@ export async function listExercises(): Promise<ExerciseRow[]> {
 }
 
 /* ============================================================
-   Random Workout Generator
-   Follows the "Build Your Workout" structure: legs → push → pull → core,
-   with style-specific sets/reps/tempo (hypertrophy / strength / endurance).
+   Random Workout Generator (async server action).
+   styleRx + SLOT_CATEGORIES live in lib/program.ts (pure helpers).
    ============================================================ */
-
-// Map the program's "Great 8" slots to library categories.
-const SLOT_CATEGORIES: Record<string, string[]> = {
-  Legs: ["squat", "hinge", "lunge", "calf"],
-  Push: ["push", "shoulder"],
-  Pull: ["pull"],
-  Core: ["core"],
-};
-
-export function styleRx(style: WorkoutStyle): ResolvedRx {
-  if (style === "strength") return { block: "strength", sets: 4, repLow: 3, repHigh: 5, tempo: "2:1:1", restSec: 180, notes: "Strength: lift heavy, 3–5 reps, full ~3 min rest between sets. Intensity high, volume low.", week: 1 };
-  if (style === "endurance") return { block: "endurance", sets: 3, repLow: 15, repHigh: 25, tempo: "smooth", restSec: 30, notes: "Endurance: 15–25+ reps, minimal rest, keep moving (circuit-style). Intensity low, volume high.", week: 1 };
-  return { block: "hypertrophy", sets: 3, repLow: 8, repHigh: 12, tempo: "3:1:1", restSec: 60, notes: "Hypertrophy: 8–12 reps, 3–4 sets, slow eccentric, low rest. Moderate volume & intensity.", week: 1 };
-}
-
-function pickRandom<T>(arr: T[], n: number): T[] {
-  const copy = [...arr];
-  const out: T[] = [];
-  while (copy.length && out.length < n) out.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0]);
-  return out;
-}
 
 /** Generate a balanced one-day workout. perSlot = exercises per slot (1 or 2). maxLevel caps difficulty. */
 export async function generateWorkout(style: WorkoutStyle, perSlot = 1, maxLevel = 4): Promise<{ slot: string; exercises: ExerciseRow[] }[]> {
   const all = await listExercises();
   const usable = all.filter((e) => e.level <= maxLevel);
+  const pick = <T,>(arr: T[], n: number): T[] => {
+    const copy = [...arr]; const out: T[] = [];
+    while (copy.length && out.length < n) out.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0]);
+    return out;
+  };
   return Object.entries(SLOT_CATEGORIES).map(([slot, cats]) => {
     const pool = usable.filter((e) => cats.includes(e.category));
-    return { slot, exercises: pickRandom(pool, perSlot) };
+    return { slot, exercises: pick(pool, perSlot) };
   });
 }
 

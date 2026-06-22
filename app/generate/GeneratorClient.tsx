@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { generateWorkout, styleRx, saveCustomDay, setActiveProgram, markOnboarded } from "@/lib/data";
+import { generateWorkout, saveCustomDay, setActiveProgram, markOnboarded } from "@/lib/data";
+import { styleRx } from "@/lib/program";
 import type { ExerciseRow, WorkoutStyle } from "@/lib/types";
 
 const STYLES: { id: WorkoutStyle; label: string; sub: string }[] = [

@@ -149,6 +149,23 @@ export interface ResolvedRx {
   week: number;       // 1 for fixed programs
 }
 
+// ---- Random Workout helpers (pure; safe to import into client or server) ----
+import type { WorkoutStyle } from "@/lib/types";
+
+// Map the "Great 8" slots to library categories.
+export const SLOT_CATEGORIES: Record<string, string[]> = {
+  Legs: ["squat", "hinge", "lunge", "calf"],
+  Push: ["push", "shoulder"],
+  Pull: ["pull"],
+  Core: ["core"],
+};
+
+export function styleRx(style: WorkoutStyle): ResolvedRx {
+  if (style === "strength") return { block: "strength", sets: 4, repLow: 3, repHigh: 5, tempo: "2:1:1", restSec: 180, notes: "Strength: lift heavy, 3–5 reps, full ~3 min rest between sets. Intensity high, volume low.", week: 1 };
+  if (style === "endurance") return { block: "endurance", sets: 3, repLow: 15, repHigh: 25, tempo: "smooth", restSec: 30, notes: "Endurance: 15–25+ reps, minimal rest, keep moving (circuit-style). Intensity low, volume high.", week: 1 };
+  return { block: "hypertrophy", sets: 3, repLow: 8, repHigh: 12, tempo: "3:1:1", restSec: 60, notes: "Hypertrophy: 8–12 reps, 3–4 sets, slow eccentric, low rest. Moderate volume & intensity.", week: 1 };
+}
+
 /** Resolve the prescription for a program. For periodized programs, pass the current week. */
 export function resolveRx(program: Program, week: number): ResolvedRx {
   if (program.type === "periodized") {
