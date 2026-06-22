@@ -27,4 +27,37 @@ alter table user_program_state add column if not exists selected_day int not nul
 alter table profiles add column if not exists disclaimer_accepted_at timestamptz;
 alter table profiles add column if not exists onboarded boolean not null default false;
 
+-- 4) existing accounts: mark them onboarded so they aren't prompted retroactively.
+--    (New signups after this still go through disclaimer + program choice.)
+update profiles set disclaimer_accepted_at = coalesce(disclaimer_accepted_at, now()),
+                    onboarded = true
+where disclaimer_accepted_at is null or onboarded = false;
+
+-- 5) Build-Your-Own: per-user custom program (a list of chosen exercises, ordered, with a day)
+create table if not exists custom_program_exercises (
+  id          bigint generated always as identity primary key,
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  day_index   int  not null default 0,
+  exercise_id bigint not null references exercises(id) on delete cascade,
+  ord         int  not null default 0,
+  created_at  timestamptz not null default now()
+);
+create index if not exists custom_prog_user_idx on custom_program_exercises (user_id, day_index, ord);
+
+alter table custom_program_exercises enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where policyname = 'own custom r') then
+    create policy "own custom r" on custom_program_exercises for select using (auth.uid() = user_id);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'own custom i') then
+    create policy "own custom i" on custom_program_exercises for insert with check (auth.uid() = user_id);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'own custom d') then
+    create policy "own custom d" on custom_program_exercises for delete using (auth.uid() = user_id);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'own custom u') then
+    create policy "own custom u" on custom_program_exercises for update using (auth.uid() = user_id);
+  end if;
+end $$;
+
 -- done. Existing 24-week logs keep working (defaulted to 'periodized24').

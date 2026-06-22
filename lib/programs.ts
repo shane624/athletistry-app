@@ -86,11 +86,26 @@ export const PROGRAMS: Program[] = [
   },
 ];
 
+// "Build Your Own" — days come from the user's custom_program_exercises rows, not from code.
+export const CUSTOM_PROGRAM: Program = {
+  id: "custom",
+  name: "Build Your Own",
+  tagline: "Pick exercises from the library and build your own routine. Full reps & weight tracking.",
+  type: "fixed",
+  scheduling: "manual",
+  fixedRx: { block: "custom", sets: 3, lo: 8, hi: 12, tempo: "controlled", rest: 75, notes: "Your custom routine. Default target is 3 sets of 8–12 — adjust your weight and reps to your goal. Log each set; weights carry forward." },
+  days: [], // filled at runtime from the DB
+};
+
 export const DEFAULT_PROGRAM_ID = "periodized24";
 
 export function getProgram(id: string | null | undefined): Program {
+  if (id === "custom") return CUSTOM_PROGRAM;
   return PROGRAMS.find((p) => p.id === id) ?? PROGRAMS[0];
 }
+
+/** All programs shown in the picker, including Build Your Own. */
+export const ALL_PICKER_PROGRAMS: Program[] = [...PROGRAMS, CUSTOM_PROGRAM];
 
 export const BLOCK_LABEL: Record<string, string> = {
   hypertrophy: "Hypertrophy", strength: "Strength", endurance: "Endurance", ballet: "Ballet Return", kids: "Kids",

@@ -61,15 +61,15 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
       <div className="mt-3 space-y-2">
         {sets.map((s) => (
           <div key={s} className="flex items-center gap-2">
-            <span className="w-12 text-sm text-grey">Set {s}</span>
-            <input className="input py-1.5 w-24" inputMode="decimal" placeholder="kg"
+            <span className="w-11 shrink-0 text-sm text-grey">Set {s}</span>
+            <input className="input py-1.5 flex-1 min-w-0" inputMode="decimal" placeholder="kg"
               value={vals[s].weight}
               onChange={(e) => setVals((v) => ({ ...v, [s]: { ...v[s], weight: e.target.value } }))} />
-            <span className="text-grey">×</span>
-            <input className="input py-1.5 w-20" inputMode="numeric" placeholder="reps"
+            <span className="text-grey shrink-0">×</span>
+            <input className="input py-1.5 flex-1 min-w-0" inputMode="numeric" placeholder="reps"
               value={vals[s].reps}
               onChange={(e) => setVals((v) => ({ ...v, [s]: { ...v[s], reps: e.target.value } }))} />
-            <button className="btn-primary py-1.5 text-sm" onClick={() => save(s)}>
+            <button className="btn-primary py-1.5 text-sm shrink-0" onClick={() => save(s)}>
               {saved[s] === "saving" ? "…" : saved[s] === "ok" ? "✓" : "Save"}
             </button>
           </div>

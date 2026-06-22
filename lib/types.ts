@@ -8,6 +8,8 @@ export interface ExerciseRow {
   category: string;
 }
 
+export type WorkoutStyle = "hypertrophy" | "strength" | "endurance";
+
 export interface TodayData {
   week: number;
   dayIndex: number;

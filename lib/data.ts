@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase-server";
 import { weekFromStartDate, resolveRx, type ResolvedRx } from "@/lib/program";
 import { getProgram, DEFAULT_PROGRAM_ID, type Program } from "@/lib/programs";
-import type { ExerciseRow, TodayData } from "@/lib/types";
+import type { ExerciseRow, TodayData, WorkoutStyle } from "@/lib/types";
 
 /** Read the user's saved program state (active program, selected day, week override, start date). */
 async function getUserState() {
@@ -43,20 +43,39 @@ async function exercisesByName(names: string[]): Promise<ExerciseRow[]> {
   return names.map((n) => byName.get(n)).filter(Boolean) as ExerciseRow[];
 }
 
-export async function getToday(): Promise<TodayData & { programId: string; programName: string; programType: string; mode?: string; dayCount: number; scheduling: string }> {
+export async function getToday(): Promise<TodayData & { programId: string; programName: string; programType: string; mode?: string; dayCount: number; scheduling: string; isCustom?: boolean }> {
   const st = await getUserState();
   const program: Program = getProgram(st.programId);
+  const isCustom = program.id === "custom";
 
   const week = program.type === "periodized"
     ? (st.weekOverride ?? weekFromStartDate(st.startDate))
     : 1;
-  const dayIndex = program.scheduling === "weekday"
-    ? weekdayDayIndex()
-    : Math.min(st.selectedDay, program.days.length - 1);
+
+  let exercises: ExerciseRow[];
+  let dayIndex: number;
+  let dayTitle: string;
+  let dayCount: number;
+
+  if (isCustom) {
+    // custom days come from the user's saved rows
+    const customDays = await getCustomDays();         // [{dayIndex, exercises[]}, ...]
+    dayCount = Math.max(customDays.length, 1);
+    dayIndex = Math.min(st.selectedDay, dayCount - 1);
+    const sel = customDays.find((d) => d.dayIndex === dayIndex) ?? customDays[0];
+    exercises = sel?.exercises ?? [];
+    dayTitle = `My Routine — Day ${dayIndex + 1}`;
+  } else {
+    dayIndex = program.scheduling === "weekday"
+      ? weekdayDayIndex()
+      : Math.min(st.selectedDay, program.days.length - 1);
+    const day = program.days[dayIndex];
+    dayTitle = day.title;
+    dayCount = program.days.length;
+    exercises = await exercisesByName(day.exerciseNames);
+  }
 
   const rx: ResolvedRx = resolveRx(program, week);
-  const day = program.days[dayIndex];
-  const exercises = await exercisesByName(day.exerciseNames);
 
   const logs: TodayData["logs"] = {};
   if (st.user && exercises.length) {
@@ -76,10 +95,45 @@ export async function getToday(): Promise<TodayData & { programId: string; progr
   }
 
   return {
-    week, dayIndex, dayTitle: day.title, rx: rx as any, exercises, logs,
+    week, dayIndex, dayTitle, rx: rx as any, exercises, logs,
     programId: program.id, programName: program.name, programType: program.type,
-    mode: program.mode, dayCount: program.days.length, scheduling: program.scheduling,
+    mode: program.mode, dayCount, scheduling: program.scheduling, isCustom,
   };
+}
+
+/** Read the user's custom routine, grouped by day with resolved exercise rows. */
+export async function getCustomDays(): Promise<{ dayIndex: number; exercises: ExerciseRow[] }[]> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [{ dayIndex: 0, exercises: [] }];
+  const { data: rows } = await supabase
+    .from("custom_program_exercises")
+    .select("day_index, ord, exercises(id,name,youtube_id,level,category)")
+    .eq("user_id", user.id)
+    .order("day_index").order("ord");
+  const byDay = new Map<number, ExerciseRow[]>();
+  for (const r of (rows ?? []) as any[]) {
+    const arr = byDay.get(r.day_index) ?? [];
+    if (r.exercises) arr.push(r.exercises);
+    byDay.set(r.day_index, arr);
+  }
+  if (byDay.size === 0) return [{ dayIndex: 0, exercises: [] }];
+  return [...byDay.entries()].sort((a, b) => a[0] - b[0]).map(([dayIndex, exercises]) => ({ dayIndex, exercises }));
+}
+
+/** Replace the user's custom routine for one day with a new ordered list of exercise ids. */
+export async function saveCustomDay(dayIndex: number, exerciseIds: number[]) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  // clear existing rows for that day, then insert the new order
+  await supabase.from("custom_program_exercises").delete().eq("user_id", user.id).eq("day_index", dayIndex);
+  if (exerciseIds.length) {
+    const rows = exerciseIds.map((id, i) => ({ user_id: user.id, day_index: dayIndex, exercise_id: id, ord: i }));
+    const { error } = await supabase.from("custom_program_exercises").insert(rows);
+    if (error) return { ok: false, error: error.message };
+  }
+  return { ok: true };
 }
 
 export async function setActiveProgram(programId: string) {
@@ -160,16 +214,60 @@ export async function listExercises(): Promise<ExerciseRow[]> {
   return data ?? [];
 }
 
-/** Onboarding status for the logged-in user. */
+/* ============================================================
+   Random Workout Generator
+   Follows the "Build Your Workout" structure: legs → push → pull → core,
+   with style-specific sets/reps/tempo (hypertrophy / strength / endurance).
+   ============================================================ */
+
+// Map the program's "Great 8" slots to library categories.
+const SLOT_CATEGORIES: Record<string, string[]> = {
+  Legs: ["squat", "hinge", "lunge", "calf"],
+  Push: ["push", "shoulder"],
+  Pull: ["pull"],
+  Core: ["core"],
+};
+
+export function styleRx(style: WorkoutStyle): ResolvedRx {
+  if (style === "strength") return { block: "strength", sets: 4, repLow: 3, repHigh: 5, tempo: "2:1:1", restSec: 180, notes: "Strength: lift heavy, 3–5 reps, full ~3 min rest between sets. Intensity high, volume low.", week: 1 };
+  if (style === "endurance") return { block: "endurance", sets: 3, repLow: 15, repHigh: 25, tempo: "smooth", restSec: 30, notes: "Endurance: 15–25+ reps, minimal rest, keep moving (circuit-style). Intensity low, volume high.", week: 1 };
+  return { block: "hypertrophy", sets: 3, repLow: 8, repHigh: 12, tempo: "3:1:1", restSec: 60, notes: "Hypertrophy: 8–12 reps, 3–4 sets, slow eccentric, low rest. Moderate volume & intensity.", week: 1 };
+}
+
+function pickRandom<T>(arr: T[], n: number): T[] {
+  const copy = [...arr];
+  const out: T[] = [];
+  while (copy.length && out.length < n) out.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0]);
+  return out;
+}
+
+/** Generate a balanced one-day workout. perSlot = exercises per slot (1 or 2). maxLevel caps difficulty. */
+export async function generateWorkout(style: WorkoutStyle, perSlot = 1, maxLevel = 4): Promise<{ slot: string; exercises: ExerciseRow[] }[]> {
+  const all = await listExercises();
+  const usable = all.filter((e) => e.level <= maxLevel);
+  return Object.entries(SLOT_CATEGORIES).map(([slot, cats]) => {
+    const pool = usable.filter((e) => cats.includes(e.category));
+    return { slot, exercises: pickRandom(pool, perSlot) };
+  });
+}
+
+/** Onboarding status for the logged-in user.
+ *  If the onboarding columns don't exist yet (migration not run) or the query
+ *  errors, we treat the user as fully onboarded so they are NOT trapped in a
+ *  redirect loop to the disclaimer. */
 export async function getOnboarding(): Promise<{ disclaimerAccepted: boolean; onboarded: boolean }> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { disclaimerAccepted: false, onboarded: false };
-  const { data } = await supabase
+  if (!user) return { disclaimerAccepted: true, onboarded: true };
+  const { data, error } = await supabase
     .from("profiles")
     .select("disclaimer_accepted_at, onboarded")
     .eq("id", user.id)
     .single();
+  if (error) {
+    // columns missing or read failed — don't loop the welcome flow
+    return { disclaimerAccepted: true, onboarded: true };
+  }
   return { disclaimerAccepted: !!data?.disclaimer_accepted_at, onboarded: !!data?.onboarded };
 }
 

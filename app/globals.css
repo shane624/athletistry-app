@@ -4,8 +4,13 @@
 
 :root { color-scheme: light; }
 
+html { -webkit-text-size-adjust: 100%; }
+
 body {
   @apply bg-light text-ink;
+  -webkit-overflow-scrolling: touch;
+  /* respect iOS notch / home-indicator safe areas */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .card {
@@ -13,6 +18,9 @@ body {
 }
 .btn {
   @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium transition;
+  /* comfortable tap target on phones */
+  min-height: 40px;
+  touch-action: manipulation;
 }
 .btn-primary {
   @apply btn bg-teal text-white hover:bg-tealdark;
@@ -22,7 +30,19 @@ body {
 }
 .input {
   @apply w-full rounded-lg border border-line px-3 py-2 outline-none focus:border-teal;
+  /* 16px font stops iOS Safari from auto-zooming when an input is focused */
+  font-size: 16px;
 }
 .badge {
   @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+}
+
+/* Tappable nav that wraps cleanly on small screens */
+@media (max-width: 640px) {
+  .nav-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .nav-scroll::-webkit-scrollbar { display: none; }
 }

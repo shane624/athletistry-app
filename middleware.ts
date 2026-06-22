@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isPrivate = ["/dashboard", "/programs", "/progress", "/exercises", "/settings", "/welcome"].some((p) =>
+  const isPrivate = ["/dashboard", "/programs", "/progress", "/exercises", "/guide", "/build", "/generate", "/workouts", "/training-styles", "/settings", "/welcome"].some((p) =>
     path.startsWith(p)
   );
 
@@ -40,5 +40,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/programs/:path*", "/progress/:path*", "/exercises/:path*", "/settings/:path*", "/welcome/:path*"],
+  matcher: ["/dashboard/:path*", "/programs/:path*", "/progress/:path*", "/exercises/:path*", "/guide/:path*", "/build/:path*", "/generate/:path*", "/workouts/:path*", "/training-styles/:path*", "/settings/:path*", "/welcome/:path*"],
 };

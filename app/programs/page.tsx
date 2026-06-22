@@ -23,7 +23,7 @@ export default async function ProgramsPage({ searchParams }: { searchParams?: { 
       <main className="max-w-4xl mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold text-navy">Choose your program</h1>
         <p className="text-grey text-sm mt-1">Each program keeps its own logs and weights. Switch anytime.</p>
-        <ProgramPicker programs={programs} active={active} first={searchParams?.first === "1"} />
+        <ProgramPicker programs={programs} active={active} first={searchParams?.first === "1"} customActive={active === "custom"} />
       </main>
     </div>
   );
