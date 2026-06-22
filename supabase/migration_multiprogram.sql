@@ -60,4 +60,51 @@ do $$ begin
   end if;
 end $$;
 
+-- 6) Saved Workouts library: many named workouts per user (custom-built or generated)
+create table if not exists saved_workouts (
+  id          bigint generated always as identity primary key,
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  name        text not null,
+  style       text not null default 'hypertrophy',  -- hypertrophy | strength | endurance | custom
+  created_at  timestamptz not null default now()
+);
+create table if not exists saved_workout_exercises (
+  id          bigint generated always as identity primary key,
+  workout_id  bigint not null references saved_workouts(id) on delete cascade,
+  exercise_id bigint not null references exercises(id) on delete cascade,
+  ord         int not null default 0
+);
+create index if not exists saved_workouts_user_idx on saved_workouts (user_id, created_at desc);
+create index if not exists saved_workout_ex_idx on saved_workout_exercises (workout_id, ord);
+
+alter table saved_workouts enable row level security;
+alter table saved_workout_exercises enable row level security;
+do $$ begin
+  if not exists (select 1 from pg_policies where policyname = 'own sw r') then
+    create policy "own sw r" on saved_workouts for select using (auth.uid() = user_id);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'own sw i') then
+    create policy "own sw i" on saved_workouts for insert with check (auth.uid() = user_id);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'own sw u') then
+    create policy "own sw u" on saved_workouts for update using (auth.uid() = user_id);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'own sw d') then
+    create policy "own sw d" on saved_workouts for delete using (auth.uid() = user_id);
+  end if;
+  -- child rows: allow if the parent workout belongs to the user
+  if not exists (select 1 from pg_policies where policyname = 'own swe r') then
+    create policy "own swe r" on saved_workout_exercises for select
+      using (exists (select 1 from saved_workouts w where w.id = workout_id and w.user_id = auth.uid()));
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'own swe i') then
+    create policy "own swe i" on saved_workout_exercises for insert
+      with check (exists (select 1 from saved_workouts w where w.id = workout_id and w.user_id = auth.uid()));
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'own swe d') then
+    create policy "own swe d" on saved_workout_exercises for delete
+      using (exists (select 1 from saved_workouts w where w.id = workout_id and w.user_id = auth.uid()));
+  end if;
+end $$;
+
 -- done. Existing 24-week logs keep working (defaulted to 'periodized24').

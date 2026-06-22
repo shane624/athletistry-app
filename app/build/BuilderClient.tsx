@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { saveCustomDay, setActiveProgram, markOnboarded } from "@/lib/data";
+import { saveCustomDay, setActiveProgram, markOnboarded, saveWorkout } from "@/lib/data";
 import type { ExerciseRow } from "@/lib/types";
 
 interface DayState { dayIndex: number; exerciseIds: number[]; }
@@ -57,6 +57,15 @@ export default function BuilderClient({ allExercises, initial }: { allExercises:
     await markOnboarded();
     router.push("/dashboard");
     router.refresh();
+  }
+  async function saveNamed() {
+    if (!day.exerciseIds.length) { setMsg("Add some exercises first."); return; }
+    const name = window.prompt(`Name this workout (Day ${activeDay + 1}):`);
+    if (!name) return;
+    setSaving(true); setMsg(null);
+    const res = await saveWorkout(name, day.exerciseIds, "custom");
+    setMsg(res.ok ? `Saved “${name}” to My Workouts ✓` : (res.error ?? "Could not save"));
+    setSaving(false);
   }
 
   return (
@@ -115,7 +124,8 @@ export default function BuilderClient({ allExercises, initial }: { allExercises:
         <button className="btn-primary" onClick={saveAndActivate} disabled={saving}>
           {saving ? "Saving…" : "Save & make active"}
         </button>
-        <button className="btn-ghost" onClick={saveAll} disabled={saving}>Save</button>
+        <button className="btn-ghost" onClick={saveNamed} disabled={saving}>Save as workout</button>
+        <button className="btn-ghost" onClick={saveAll} disabled={saving}>Save routine</button>
         {msg && <span className="text-tealdark text-sm">{msg}</span>}
       </div>
     </div>

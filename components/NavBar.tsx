@@ -8,6 +8,7 @@ const links = [
   { href: "/dashboard", label: "Today" },
   { href: "/programs", label: "Programs" },
   { href: "/generate", label: "Random" },
+  { href: "/my-workouts", label: "My Workouts" },
   { href: "/workouts", label: "Guided" },
   { href: "/progress", label: "Progress" },
   { href: "/exercises", label: "Library" },

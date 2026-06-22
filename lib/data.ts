@@ -273,3 +273,81 @@ export async function markOnboarded() {
   const { error } = await supabase.from("profiles").update({ onboarded: true }).eq("id", user.id);
   return error ? { ok: false, error: error.message } : { ok: true };
 }
+
+/* ============================================================
+   Saved Workouts library (multiple named workouts per user)
+   ============================================================ */
+
+/** Save a named workout from an ordered list of exercise ids. */
+export async function saveWorkout(name: string, exerciseIds: number[], style = "custom") {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  if (!name.trim() || exerciseIds.length === 0) return { ok: false, error: "Add a name and at least one exercise." };
+  const { data: wk, error: e1 } = await supabase
+    .from("saved_workouts")
+    .insert({ user_id: user.id, name: name.trim(), style })
+    .select("id")
+    .single();
+  if (e1 || !wk) return { ok: false, error: e1?.message ?? "Could not save" };
+  const rows = exerciseIds.map((id, i) => ({ workout_id: wk.id, exercise_id: id, ord: i }));
+  const { error: e2 } = await supabase.from("saved_workout_exercises").insert(rows);
+  if (e2) return { ok: false, error: e2.message };
+  return { ok: true, id: wk.id as number };
+}
+
+/** List the user's saved workouts with their exercises. */
+export async function listSavedWorkouts(): Promise<{ id: number; name: string; style: string; exercises: ExerciseRow[] }[]> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data: wks } = await supabase
+    .from("saved_workouts")
+    .select("id,name,style,saved_workout_exercises(ord, exercises(id,name,youtube_id,level,category))")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+  return (wks ?? []).map((w: any) => ({
+    id: w.id, name: w.name, style: w.style,
+    exercises: (w.saved_workout_exercises ?? [])
+      .sort((a: any, b: any) => a.ord - b.ord)
+      .map((r: any) => r.exercises)
+      .filter(Boolean),
+  }));
+}
+
+export async function deleteSavedWorkout(id: number) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const { error } = await supabase.from("saved_workouts").delete().eq("id", id).eq("user_id", user.id);
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+export async function renameSavedWorkout(id: number, name: string) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const { error } = await supabase.from("saved_workouts").update({ name: name.trim() }).eq("id", id).eq("user_id", user.id);
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+/** Load a saved workout into the custom slot and make it active for tracking in Today. */
+export async function loadSavedWorkout(id: number) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  // verify ownership + read exercises
+  const { data: rows } = await supabase
+    .from("saved_workout_exercises")
+    .select("ord, exercise_id, saved_workouts!inner(user_id)")
+    .eq("workout_id", id)
+    .order("ord");
+  const owned = (rows ?? []).filter((r: any) => r.saved_workouts?.user_id === user.id);
+  if (!owned.length) return { ok: false, error: "Workout not found" };
+  const ids = owned.map((r: any) => r.exercise_id);
+  const save = await saveCustomDay(0, ids);
+  if (!save.ok) return save;
+  await setActiveProgram("custom");
+  await markOnboarded();
+  return { ok: true };
+}

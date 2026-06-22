@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { generateWorkout, saveCustomDay, setActiveProgram, markOnboarded } from "@/lib/data";
+import { generateWorkout, saveCustomDay, setActiveProgram, markOnboarded, saveWorkout } from "@/lib/data";
 import { styleRx } from "@/lib/program";
 import type { ExerciseRow, WorkoutStyle } from "@/lib/types";
 
@@ -42,7 +42,18 @@ export default function GeneratorClient() {
     await saveCustomDay(0, ids);
     await setActiveProgram("custom");
     await markOnboarded();
-    setSavedMsg("Saved as your routine — go to Today to log it with weights & reps.");
+    setSavedMsg("Loaded — go to Today to log it with weights & reps.");
+    setBusy(false);
+  }
+
+  async function saveNamed() {
+    if (!workout) return;
+    const name = window.prompt("Name this workout (e.g. 'Leg Day', 'Quick Core'):");
+    if (!name) return;
+    setBusy(true);
+    const ids = workout.flatMap((s) => s.exercises.map((e) => e.id));
+    const res = await saveWorkout(name, ids, style);
+    setSavedMsg(res.ok ? `Saved “${name}” to My Workouts ✓` : (res.error ?? "Could not save"));
     setBusy(false);
   }
 
@@ -131,7 +142,8 @@ export default function GeneratorClient() {
           </div>
 
           <div className="flex items-center gap-3 mt-4 flex-wrap">
-            <button className="btn-primary" onClick={useAsRoutine} disabled={busy}>Save &amp; log this with weights</button>
+            <button className="btn-primary" onClick={useAsRoutine} disabled={busy}>Train this today</button>
+            <button className="btn-ghost" onClick={saveNamed} disabled={busy}>Save as workout</button>
             {savedMsg && <span className="text-tealdark text-sm">{savedMsg}</span>}
           </div>
         </div>
