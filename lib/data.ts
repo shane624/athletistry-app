@@ -159,3 +159,36 @@ export async function listExercises(): Promise<ExerciseRow[]> {
   const { data } = await supabase.from("exercises").select("id,name,youtube_id,level,category").order("name");
   return data ?? [];
 }
+
+/** Onboarding status for the logged-in user. */
+export async function getOnboarding(): Promise<{ disclaimerAccepted: boolean; onboarded: boolean }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { disclaimerAccepted: false, onboarded: false };
+  const { data } = await supabase
+    .from("profiles")
+    .select("disclaimer_accepted_at, onboarded")
+    .eq("id", user.id)
+    .single();
+  return { disclaimerAccepted: !!data?.disclaimer_accepted_at, onboarded: !!data?.onboarded };
+}
+
+export async function acceptDisclaimer() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const { error } = await supabase
+    .from("profiles")
+    .update({ disclaimer_accepted_at: new Date().toISOString() })
+    .eq("id", user.id);
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+/** Mark onboarding complete (called when they pick their first program). */
+export async function markOnboarded() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const { error } = await supabase.from("profiles").update({ onboarded: true }).eq("id", user.id);
+  return error ? { ok: false, error: error.message } : { ok: true };
+}

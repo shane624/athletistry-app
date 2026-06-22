@@ -2,17 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { setActiveProgram } from "@/lib/data";
+import { setActiveProgram, markOnboarded } from "@/lib/data";
 
 interface P { id: string; name: string; tagline: string; dayCount: number; exerciseCount: number; }
 
-export default function ProgramPicker({ programs, active }: { programs: P[]; active: string }) {
+export default function ProgramPicker({ programs, active, first }: { programs: P[]; active: string; first?: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
 
   async function choose(id: string) {
     setBusy(id);
     await setActiveProgram(id);
+    if (first) await markOnboarded();
     router.push("/dashboard");
     router.refresh();
   }

@@ -23,4 +23,8 @@ create unique index if not exists set_logs_unique_per_program
 alter table user_program_state add column if not exists active_program text not null default 'periodized24';
 alter table user_program_state add column if not exists selected_day int not null default 0;
 
+-- 3) profiles: onboarding flags (disclaimer + first-run program choice)
+alter table profiles add column if not exists disclaimer_accepted_at timestamptz;
+alter table profiles add column if not exists onboarded boolean not null default false;
+
 -- done. Existing 24-week logs keep working (defaulted to 'periodized24').

@@ -1,13 +1,19 @@
 import NavBar from "@/components/NavBar";
 import ExerciseCard from "@/components/ExerciseCard";
 import DaySelector from "@/components/DaySelector";
-import { getToday } from "@/lib/data";
+import { getToday, getOnboarding } from "@/lib/data";
 import { BLOCK_LABEL, BLOCK_WEEKS } from "@/lib/programs";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
+  // first-login flow: disclaimer → program choice → dashboard
+  const ob = await getOnboarding();
+  if (!ob.disclaimerAccepted) redirect("/welcome");
+  if (!ob.onboarded) redirect("/programs?first=1");
+
   const today = await getToday();
   const blockColor =
     today.rx.block === "hypertrophy" ? "bg-navy"
