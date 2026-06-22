@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+
+body {
+  @apply bg-light text-ink;
+}
+
+.card {
+  @apply bg-white rounded-xl border border-line shadow-sm;
+}
+.btn {
+  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium transition;
+}
+.btn-primary {
+  @apply btn bg-teal text-white hover:bg-tealdark;
+}
+.btn-ghost {
+  @apply btn border border-line bg-white hover:bg-rowalt;
+}
+.input {
+  @apply w-full rounded-lg border border-line px-3 py-2 outline-none focus:border-teal;
+}
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+}
