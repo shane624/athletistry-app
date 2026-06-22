@@ -5,7 +5,7 @@ import { getProgress } from "@/lib/data";
 import type { ExerciseRow } from "@/lib/types";
 import ProgressChart from "@/components/ProgressChart";
 
-export default function ProgressClient({ exercises }: { exercises: ExerciseRow[] }) {
+export default function ProgressClient({ exercises, programId }: { exercises: ExerciseRow[]; programId: string }) {
   const [selected, setSelected] = useState<number | "">("");
   const [data, setData] = useState<{ week: number; topWeight: number; volume: number }[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -13,7 +13,7 @@ export default function ProgressClient({ exercises }: { exercises: ExerciseRow[]
   async function pick(id: number) {
     setSelected(id);
     setLoading(true);
-    const series = await getProgress(id);
+    const series = await getProgress(programId, id);
     setData(series);
     setLoading(false);
   }

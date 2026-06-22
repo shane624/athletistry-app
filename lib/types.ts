@@ -1,4 +1,4 @@
-import type { Prescription } from "@/lib/program";
+import type { ResolvedRx } from "@/lib/program";
 
 export interface ExerciseRow {
   id: number;
@@ -12,7 +12,7 @@ export interface TodayData {
   week: number;
   dayIndex: number;
   dayTitle: string;
-  rx: Prescription;
+  rx: ResolvedRx;
   exercises: ExerciseRow[];
   // exercise id -> set_number -> {weight, reps}
   logs: Record<number, Record<number, { weight: number; reps: number }>>;

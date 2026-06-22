@@ -133,3 +133,34 @@ export const DAY_TITLES = [
   "Lower — Hinge & Lunge focus",
   "Upper Pull & Core",
 ];
+
+// ---- unified prescription for any program (periodized or fixed/timed) ----
+import type { Program } from "@/lib/programs";
+
+export interface ResolvedRx {
+  block: string;
+  sets: number;
+  repLow: number;
+  repHigh: number;
+  tempo: string;
+  restSec: number;
+  workSec?: number;   // timed mode
+  notes: string;
+  week: number;       // 1 for fixed programs
+}
+
+/** Resolve the prescription for a program. For periodized programs, pass the current week. */
+export function resolveRx(program: Program, week: number): ResolvedRx {
+  if (program.type === "periodized") {
+    const p = prescription(week);
+    return {
+      block: p.block, sets: p.sets, repLow: p.repLow, repHigh: p.repHigh,
+      tempo: p.tempo, restSec: p.restSec, notes: p.notes, week,
+    };
+  }
+  const f = program.fixedRx!;
+  return {
+    block: f.block, sets: f.sets, repLow: f.lo, repHigh: f.hi,
+    tempo: f.tempo, restSec: f.rest, workSec: f.work, notes: f.notes, week: 1,
+  };
+}
