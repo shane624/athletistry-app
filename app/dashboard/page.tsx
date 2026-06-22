@@ -9,9 +9,10 @@ import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
-  // first-login flow: disclaimer → program choice → dashboard
+  // first-login flow: disclaimer → Start Here (learn + quiz) → program choice → dashboard
   const ob = await getOnboarding();
   if (!ob.disclaimerAccepted) redirect("/welcome");
+  if (!ob.learningCompleted) redirect("/start-here");
   if (!ob.onboarded) redirect("/programs?first=1");
 
   const today = await getToday();

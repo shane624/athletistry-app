@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
@@ -20,6 +21,10 @@ export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const [open, setOpen] = useState(false);
+
+  // close the dropdown whenever the route changes
+  useEffect(() => { setOpen(false); }, [pathname]);
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -27,29 +32,64 @@ export default function NavBar() {
     router.refresh();
   }
 
+  const current = links.find((l) => pathname.startsWith(l.href))?.label ?? "Menu";
+
   return (
-    <header className="bg-navy text-white sticky top-0 z-20 safe-top">
+    <header className="bg-navy text-white sticky top-0 z-30 safe-top">
       <div className="max-w-4xl mx-auto px-4">
-        {/* top row: brand + sign out */}
-        <div className="h-12 flex items-center justify-between">
-          <Link href="/dashboard" className="font-bold tracking-widest text-teal text-sm">ATHLETISTRY</Link>
-          <button onClick={signOut} className="text-sm text-white/70 hover:text-white py-2">Sign out</button>
+        <div className="h-12 flex items-center justify-between gap-2">
+          <Link href="/dashboard" className="font-bold tracking-widest text-teal text-sm shrink-0">ATHLETISTRY</Link>
+
+          {/* desktop: inline links */}
+          <nav className="hidden md:flex items-center gap-1">
+            {links.map((l) => (
+              <Link key={l.href} href={l.href}
+                className={`whitespace-nowrap px-3 py-1.5 rounded-md text-sm ${
+                  pathname.startsWith(l.href) ? "bg-white/15 text-white" : "text-white/80 hover:text-white"
+                }`}>
+                {l.label}
+              </Link>
+            ))}
+            <button onClick={signOut} className="ml-1 text-sm text-white/70 hover:text-white">Sign out</button>
+          </nav>
+
+          {/* mobile: menu button */}
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="md:hidden flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/10 text-sm"
+            aria-expanded={open}
+            aria-label="Open menu"
+          >
+            <span className="text-white/90">{current}</span>
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" className={`transition-transform ${open ? "rotate-180" : ""}`}>
+              <path d="M5.5 7.5L10 12l4.5-4.5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
         </div>
-        {/* links: scroll horizontally on small screens, never wrap/clip */}
-        <nav className="nav-scroll flex items-center gap-1 pb-2 -mt-1">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={`whitespace-nowrap px-3 py-2 rounded-md text-sm ${
-                pathname.startsWith(l.href) ? "bg-white/15 text-white" : "text-white/80 hover:text-white"
-              }`}
-            >
-              {l.label}
-            </Link>
-          ))}
-        </nav>
       </div>
+
+      {/* mobile dropdown panel */}
+      {open && (
+        <>
+          <div className="md:hidden fixed inset-0 z-20" onClick={() => setOpen(false)} />
+          <div className="md:hidden absolute left-0 right-0 z-30 bg-navy border-t border-white/10 shadow-lg">
+            <nav className="max-w-4xl mx-auto px-2 py-2 grid grid-cols-2 gap-1">
+              {links.map((l) => (
+                <Link key={l.href} href={l.href}
+                  className={`px-3 py-2.5 rounded-md text-sm ${
+                    pathname.startsWith(l.href) ? "bg-teal text-white" : "text-white/85 hover:bg-white/10"
+                  }`}>
+                  {l.label}
+                </Link>
+              ))}
+              <button onClick={signOut}
+                className="px-3 py-2.5 rounded-md text-sm text-left text-white/70 hover:bg-white/10 col-span-2">
+                Sign out
+              </button>
+            </nav>
+          </div>
+        </>
+      )}
     </header>
   );
 }

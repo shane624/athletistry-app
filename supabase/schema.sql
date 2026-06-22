@@ -85,20 +85,33 @@ alter table program_days          enable row level security;
 alter table program_day_exercises enable row level security;
 
 -- reference tables: anyone authenticated can read
+drop policy if exists "ref read exercises" on exercises;
 create policy "ref read exercises" on exercises for select using (true);
+drop policy if exists "ref read days" on program_days;
 create policy "ref read days" on program_days for select using (true);
+drop policy if exists "ref read day_ex" on program_day_exercises;
 create policy "ref read day_ex" on program_day_exercises for select using (true);
 
 -- user-owned tables: only the owner
+drop policy if exists "own profile r" on profiles;
 create policy "own profile r"  on profiles for select using (auth.uid() = id);
+drop policy if exists "own profile u" on profiles;
 create policy "own profile u"  on profiles for update using (auth.uid() = id);
+drop policy if exists "own profile i" on profiles;
 create policy "own profile i"  on profiles for insert with check (auth.uid() = id);
 
+drop policy if exists "own state r" on user_program_state;
 create policy "own state r" on user_program_state for select using (auth.uid() = user_id);
+drop policy if exists "own state u" on user_program_state;
 create policy "own state u" on user_program_state for update using (auth.uid() = user_id);
+drop policy if exists "own state i" on user_program_state;
 create policy "own state i" on user_program_state for insert with check (auth.uid() = user_id);
 
+drop policy if exists "own logs r" on set_logs;
 create policy "own logs r" on set_logs for select using (auth.uid() = user_id);
+drop policy if exists "own logs i" on set_logs;
 create policy "own logs i" on set_logs for insert with check (auth.uid() = user_id);
+drop policy if exists "own logs u" on set_logs;
 create policy "own logs u" on set_logs for update using (auth.uid() = user_id);
+drop policy if exists "own logs d" on set_logs;
 create policy "own logs d" on set_logs for delete using (auth.uid() = user_id);

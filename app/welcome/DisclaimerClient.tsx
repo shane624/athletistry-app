@@ -13,7 +13,7 @@ export default function DisclaimerClient() {
     if (!checked || busy) return;
     setBusy(true);
     await acceptDisclaimer();
-    router.push("/programs?first=1");
+    router.push("/start-here");
     router.refresh();
   }
 

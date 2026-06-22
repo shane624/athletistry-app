@@ -238,20 +238,34 @@ export async function generateWorkout(style: WorkoutStyle, perSlot = 1, maxLevel
  *  If the onboarding columns don't exist yet (migration not run) or the query
  *  errors, we treat the user as fully onboarded so they are NOT trapped in a
  *  redirect loop to the disclaimer. */
-export async function getOnboarding(): Promise<{ disclaimerAccepted: boolean; onboarded: boolean }> {
+export async function getOnboarding(): Promise<{ disclaimerAccepted: boolean; onboarded: boolean; learningCompleted: boolean }> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { disclaimerAccepted: true, onboarded: true };
+  if (!user) return { disclaimerAccepted: true, onboarded: true, learningCompleted: true };
   const { data, error } = await supabase
     .from("profiles")
-    .select("disclaimer_accepted_at, onboarded")
+    .select("disclaimer_accepted_at, onboarded, learning_completed")
     .eq("id", user.id)
     .single();
   if (error) {
-    // columns missing or read failed — don't loop the welcome flow
-    return { disclaimerAccepted: true, onboarded: true };
+    // columns missing or read failed — don't loop the onboarding flows
+    return { disclaimerAccepted: true, onboarded: true, learningCompleted: true };
   }
-  return { disclaimerAccepted: !!data?.disclaimer_accepted_at, onboarded: !!data?.onboarded };
+  return {
+    disclaimerAccepted: !!data?.disclaimer_accepted_at,
+    onboarded: !!data?.onboarded,
+    // if the column doesn't exist yet, default to true so nobody is locked out
+    learningCompleted: data?.learning_completed === undefined ? true : !!data?.learning_completed,
+  };
+}
+
+/** Mark the Start Here learning flow complete (called after passing the quiz). */
+export async function completeLearning() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const { error } = await supabase.from("profiles").update({ learning_completed: true }).eq("id", user.id);
+  return error ? { ok: false, error: error.message } : { ok: true };
 }
 
 export async function acceptDisclaimer() {
