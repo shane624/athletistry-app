@@ -46,3 +46,6 @@ body {
   }
   .nav-scroll::-webkit-scrollbar { display: none; }
 }
+
+/* push content below the iOS status bar / notch when launched full-screen from the home screen */
+.safe-top { padding-top: env(safe-area-inset-top); }

@@ -28,7 +28,7 @@ export default function NavBar() {
   }
 
   return (
-    <header className="bg-navy text-white sticky top-0 z-20">
+    <header className="bg-navy text-white sticky top-0 z-20 safe-top">
       <div className="max-w-4xl mx-auto px-4">
         {/* top row: brand + sign out */}
         <div className="h-12 flex items-center justify-between">

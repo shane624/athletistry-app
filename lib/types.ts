@@ -4,6 +4,7 @@ export interface ExerciseRow {
   id: number;
   name: string;
   youtube_id: string;
+  cloudinary_id?: string | null;
   level: number;
   category: string;
 }

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { ExerciseRow } from "@/lib/types";
+import ExerciseVideo from "@/components/ExerciseVideo";
 
 export default function LibraryClient({ exercises }: { exercises: ExerciseRow[] }) {
   const [q, setQ] = useState("");
@@ -39,11 +40,8 @@ export default function LibraryClient({ exercises }: { exercises: ExerciseRow[] 
               </button>
             </div>
             {open === e.id && (
-              <div className="mt-3 aspect-video w-full overflow-hidden rounded-lg bg-black">
-                <iframe className="w-full h-full"
-                  src={`https://www.youtube.com/embed/${e.youtube_id}`}
-                  title={e.name} allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" />
+              <div className="mt-3">
+                <ExerciseVideo cloudinaryId={e.cloudinary_id} youtubeId={e.youtube_id} title={e.name} />
               </div>
             )}
           </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { generateWorkout, saveCustomDay, setActiveProgram, markOnboarded, saveWorkout } from "@/lib/data";
 import { styleRx } from "@/lib/program";
 import type { ExerciseRow, WorkoutStyle } from "@/lib/types";
+import ExerciseVideo from "@/components/ExerciseVideo";
 
 const STYLES: { id: WorkoutStyle; label: string; sub: string }[] = [
   { id: "hypertrophy", label: "Hypertrophy", sub: "8–12 reps · build muscle" },
@@ -62,13 +63,18 @@ export default function GeneratorClient() {
       {/* style */}
       <p className="text-sm font-medium text-navy">Training style</p>
       <div className="grid grid-cols-3 gap-2 mt-2">
-        {STYLES.map((s) => (
-          <button key={s.id} onClick={() => setStyle(s.id)}
-            className={`card p-3 text-center border-2 ${style === s.id ? "border-teal bg-light" : "border-line"}`}>
-            <div className="font-semibold text-navy text-sm">{s.label}</div>
-            <div className="text-grey text-xs mt-0.5">{s.sub}</div>
-          </button>
-        ))}
+        {STYLES.map((s) => {
+          const selected = style === s.id;
+          return (
+            <button key={s.id} onClick={() => setStyle(s.id)}
+              className={`rounded-xl p-3 text-center border-2 transition ${
+                selected ? "bg-teal border-teal text-white shadow-sm" : "bg-white border-line hover:border-teal"
+              }`}>
+              <div className={`font-semibold text-sm ${selected ? "text-white" : "text-navy"}`}>{s.label}</div>
+              <div className={`text-xs mt-0.5 ${selected ? "text-white/90" : "text-grey"}`}>{s.sub}</div>
+            </button>
+          );
+        })}
       </div>
 
       {/* difficulty + per slot */}
@@ -129,9 +135,8 @@ export default function GeneratorClient() {
                       </button>
                     </div>
                     {openVid === e.id && (
-                      <div className="mt-3 aspect-video w-full overflow-hidden rounded-lg bg-black">
-                        <iframe className="w-full h-full" src={`https://www.youtube-nocookie.com/embed/${e.youtube_id}?rel=0&playsinline=1`}
-                          title={e.name} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                      <div className="mt-3">
+                        <ExerciseVideo cloudinaryId={e.cloudinary_id} youtubeId={e.youtube_id} title={e.name} />
                       </div>
                     )}
                   </div>

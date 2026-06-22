@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { logSet } from "@/lib/data";
 import type { ResolvedRx } from "@/lib/program";
+import ExerciseVideo from "@/components/ExerciseVideo";
 
 interface Props {
-  exercise: { id: number; name: string; youtube_id: string; level: number; category: string };
+  exercise: { id: number; name: string; youtube_id: string; cloudinary_id?: string | null; level: number; category: string };
   rx: ResolvedRx;
   programId: string;
   week: number;
@@ -56,7 +57,7 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
   return (
     <div className="card p-4">
       <CardHeader exercise={exercise} rx={rx} showVideo={showVideo} setShowVideo={setShowVideo} />
-      {showVideo && <VideoEmbed yid={exercise.youtube_id} name={exercise.name} />}
+      {showVideo && <VideoEmbed exercise={exercise} />}
 
       <div className="mt-3 space-y-2">
         {sets.map((s) => (
@@ -98,16 +99,10 @@ function CardHeader({ exercise, rx, showVideo, setShowVideo }: any) {
   );
 }
 
-function VideoEmbed({ yid, name }: { yid: string; name: string }) {
+function VideoEmbed({ exercise }: { exercise: { youtube_id: string; cloudinary_id?: string | null; name: string } }) {
   return (
-    <div className="mt-3 aspect-video w-full overflow-hidden rounded-lg bg-black">
-      <iframe
-        className="w-full h-full"
-        src={`https://www.youtube-nocookie.com/embed/${yid}?rel=0&playsinline=1`}
-        title={name}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      />
+    <div className="mt-3">
+      <ExerciseVideo cloudinaryId={exercise.cloudinary_id} youtubeId={exercise.youtube_id} title={exercise.name} />
     </div>
   );
 }
@@ -148,7 +143,7 @@ function TimedCard({ exercise, rx, programId, week, dayIndex, initialDone, showV
           {showVideo ? "Hide video" : "Watch ▸"}
         </button>
       </div>
-      {showVideo && <VideoEmbed yid={exercise.youtube_id} name={exercise.name} />}
+      {showVideo && <VideoEmbed exercise={exercise} />}
       <div className="mt-3 flex items-center gap-3 flex-wrap">
         <button className="btn-primary py-2" onClick={start}>▶ Start {work}s</button>
         <span className="text-2xl font-extrabold text-teal">

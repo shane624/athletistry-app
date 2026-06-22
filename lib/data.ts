@@ -36,7 +36,7 @@ async function exercisesByName(names: string[]): Promise<ExerciseRow[]> {
   const supabase = createClient();
   const { data } = await supabase
     .from("exercises")
-    .select("id,name,youtube_id,level,category")
+    .select("id,name,youtube_id,cloudinary_id,level,category")
     .in("name", names);
   const byName = new Map((data ?? []).map((e: any) => [e.name, e]));
   // preserve the program's order
@@ -108,7 +108,7 @@ export async function getCustomDays(): Promise<{ dayIndex: number; exercises: Ex
   if (!user) return [{ dayIndex: 0, exercises: [] }];
   const { data: rows } = await supabase
     .from("custom_program_exercises")
-    .select("day_index, ord, exercises(id,name,youtube_id,level,category)")
+    .select("day_index, ord, exercises(id,name,youtube_id,cloudinary_id,level,category)")
     .eq("user_id", user.id)
     .order("day_index").order("ord");
   const byDay = new Map<number, ExerciseRow[]>();
@@ -210,7 +210,7 @@ export async function getProgress(programId: string, exerciseId: number) {
 
 export async function listExercises(): Promise<ExerciseRow[]> {
   const supabase = createClient();
-  const { data } = await supabase.from("exercises").select("id,name,youtube_id,level,category").order("name");
+  const { data } = await supabase.from("exercises").select("id,name,youtube_id,cloudinary_id,level,category").order("name");
   return data ?? [];
 }
 
@@ -303,7 +303,7 @@ export async function listSavedWorkouts(): Promise<{ id: number; name: string; s
   if (!user) return [];
   const { data: wks } = await supabase
     .from("saved_workouts")
-    .select("id,name,style,saved_workout_exercises(ord, exercises(id,name,youtube_id,level,category))")
+    .select("id,name,style,saved_workout_exercises(ord, exercises(id,name,youtube_id,cloudinary_id,level,category))")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
   return (wks ?? []).map((w: any) => ({
