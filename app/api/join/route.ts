@@ -23,9 +23,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Bad request" }, { status: 400 });
   }
 
-  // 1) check the shared code
+  // 1) check the shared code (case-insensitive, whitespace-trimmed)
   const expected = process.env.JOIN_CODE;
-  if (!expected || code !== expected) {
+  if (!expected || code.trim().toUpperCase() !== expected.trim().toUpperCase()) {
     return NextResponse.json(
       { ok: false, error: "That access code isn't right. Check the code posted in the Athletistry community." },
       { status: 401 }
