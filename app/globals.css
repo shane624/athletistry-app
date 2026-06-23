@@ -67,9 +67,32 @@ body {
 
 /* gentle entrance for page content */
 @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform:none; } }
-.animate-in { animation: fadeUp .45s cubic-bezier(.2,.7,.2,1) both; }
+.animate-in { animation: fadeUp .5s cubic-bezier(.2,.7,.2,1) both; }
+
+/* ---- landing hero (matches the showcase rendering) ---- */
+.hero-bg { background: radial-gradient(1100px 560px at 72% -12%, #2c3c5e 0%, #1f2a44 56%); }
+.hero-glow {
+  position:absolute; width:480px; height:480px; right:-130px; top:40px;
+  background: radial-gradient(circle, rgba(39,174,159,.30), transparent 65%);
+  filter: blur(18px); animation: heroFloat 9s ease-in-out infinite; z-index:0;
+}
+@keyframes heroFloat { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-24px);} }
+
+/* ---- phone mockup ---- */
+.phone-shell {
+  width: 270px; border-radius: 36px; background:#0e1626; padding:10px;
+  box-shadow: 0 34px 70px rgba(0,0,0,.42); position:relative;
+  animation: phoneFloat 6s ease-in-out infinite;
+}
+.phone-shell::before {
+  content:""; position:absolute; top:18px; left:50%; transform:translateX(-50%);
+  width:108px; height:22px; background:#0e1626; border-radius:0 0 14px 14px; z-index:5;
+}
+.phone-screen { background:#eef6f5; border-radius:27px; overflow:hidden; }
+@keyframes phoneFloat { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-12px);} }
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-in { animation: none; }
+  .animate-in, .hero-glow, .phone-shell { animation: none; }
   .card, .btn, .input { transition: none; }
 }
 
