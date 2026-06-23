@@ -55,7 +55,7 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
     : null;
 
   return (
-    <div className="card p-4">
+    <div className="card card-hover p-4 animate-in">
       <CardHeader exercise={exercise} rx={rx} showVideo={showVideo} setShowVideo={setShowVideo} />
       {showVideo && <VideoEmbed exercise={exercise} />}
 

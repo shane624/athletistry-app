@@ -18,8 +18,8 @@ export default async function Dashboard() {
 
   const today = await getToday();
   const blockColor =
-    today.rx.block === "hypertrophy" ? "bg-navy"
-    : today.rx.block === "strength" ? "bg-teal"
+    today.rx.block === "hypertrophy" ? "grad-navy"
+    : today.rx.block === "strength" ? "grad-brand"
     : "bg-navy2";
   const isPeriodized = today.programType === "periodized";
   const isManual = today.scheduling === "manual";
@@ -34,7 +34,7 @@ export default async function Dashboard() {
           <Link href="/programs" className="text-teal text-sm font-medium">Switch program →</Link>
         </div>
 
-        <div className={`rounded-xl ${blockColor} text-white p-5`}>
+        <div className={`${blockColor} text-white p-5 animate-in`} style={{ borderRadius: "16px", boxShadow: "0 10px 30px rgba(31,42,68,.18)" }}>
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <p className="text-white/80 text-sm">{BLOCK_WEEKS[today.rx.block] ?? ""} · {BLOCK_LABEL[today.rx.block] ?? ""}</p>

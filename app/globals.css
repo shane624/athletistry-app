@@ -14,27 +14,63 @@ body {
 }
 
 .card {
-  @apply bg-white rounded-xl border border-line shadow-sm;
+  @apply bg-white border border-line;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(31,42,68,.04), 0 8px 24px rgba(31,42,68,.06);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+/* cards that should lift when hovered/tapped (exercise cards, program tiles) */
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(31,42,68,.06), 0 18px 40px rgba(31,42,68,.12);
 }
 .btn {
-  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium transition;
-  /* comfortable tap target on phones */
-  min-height: 40px;
+  @apply inline-flex items-center justify-center font-semibold transition;
+  border-radius: 11px;
+  padding: 11px 22px;
+  min-height: 44px;
   touch-action: manipulation;
+  transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
 }
 .btn-primary {
   @apply btn bg-teal text-white hover:bg-tealdark;
+  box-shadow: 0 6px 18px rgba(39,174,159,.28);
 }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(39,174,159,.36); }
 .btn-ghost {
-  @apply btn border border-line bg-white hover:bg-rowalt;
+  @apply btn border bg-white hover:bg-rowalt;
+  border-color: var(--line, #d6e0df);
 }
+.btn-ghost:hover { transform: translateY(-2px); }
 .input {
-  @apply w-full rounded-lg border border-line px-3 py-2 outline-none focus:border-teal;
+  @apply w-full border border-line px-3 py-2 outline-none focus:border-teal;
+  border-radius: 11px;
   /* 16px font stops iOS Safari from auto-zooming when an input is focused */
   font-size: 16px;
+  transition: border-color .18s ease, box-shadow .18s ease;
 }
+.input:focus { box-shadow: 0 0 0 3px rgba(39,174,159,.14); }
 .badge {
   @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+}
+
+/* small teal uppercase eyebrow label, like the renderings */
+.eyebrow {
+  @apply text-teal font-bold;
+  letter-spacing: 2px;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+/* navy → teal gradient surface for thumbnails / accent headers */
+.grad-brand { background: linear-gradient(135deg, #3a4a6b, #27ae9f); }
+.grad-navy  { background: linear-gradient(135deg, #1f2a44, #27ae9f); }
+
+/* gentle entrance for page content */
+@keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform:none; } }
+.animate-in { animation: fadeUp .45s cubic-bezier(.2,.7,.2,1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-in { animation: none; }
+  .card, .btn, .input { transition: none; }
 }
 
 /* Tappable nav that wraps cleanly on small screens */

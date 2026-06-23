@@ -27,7 +27,7 @@ export default function ProgramPicker({ programs, active, first, customActive }:
           key={p.id}
           onClick={() => choose(p.id)}
           disabled={!!busy}
-          className={`text-left card p-5 border-2 transition ${
+          className={`text-left card card-hover p-5 border-2 transition ${
             p.id === active ? "border-teal bg-light" : "border-line hover:border-teal"
           }`}
         >
@@ -42,7 +42,7 @@ export default function ProgramPicker({ programs, active, first, customActive }:
       ))}
 
       {/* Build Your Own */}
-      <Link href="/build" className={`text-left card p-5 border-2 transition block ${customActive ? "border-teal bg-light" : "border-line hover:border-teal"}`}>
+      <Link href="/build" className={`text-left card card-hover p-5 border-2 transition block ${customActive ? "border-teal bg-light" : "border-line hover:border-teal"}`}>
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-navy">Build Your Own</h3>
           {customActive && <span className="badge bg-teal text-white">Active</span>}
@@ -52,7 +52,7 @@ export default function ProgramPicker({ programs, active, first, customActive }:
       </Link>
 
       {/* Random Workout Generator */}
-      <Link href="/generate" className="text-left card p-5 border-2 border-line hover:border-teal transition block">
+      <Link href="/generate" className="text-left card card-hover p-5 border-2 border-line hover:border-teal transition block">
         <h3 className="font-semibold text-navy">Random Workout</h3>
         <p className="text-grey text-sm mt-1">Generate a balanced session on the spot — legs, push, pull, and core — at the difficulty you choose.</p>
         <p className="text-teal text-xs mt-2 font-medium">Generate →</p>

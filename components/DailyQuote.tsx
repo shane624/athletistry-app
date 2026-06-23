@@ -54,8 +54,8 @@ export default function DailyQuote() {
   if (!q) return <div className="h-px" aria-hidden />;
 
   return (
-    <div className="mb-5 rounded-xl border border-line bg-white px-5 py-4">
-      <p className="text-teal text-xs font-bold tracking-widest">DAILY INSPIRATION</p>
+    <div className="card mb-5 px-5 py-4 animate-in">
+      <p className="eyebrow">Daily Inspiration</p>
       <p className="text-navy text-lg md:text-xl font-semibold leading-snug mt-2">
         &ldquo;{q.text}&rdquo;
       </p>
