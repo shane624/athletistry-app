@@ -23,7 +23,7 @@ export default function Home() {
         </p>
 
         <div className="mt-8 flex gap-3 justify-center flex-wrap">
-          <Link href="/login" className="btn-primary">Log in / Sign up</Link>
+          <Link href="/login" className="btn-primary">Member log in</Link>
           <Link href="/dashboard" className="btn-ghost">Go to today&apos;s workout</Link>
         </div>
 
