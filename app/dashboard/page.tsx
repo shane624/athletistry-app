@@ -1,6 +1,7 @@
 import NavBar from "@/components/NavBar";
 import ExerciseCard from "@/components/ExerciseCard";
 import DaySelector from "@/components/DaySelector";
+import DailyQuote from "@/components/DailyQuote";
 import { getToday, getOnboarding } from "@/lib/data";
 import { BLOCK_LABEL, BLOCK_WEEKS } from "@/lib/programs";
 import Link from "next/link";
@@ -27,6 +28,7 @@ export default async function Dashboard() {
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-4xl mx-auto px-4 py-6">
+        <DailyQuote />
         <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
           <p className="text-grey text-sm">{today.programName}</p>
           <Link href="/programs" className="text-teal text-sm font-medium">Switch program →</Link>
