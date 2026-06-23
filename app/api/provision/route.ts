@@ -15,15 +15,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  // 2) parse
+  // 2) parse — accept JSON or form-encoded (so Zapier "Form" or "Json" both work)
   let email: string | undefined;
   let name: string | undefined;
   try {
-    const body = await request.json();
-    email = (body.email || "").trim().toLowerCase();
-    name = (body.name || "").trim();
+    const ct = request.headers.get("content-type") || "";
+    let raw: Record<string, string> = {};
+    if (ct.includes("application/json")) {
+      raw = await request.json();
+    } else {
+      // form-urlencoded or multipart
+      const form = await request.formData();
+      form.forEach((v, k) => { raw[k] = typeof v === "string" ? v : ""; });
+    }
+    email = (raw.email || "").trim().toLowerCase();
+    name = (raw.name || raw.first_name || "").trim();
   } catch {
-    return NextResponse.json({ ok: false, error: "Bad JSON" }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "Could not parse request body" }, { status: 400 });
   }
   if (!email || !email.includes("@")) {
     return NextResponse.json({ ok: false, error: "Valid email required" }, { status: 400 });
