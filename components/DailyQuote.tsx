@@ -33,20 +33,33 @@ const QUOTES: Quote[] = [
   { text: "Every day brings a chance for you to draw in a breath, kick off your shoes, and dance.", author: "Oprah Winfrey" },
 ];
 
+// Same quote for the whole day, changing at local midnight. Uses the day
+// number since epoch as a stable index so "Daily Inspiration" is accurate.
+function quoteForToday(): Quote {
+  const now = new Date();
+  const dayNumber = Math.floor(
+    (now.getTime() - now.getTimezoneOffset() * 60000) / 86400000
+  );
+  return QUOTES[dayNumber % QUOTES.length];
+}
+
 export default function DailyQuote() {
   const [q, setQ] = useState<Quote | null>(null);
 
   useEffect(() => {
-    setQ(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+    setQ(quoteForToday());
   }, []);
 
   // Render a placeholder until mounted to avoid a hydration flash.
   if (!q) return <div className="h-px" aria-hidden />;
 
   return (
-    <div className="mb-4 border-l-2 border-teal pl-4 py-1">
-      <p className="text-navy text-[15px] leading-snug italic">&ldquo;{q.text}&rdquo;</p>
-      <p className="text-grey text-xs mt-1">— {q.author}</p>
+    <div className="mb-5 rounded-xl border border-line bg-white px-5 py-4">
+      <p className="text-teal text-xs font-bold tracking-widest">DAILY INSPIRATION</p>
+      <p className="text-navy text-lg md:text-xl font-semibold leading-snug mt-2">
+        &ldquo;{q.text}&rdquo;
+      </p>
+      <p className="text-grey text-sm mt-2">— {q.author}</p>
     </div>
   );
 }
