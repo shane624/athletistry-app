@@ -16,11 +16,9 @@ interface Props {
 }
 
 export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, timed, initialLogs }: Props) {
-  const [showVideo, setShowVideo] = useState(false);
-
   // ---------- timed mode (kids): work timer + done check, no weights ----------
   if (timed) {
-    return <TimedCard exercise={exercise} rx={rx} programId={programId} week={week} dayIndex={dayIndex} initialDone={!!initialLogs[1]} showVideo={showVideo} setShowVideo={setShowVideo} />;
+    return <TimedCard exercise={exercise} rx={rx} programId={programId} week={week} dayIndex={dayIndex} initialDone={!!initialLogs[1]} />;
   }
 
   const sets = Array.from({ length: rx.sets }, (_, i) => i + 1);
@@ -56,8 +54,8 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
 
   return (
     <div className="card card-hover p-4 animate-in">
-      <CardHeader exercise={exercise} rx={rx} showVideo={showVideo} setShowVideo={setShowVideo} />
-      {showVideo && <VideoEmbed exercise={exercise} />}
+      <CardHeader exercise={exercise} rx={rx} />
+      <div className="mt-3"><VideoEmbed exercise={exercise} /></div>
 
       <div className="mt-3 space-y-2">
         {sets.map((s) => (
@@ -82,32 +80,23 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
   );
 }
 
-function CardHeader({ exercise, rx, showVideo, setShowVideo }: any) {
+function CardHeader({ exercise, rx }: any) {
   return (
-    <div className="flex items-start justify-between gap-3">
-      <div>
-        <h3 className="font-semibold text-navy">{exercise.name}</h3>
-        <p className="text-xs text-grey mt-0.5">
-          Level {exercise.level} · {exercise.category} · Target {rx.sets} × {rx.repLow}–{rx.repHigh}
-          {rx.tempo !== "smooth" ? ` · tempo ${rx.tempo}` : ""}
-        </p>
-      </div>
-      <button className="btn-ghost text-sm shrink-0" onClick={() => setShowVideo((v: boolean) => !v)}>
-        {showVideo ? "Hide video" : "Watch ▸"}
-      </button>
+    <div>
+      <h3 className="font-semibold text-navy">{exercise.name}</h3>
+      <p className="text-xs text-grey mt-0.5">
+        Level {exercise.level} · {exercise.category} · Target {rx.sets} × {rx.repLow}–{rx.repHigh}
+        {rx.tempo !== "smooth" ? ` · tempo ${rx.tempo}` : ""}
+      </p>
     </div>
   );
 }
 
 function VideoEmbed({ exercise }: { exercise: { youtube_id: string; cloudinary_id?: string | null; name: string } }) {
-  return (
-    <div className="mt-3">
-      <ExerciseVideo cloudinaryId={exercise.cloudinary_id} youtubeId={exercise.youtube_id} title={exercise.name} />
-    </div>
-  );
+  return <ExerciseVideo cloudinaryId={exercise.cloudinary_id} youtubeId={exercise.youtube_id} title={exercise.name} />;
 }
 
-function TimedCard({ exercise, rx, programId, week, dayIndex, initialDone, showVideo, setShowVideo }: any) {
+function TimedCard({ exercise, rx, programId, week, dayIndex, initialDone }: any) {
   const work = rx.workSec ?? 30;
   const [left, setLeft] = useState<number | null>(null);
   const [done, setDone] = useState<boolean>(initialDone);
@@ -133,17 +122,12 @@ function TimedCard({ exercise, rx, programId, week, dayIndex, initialDone, showV
   }
 
   return (
-    <div className="card p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="font-semibold text-navy">{exercise.name}</h3>
-          <p className="text-xs text-grey mt-0.5">Do it for {work} seconds · {rx.sets} rounds</p>
-        </div>
-        <button className="btn-ghost text-sm shrink-0" onClick={() => setShowVideo((v: boolean) => !v)}>
-          {showVideo ? "Hide video" : "Watch ▸"}
-        </button>
+    <div className="card card-hover p-4 animate-in">
+      <div>
+        <h3 className="font-semibold text-navy">{exercise.name}</h3>
+        <p className="text-xs text-grey mt-0.5">Do it for {work} seconds · {rx.sets} rounds</p>
       </div>
-      {showVideo && <VideoEmbed exercise={exercise} />}
+      <div className="mt-3"><VideoEmbed exercise={exercise} /></div>
       <div className="mt-3 flex items-center gap-3 flex-wrap">
         <button className="btn-primary py-2" onClick={start}>▶ Start {work}s</button>
         <span className="text-2xl font-extrabold text-teal">
