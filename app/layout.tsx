@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import SplashGate from "@/components/SplashGate";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://athletistry-app.vercel.app"),
@@ -44,7 +45,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <SplashGate>{children}</SplashGate>
+      </body>
     </html>
   );
 }
