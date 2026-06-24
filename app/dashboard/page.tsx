@@ -3,6 +3,7 @@ import ExerciseCard from "@/components/ExerciseCard";
 import DaySelector from "@/components/DaySelector";
 import DailyQuote from "@/components/DailyQuote";
 import AchievementStrip from "@/components/AchievementStrip";
+import WarmUp from "@/components/WarmUp";
 import { getToday, getOnboarding } from "@/lib/data";
 import { BLOCK_LABEL, BLOCK_WEEKS } from "@/lib/programs";
 import Link from "next/link";
@@ -99,7 +100,11 @@ export default async function Dashboard() {
         )}
 
         {totalEx > 0 && (
-          <p className="eyebrow mt-6 mb-3">Today&apos;s exercises</p>
+          <>
+            <p className="eyebrow mt-6 mb-3">Warm-up first</p>
+            <WarmUp />
+            <p className="eyebrow mb-3">Today&apos;s exercises</p>
+          </>
         )}
 
         <div className="grid md:grid-cols-2 gap-4">
