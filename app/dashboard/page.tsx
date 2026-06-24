@@ -2,6 +2,7 @@ import NavBar from "@/components/NavBar";
 import ExerciseCard from "@/components/ExerciseCard";
 import DaySelector from "@/components/DaySelector";
 import DailyQuote from "@/components/DailyQuote";
+import AchievementStrip from "@/components/AchievementStrip";
 import { getToday, getOnboarding } from "@/lib/data";
 import { BLOCK_LABEL, BLOCK_WEEKS } from "@/lib/programs";
 import Link from "next/link";
@@ -24,21 +25,45 @@ export default async function Dashboard() {
   const isPeriodized = today.programType === "periodized";
   const isManual = today.scheduling === "manual";
 
+  // session progress: how many exercises already have at least one logged set
+  const totalEx = today.exercises.length;
+  const startedEx = today.exercises.filter((ex) => Object.keys(today.logs[ex.id] ?? {}).length > 0).length;
+  const pct = totalEx ? Math.round((startedEx / totalEx) * 100) : 0;
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 17) return "Good afternoon";
+    return "Good evening";
+  })();
+
   return (
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-4xl mx-auto px-4 py-6">
-        <DailyQuote />
-        <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
-          <p className="text-grey text-sm">{today.programName}</p>
-          <Link href="/programs" className="text-teal text-sm font-medium">Switch program →</Link>
+        {/* greeting + program row */}
+        <div className="flex items-end justify-between flex-wrap gap-2 mb-4 animate-in">
+          <div>
+            <p className="eyebrow">{greeting}</p>
+            <h2 className="text-2xl font-extrabold text-navy mt-1">Ready to train?</h2>
+            <p className="text-grey text-sm mt-0.5">{today.programName}</p>
+          </div>
+          <Link href="/programs" className="text-teal text-sm font-semibold whitespace-nowrap hover:text-tealdark">
+            Switch program →
+          </Link>
         </div>
 
-        <div className={`${blockColor} text-white p-5 animate-in`} style={{ borderRadius: "16px", boxShadow: "0 10px 30px rgba(31,42,68,.18)" }}>
+        <AchievementStrip />
+
+        <DailyQuote />
+
+        {/* today's session header */}
+        <div className={`${blockColor} text-white p-5 animate-in`} style={{ borderRadius: "18px", boxShadow: "0 12px 34px rgba(31,42,68,.2)" }}>
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <p className="text-white/80 text-sm">{BLOCK_WEEKS[today.rx.block] ?? ""} · {BLOCK_LABEL[today.rx.block] ?? ""}</p>
-              <h1 className="text-2xl font-bold">
+              <p className="text-white/75 text-xs font-semibold tracking-wide uppercase">
+                {BLOCK_WEEKS[today.rx.block] ?? ""} · {BLOCK_LABEL[today.rx.block] ?? ""}
+              </p>
+              <h1 className="text-2xl font-extrabold mt-1">
                 {isPeriodized ? `Week ${today.week} — ` : ""}{today.dayTitle.replace(/^Day \d+ — /, "")}
               </h1>
             </div>
@@ -50,6 +75,19 @@ export default async function Dashboard() {
             </div>
           </div>
           <p className="text-white/85 text-sm mt-3">{today.rx.notes}</p>
+
+          {/* session progress bar */}
+          {totalEx > 0 && (
+            <div className="mt-4">
+              <div className="flex items-center justify-between text-xs text-white/80 mb-1.5">
+                <span>{startedEx} of {totalEx} exercises started</span>
+                <span>{pct}%</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-white/20 overflow-hidden">
+                <div className="h-full bg-white/90 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+          )}
         </div>
 
         {isManual && (
@@ -60,7 +98,11 @@ export default async function Dashboard() {
           />
         )}
 
-        <div className="grid md:grid-cols-2 gap-4 mt-5">
+        {totalEx > 0 && (
+          <p className="eyebrow mt-6 mb-3">Today&apos;s exercises</p>
+        )}
+
+        <div className="grid md:grid-cols-2 gap-4">
           {today.exercises.map((ex) => (
             <ExerciseCard
               key={ex.id}
