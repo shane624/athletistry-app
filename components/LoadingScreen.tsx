@@ -2,21 +2,15 @@
 
 import { useEffect, useState } from "react";
 
-// Branded splash / loading screen. Shows the app icon, a rotating dancer
-// quote, the tagline, and animated dots. When used as a timed splash it
-// holds for ~5s (enough to read the quote) then fades out.
-
-const QUOTES: { text: string; author: string }[] = [
-  { text: "No one can arrive from being talented alone. Work transforms talent into genius.", author: "Anna Pavlova" },
-  { text: "I do not try to dance better than anyone else. I only try to dance better than myself.", author: "Mikhail Baryshnikov" },
-  { text: "Great dancers are great because of their passion.", author: "Martha Graham" },
-  { text: "Get the basics right and the rest will follow.", author: "Margot Fonteyn" },
-  { text: "Technique is what you fall back on when you run out of inspiration.", author: "Rudolf Nureyev" },
-  { text: "To follow, without halt, one aim: there is the secret of success.", author: "Anna Pavlova" },
-  { text: "The body says what words cannot.", author: "Martha Graham" },
-  { text: "You live as long as you dance.", author: "Rudolf Nureyev" },
-  { text: "Start where you are. Use what you have. Do what you can.", author: "Arthur Ashe" },
-];
+// Branded splash / loading screen. Shows the app icon, a fixed quote, the
+// tagline, and animated dots. When used as a timed splash it holds for ~5s
+// then fades out. The quote here is intentionally ALWAYS the same so returning
+// users already know it and never feel rushed to read it. (The in-app "Daily
+// Inspiration" quote rotates separately.)
+const SPLASH_QUOTE = {
+  text: "Start where you are. Use what you have. Do what you can.",
+  author: "Arthur Ashe",
+};
 
 export default function LoadingScreen({
   label = "Loading…",
@@ -28,7 +22,7 @@ export default function LoadingScreen({
   holdMs?: number;
   onDone?: () => void;
 }) {
-  const [q] = useState(() => QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+  const q = SPLASH_QUOTE;
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
