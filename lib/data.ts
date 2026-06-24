@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase-server";
-import { weekFromStartDate, resolveRx, SLOT_CATEGORIES, type ResolvedRx } from "@/lib/program";
+import { weekFromStartDate, resolveRx, SLOT_CATEGORIES, isHoldExercise, type ResolvedRx } from "@/lib/program";
 import { getProgram, DEFAULT_PROGRAM_ID, type Program } from "@/lib/programs";
 import type { ExerciseRow, TodayData, WorkoutStyle } from "@/lib/types";
 
@@ -222,7 +222,12 @@ export async function listExercises(): Promise<ExerciseRow[]> {
 /** Generate a balanced one-day workout. perSlot = exercises per slot (1 or 2). maxLevel caps difficulty. */
 export async function generateWorkout(style: WorkoutStyle, perSlot = 1, maxLevel = 4): Promise<{ slot: string; exercises: ExerciseRow[] }[]> {
   const all = await listExercises();
-  const usable = all.filter((e) => e.level <= maxLevel);
+  let usable = all.filter((e) => e.level <= maxLevel);
+  // Isometric / hold exercises don't suit a hypertrophy rep scheme — keep them
+  // out of hypertrophy-style generated workouts (they belong in strength/skill work).
+  if (style === "hypertrophy") {
+    usable = usable.filter((e) => !isHoldExercise(e.name));
+  }
   const pick = <T,>(arr: T[], n: number): T[] => {
     const copy = [...arr]; const out: T[] = [];
     while (copy.length && out.length < n) out.push(copy.splice(Math.floor(Math.random() * copy.length), 1)[0]);

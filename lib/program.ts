@@ -160,6 +160,38 @@ export const SLOT_CATEGORIES: Record<string, string[]> = {
   Core: ["core"],
 };
 
+// ---- Isometric / hold exercises: tracked by hold-time, not weight × reps ----
+// Matched by name so any program (periodized, custom, random, kids) routes these
+// to a hold timer. Keep patterns lowercase.
+const HOLD_PATTERNS: RegExp[] = [
+  /isometric/i,
+  /\bhold\b/i,
+  /\bplank\b/i,
+  /\bl-?\s?sit\b/i,
+  /\bhandstand\b/i,
+  /\bbattu\b/i,            // battu strength / l-sit battu
+  /\bhollow\b/i,           // hollow hold/body
+  /\bhang\b/i,             // dead hang / hanging hold
+  /\bwall sit\b/i,
+  /\bbridge hold\b/i,
+  /\bsuperman hold\b/i,
+  /\bhover\b/i,
+];
+
+/** True if this exercise should be tracked with a hold timer instead of reps. */
+export function isHoldExercise(name: string): boolean {
+  return HOLD_PATTERNS.some((re) => re.test(name));
+}
+
+/** Suggested target hold per set (seconds) for a hold exercise, by difficulty cue. */
+export function holdSeconds(name: string): number {
+  const n = name.toLowerCase();
+  if (/handstand|l-?\s?sit/.test(n)) return 20;   // hard holds — shorter target
+  if (/battu/.test(n)) return 20;
+  if (/plank|hollow|bridge|superman/.test(n)) return 30;
+  return 30;
+}
+
 export function styleRx(style: WorkoutStyle): ResolvedRx {
   if (style === "strength") return { block: "strength", sets: 4, repLow: 3, repHigh: 5, tempo: "2:1:1", restSec: 180, notes: "Strength: lift heavy, 3–5 reps, full ~3 min rest between sets. Intensity high, volume low.", week: 1 };
   if (style === "endurance") return { block: "endurance", sets: 3, repLow: 15, repHigh: 25, tempo: "smooth", restSec: 30, notes: "Endurance: 15–25+ reps, minimal rest, keep moving (circuit-style). Intensity low, volume high.", week: 1 };

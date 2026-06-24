@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { logSet } from "@/lib/data";
 import type { ResolvedRx } from "@/lib/program";
+import { isHoldExercise, holdSeconds } from "@/lib/program";
 import ExerciseVideo from "@/components/ExerciseVideo";
 
 interface Props {
@@ -19,6 +20,11 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
   // ---------- timed mode (kids): work timer + done check, no weights ----------
   if (timed) {
     return <TimedCard exercise={exercise} rx={rx} programId={programId} week={week} dayIndex={dayIndex} initialDone={!!initialLogs[1]} />;
+  }
+
+  // ---------- isometric / hold exercises: per-set hold timer, logs seconds ----------
+  if (isHoldExercise(exercise.name)) {
+    return <HoldCard exercise={exercise} rx={rx} programId={programId} week={week} dayIndex={dayIndex} initialLogs={initialLogs} />;
   }
 
   const sets = Array.from({ length: rx.sets }, (_, i) => i + 1);
@@ -94,6 +100,108 @@ function CardHeader({ exercise, rx }: any) {
 
 function VideoEmbed({ exercise }: { exercise: { youtube_id: string; cloudinary_id?: string | null; name: string } }) {
   return <ExerciseVideo cloudinaryId={exercise.cloudinary_id} youtubeId={exercise.youtube_id} title={exercise.name} />;
+}
+
+/** Isometric / hold exercise: each set is a hold timed in seconds. We log the
+ *  seconds achieved (stored in `reps`, weight 0) so it still counts toward
+ *  tracking and achievements. A live count-up timer runs against a target. */
+function HoldCard({ exercise, rx, programId, week, dayIndex, initialLogs }: any) {
+  const target = holdSeconds(exercise.name);
+  const sets: number[] = Array.from({ length: rx.sets }, (_, i) => i + 1);
+
+  // seconds logged per set (reps field holds seconds)
+  const [secs, setSecs] = useState<Record<number, string>>(() => {
+    const init: Record<number, string> = {};
+    for (const s of sets) init[s] = initialLogs[s]?.reps != null ? String(initialLogs[s].reps) : "";
+    return init;
+  });
+  const [saved, setSaved] = useState<Record<number, "idle" | "saving" | "ok">>({});
+  const [activeSet, setActiveSet] = useState<number | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+  const timer = useRef<any>(null);
+
+  useEffect(() => () => { if (timer.current) clearInterval(timer.current); }, []);
+
+  function startHold(setNumber: number) {
+    if (timer.current) clearInterval(timer.current);
+    setActiveSet(setNumber);
+    setElapsed(0);
+    timer.current = setInterval(() => setElapsed((e) => e + 1), 1000);
+  }
+
+  async function stopHold() {
+    if (timer.current) clearInterval(timer.current);
+    const setNumber = activeSet!;
+    const held = elapsed;
+    setActiveSet(null);
+    setElapsed(0);
+    if (navigator.vibrate) navigator.vibrate(60);
+    setSecs((v) => ({ ...v, [setNumber]: String(held) }));
+    await save(setNumber, held);
+  }
+
+  async function save(setNumber: number, seconds?: number) {
+    const value = seconds != null ? seconds : parseInt(secs[setNumber] || "0");
+    setSaved((s) => ({ ...s, [setNumber]: "saving" }));
+    const res = await logSet({
+      programId, exerciseId: exercise.id, week, dayIndex, setNumber,
+      weight: 0, reps: value,
+    });
+    setSaved((s) => ({ ...s, [setNumber]: res.ok ? "ok" : "idle" }));
+    if (res.ok) setTimeout(() => setSaved((s) => ({ ...s, [setNumber]: "idle" })), 1200);
+  }
+
+  return (
+    <div className="card card-hover p-4 animate-in">
+      <div>
+        <h3 className="font-semibold text-navy">{exercise.name}</h3>
+        <p className="text-xs text-grey mt-0.5">
+          Hold · Level {exercise.level} · {exercise.category} · Target {rx.sets} × {target}s hold
+        </p>
+      </div>
+      <div className="mt-3"><VideoEmbed exercise={exercise} /></div>
+
+      {/* live timer */}
+      <div className="mt-3 flex items-center gap-3 flex-wrap">
+        {activeSet === null ? (
+          <span className="text-grey text-sm">Tap a set below to start its hold timer.</span>
+        ) : (
+          <>
+            <span className={`text-3xl font-extrabold tabular-nums ${elapsed >= target ? "text-teal" : "text-navy"}`}>
+              {elapsed}s
+            </span>
+            <span className="text-grey text-sm">/ {target}s target — Set {activeSet}</span>
+            <button className="btn-primary py-2 ml-auto" onClick={stopHold}>Stop &amp; log</button>
+          </>
+        )}
+      </div>
+
+      {/* per-set rows */}
+      <div className="mt-3 space-y-2">
+        {sets.map((s) => {
+          const done = secs[s] !== "" && secs[s] != null;
+          return (
+            <div key={s} className="flex items-center gap-2">
+              <span className="w-11 shrink-0 text-sm text-grey">Set {s}</span>
+              <input className="input py-1.5 flex-1 min-w-0" inputMode="numeric" placeholder="seconds held"
+                value={secs[s]} onChange={(e) => setSecs((v) => ({ ...v, [s]: e.target.value }))} />
+              <span className="text-grey text-sm shrink-0">s</span>
+              {activeSet === s ? (
+                <button className="btn-primary py-1.5 text-sm shrink-0" onClick={stopHold}>Stop</button>
+              ) : (
+                <button className="btn-ghost py-1.5 text-sm shrink-0" onClick={() => startHold(s)} disabled={activeSet !== null}>
+                  ▶ {done ? "Redo" : "Start"}
+                </button>
+              )}
+              <button className="btn-primary py-1.5 text-sm shrink-0" onClick={() => save(s)}>
+                {saved[s] === "saving" ? "…" : saved[s] === "ok" ? "✓" : "Save"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 function TimedCard({ exercise, rx, programId, week, dayIndex, initialDone }: any) {
