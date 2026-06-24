@@ -4,7 +4,12 @@
 
 :root { color-scheme: light; }
 
-html { -webkit-text-size-adjust: 100%; }
+/* Navy at the html level so the FIRST paint (before React/JS loads, and the
+   PWA cold-start frame on phones) is brand navy, not a white flash. */
+html {
+  -webkit-text-size-adjust: 100%;
+  background-color: #1f2a44;
+}
 
 body {
   @apply bg-light text-ink;

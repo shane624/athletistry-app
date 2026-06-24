@@ -15,6 +15,7 @@ const QUOTES: { text: string; author: string }[] = [
   { text: "To follow, without halt, one aim: there is the secret of success.", author: "Anna Pavlova" },
   { text: "The body says what words cannot.", author: "Martha Graham" },
   { text: "You live as long as you dance.", author: "Rudolf Nureyev" },
+  { text: "Start where you are. Use what you have. Do what you can.", author: "Arthur Ashe" },
 ];
 
 export default function LoadingScreen({
