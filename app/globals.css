@@ -91,8 +91,18 @@ body {
 .phone-screen { background:#eef6f5; border-radius:27px; overflow:hidden; }
 @keyframes phoneFloat { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-12px);} }
 
+/* animated loading dots (login button) */
+.dot-pulse {
+  width: 7px; height: 7px; border-radius: 50%; background: currentColor;
+  display: inline-block; animation: dotPulse 0.9s ease-in-out infinite;
+}
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.1); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-in, .hero-glow, .phone-shell { animation: none; }
+  .animate-in, .hero-glow, .phone-shell, .dot-pulse { animation: none; }
   .card, .btn, .input { transition: none; }
 }
 

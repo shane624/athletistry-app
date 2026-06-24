@@ -27,16 +27,18 @@ export default function LoginPage() {
         });
         if (error) throw error;
         setMsg("If an account exists for that email, a reset link is on its way. Check your inbox.");
+        setBusy(false); // staying on this page — stop the spinner
         return;
       }
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
+      // success: navigate. Keep `busy` TRUE so the button keeps animating until
+      // the dashboard finishes loading — don't revert to "Log in" mid-transition.
       router.push("/dashboard");
       router.refresh();
     } catch (err: any) {
       setMsg(err.message ?? "Something went wrong.");
-    } finally {
-      setBusy(false);
+      setBusy(false); // error — re-enable the button
     }
   }
 
@@ -59,7 +61,13 @@ export default function LoginPage() {
               value={password} onChange={(e) => setPassword(e.target.value)} />
           )}
           <button className="btn-primary w-full" disabled={busy}>
-            {busy ? "…" : mode === "login" ? "Log in" : "Send reset link"}
+            {busy ? (
+              <span className="inline-flex items-center gap-1.5" aria-label="Loading">
+                <span className="dot-pulse" />
+                <span className="dot-pulse" style={{ animationDelay: "0.15s" }} />
+                <span className="dot-pulse" style={{ animationDelay: "0.3s" }} />
+              </span>
+            ) : mode === "login" ? "Log in" : "Send reset link"}
           </button>
         </form>
 

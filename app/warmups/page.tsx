@@ -4,8 +4,8 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 const WARMUPS = [
-  { slug: "standard", title: "Standard Warm-Up", desc: "Your everyday warm-up — prepare the body before training, class, or rehearsal.", yid: "nftG1M2IJPA", advanced: false },
-  { slug: "advanced", title: "Advanced Warm-Up", desc: "A harder warm-up for stronger dancers. Work up to it as your conditioning improves.", yid: "Nt_zXCLKYc8", advanced: true },
+  { slug: "gentle", title: "Gentle Warm-Up", desc: "An easier warm-up to prepare the body before training, class, or rehearsal.", yid: "nftG1M2IJPA", advanced: false },
+  { slug: "winning", title: "Winning Warm-Up", desc: "A harder warm-up for stronger dancers. Work up to it as your conditioning improves.", yid: "Nt_zXCLKYc8", advanced: true },
 ];
 
 export default function WarmupsPage() {

@@ -42,23 +42,10 @@ export default function NavBar() {
         <div className="h-12 flex items-center justify-between gap-2">
           <Link href="/dashboard" className="font-bold tracking-widest text-teal text-sm shrink-0">ATHLETISTRY</Link>
 
-          {/* desktop: inline links */}
-          <nav className="hidden md:flex items-center gap-1">
-            {links.map((l) => (
-              <Link key={l.href} href={l.href}
-                className={`whitespace-nowrap px-3 py-1.5 rounded-md text-sm ${
-                  pathname.startsWith(l.href) ? "bg-white/15 text-white" : "text-white/80 hover:text-white"
-                }`}>
-                {l.label}
-              </Link>
-            ))}
-            <button onClick={signOut} className="ml-1 text-sm text-white/70 hover:text-white">Sign out</button>
-          </nav>
-
-          {/* mobile: menu button */}
+          {/* dropdown menu button — used on every screen size for consistency */}
           <button
             onClick={() => setOpen((v) => !v)}
-            className="md:hidden flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/10 text-sm"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/10 text-sm"
             aria-expanded={open}
             aria-label="Open menu"
           >
@@ -70,12 +57,12 @@ export default function NavBar() {
         </div>
       </div>
 
-      {/* mobile dropdown panel */}
+      {/* dropdown panel — shown on every screen size */}
       {open && (
         <>
-          <div className="md:hidden fixed inset-0 z-20" onClick={() => setOpen(false)} />
-          <div className="md:hidden absolute left-0 right-0 z-30 bg-navy border-t border-white/10 shadow-lg">
-            <nav className="max-w-4xl mx-auto px-2 py-2 grid grid-cols-2 gap-1">
+          <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
+          <div className="absolute left-0 right-0 z-30 bg-navy border-t border-white/10 shadow-lg">
+            <nav className="max-w-4xl mx-auto px-2 py-2 grid grid-cols-2 sm:grid-cols-3 gap-1">
               {links.map((l) => (
                 <Link key={l.href} href={l.href}
                   className={`px-3 py-2.5 rounded-md text-sm ${

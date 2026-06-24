@@ -5,8 +5,8 @@ import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 const WARMUPS: Record<string, { title: string; desc: string; yid: string }> = {
-  standard: { title: "Standard Warm-Up", desc: "Your everyday warm-up. Follow along to prepare your body before training, class, rehearsal, or a performance.", yid: "nftG1M2IJPA" },
-  advanced: { title: "Advanced Warm-Up", desc: "A harder warm-up for stronger dancers. Build up to this as your conditioning improves — back off if anything feels too much.", yid: "Nt_zXCLKYc8" },
+  gentle: { title: "Gentle Warm-Up", desc: "An easier warm-up. Follow along to prepare your body before training, class, rehearsal, or a performance.", yid: "nftG1M2IJPA" },
+  winning: { title: "Winning Warm-Up", desc: "A harder warm-up for stronger dancers. Build up to this as your conditioning improves — back off if anything feels too much.", yid: "Nt_zXCLKYc8" },
 };
 
 export default function WarmupPlayer({ params }: { params: { slug: string } }) {

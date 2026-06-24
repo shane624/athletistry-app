@@ -6,8 +6,8 @@ import { useState } from "react";
 // harder progression. Members pick one, watch it, and mark the warm-up done
 // before training. Kept on-brand (navy/teal, no emoji).
 const WARMUPS = [
-  { id: "nftG1M2IJPA", label: "Standard Warm-Up", tag: "Start here", advanced: false },
-  { id: "Nt_zXCLKYc8", label: "Advanced Warm-Up", tag: "Harder — level up", advanced: true },
+  { id: "nftG1M2IJPA", label: "Gentle Warm-Up", tag: "Easier — start here", advanced: false },
+  { id: "Nt_zXCLKYc8", label: "Winning Warm-Up", tag: "Harder — level up", advanced: true },
 ];
 
 export default function WarmUp() {
@@ -33,7 +33,7 @@ export default function WarmUp() {
       </div>
 
       <p className="text-grey text-sm mt-2">
-        Complete one warm-up before your exercises. The advanced option is harder — work up to it.
+        Complete one warm-up before your exercises. The Winning Warm-Up is harder — work up to it.
       </p>
 
       {/* option toggle */}
