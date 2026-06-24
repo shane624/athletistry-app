@@ -239,6 +239,20 @@ export async function generateWorkout(style: WorkoutStyle, perSlot = 1, maxLevel
   });
 }
 
+/** Build a targeted workout for a ballet move: the library exercises that
+ *  benefit that move (only those that actually exist in the library). */
+export async function generateBalletWorkout(moveSlug: string): Promise<{ move: string; focus: string; exercises: ExerciseRow[] } | null> {
+  const { balletMove } = await import("@/lib/ballet");
+  const move = balletMove(moveSlug);
+  if (!move) return null;
+  const all = await listExercises();
+  const byName = new Map(all.map((e) => [e.name.toLowerCase(), e]));
+  const exercises = move.exercises
+    .map((n) => byName.get(n.toLowerCase()))
+    .filter((e): e is ExerciseRow => !!e);
+  return { move: move.name, focus: move.focus, exercises };
+}
+
 /** Onboarding status for the logged-in user.
  *  If the onboarding columns don't exist yet (migration not run) or the query
  *  errors, we treat the user as fully onboarded so they are NOT trapped in a

@@ -4,7 +4,9 @@ import DaySelector from "@/components/DaySelector";
 import DailyQuote from "@/components/DailyQuote";
 import AchievementStrip from "@/components/AchievementStrip";
 import WarmUp from "@/components/WarmUp";
+import Greeting from "@/components/Greeting";
 import { getToday, getOnboarding } from "@/lib/data";
+import { getDisplayName } from "@/lib/profile-data";
 import { BLOCK_LABEL, BLOCK_WEEKS } from "@/lib/programs";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -19,6 +21,7 @@ export default async function Dashboard() {
   if (!ob.onboarded) redirect("/programs?first=1");
 
   const today = await getToday();
+  const displayName = await getDisplayName();
   const blockColor =
     today.rx.block === "hypertrophy" ? "grad-navy"
     : today.rx.block === "strength" ? "grad-brand"
@@ -30,12 +33,6 @@ export default async function Dashboard() {
   const totalEx = today.exercises.length;
   const startedEx = today.exercises.filter((ex) => Object.keys(today.logs[ex.id] ?? {}).length > 0).length;
   const pct = totalEx ? Math.round((startedEx / totalEx) * 100) : 0;
-  const greeting = (() => {
-    const h = new Date().getHours();
-    if (h < 12) return "Good morning";
-    if (h < 17) return "Good afternoon";
-    return "Good evening";
-  })();
 
   return (
     <div className="min-h-screen">
@@ -43,11 +40,7 @@ export default async function Dashboard() {
       <main className="max-w-4xl mx-auto px-4 py-6">
         {/* greeting + program row */}
         <div className="flex items-end justify-between flex-wrap gap-2 mb-4 animate-in">
-          <div>
-            <p className="eyebrow">{greeting}</p>
-            <h2 className="text-2xl font-extrabold text-navy mt-1">Ready to train?</h2>
-            <p className="text-grey text-sm mt-0.5">{today.programName}</p>
-          </div>
+          <Greeting name={displayName} programName={today.programName} />
           <Link href="/programs" className="text-teal text-sm font-semibold whitespace-nowrap hover:text-tealdark">
             Switch program →
           </Link>
