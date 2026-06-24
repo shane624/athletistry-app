@@ -1,5 +1,5 @@
 import NavBar from "@/components/NavBar";
-import { getAchievements } from "@/lib/data";
+import { getAchievements } from "@/lib/achievements-data";
 import { LEVELS } from "@/lib/achievements";
 
 export const dynamic = "force-dynamic";
