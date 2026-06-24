@@ -69,11 +69,12 @@ export default function WarmUp() {
         />
       </div>
 
-      {!done && (
-        <p className="text-grey text-xs mt-2">
-          Tip: warming up first reduces injury risk and helps you move better in your working sets.
-        </p>
-      )}
+      <p className="text-grey text-xs mt-2">
+        {!done
+          ? "Tip: warming up first reduces injury risk and helps you move better in your working sets. "
+          : ""}
+        <a href="/warmups" className="text-teal font-medium">All warm-ups →</a>
+      </p>
     </div>
   );
 }

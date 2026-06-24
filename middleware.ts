@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isPrivate = ["/dashboard", "/programs", "/progress", "/achievements", "/exercises", "/guide", "/build", "/generate", "/workouts", "/my-workouts", "/training-styles", "/start-here", "/settings", "/welcome"].some((p) =>
+  const isPrivate = ["/dashboard", "/programs", "/progress", "/achievements", "/exercises", "/guide", "/build", "/generate", "/workouts", "/warmups", "/my-workouts", "/training-styles", "/start-here", "/settings", "/welcome"].some((p) =>
     path.startsWith(p)
   );
 
@@ -40,5 +40,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/programs/:path*", "/progress/:path*", "/exercises/:path*", "/guide/:path*", "/build/:path*", "/generate/:path*", "/workouts/:path*", "/my-workouts/:path*", "/training-styles/:path*", "/start-here/:path*", "/settings/:path*", "/welcome/:path*"],
+  matcher: ["/dashboard/:path*", "/programs/:path*", "/progress/:path*", "/achievements/:path*", "/exercises/:path*", "/guide/:path*", "/build/:path*", "/generate/:path*", "/workouts/:path*", "/warmups/:path*", "/my-workouts/:path*", "/training-styles/:path*", "/start-here/:path*", "/settings/:path*", "/welcome/:path*"],
 };

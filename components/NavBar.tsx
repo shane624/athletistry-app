@@ -11,6 +11,7 @@ const links = [
   { href: "/generate", label: "Random" },
   { href: "/my-workouts", label: "My Workouts" },
   { href: "/workouts", label: "Guided" },
+  { href: "/warmups", label: "Warm-Ups" },
   { href: "/progress", label: "Progress" },
   { href: "/achievements", label: "Achievements" },
   { href: "/exercises", label: "Library" },
