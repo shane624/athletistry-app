@@ -20,14 +20,26 @@ const links = [
   { href: "/settings", label: "Settings" },
 ];
 
+const ADMIN_EMAIL = "swuerthner@gmail.com";
+
 export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
   const [open, setOpen] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   // close the dropdown whenever the route changes
   useEffect(() => { setOpen(false); }, [pathname]);
+
+  // show the Admin link only for the admin (server still enforces access)
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setShowAdmin((data.user?.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase());
+    });
+  }, [supabase]);
+
+  const navLinks = showAdmin ? [...links, { href: "/admin", label: "Admin" }] : links;
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -35,7 +47,7 @@ export default function NavBar() {
     router.refresh();
   }
 
-  const current = links.find((l) => pathname.startsWith(l.href))?.label ?? "Menu";
+  const current = navLinks.find((l) => pathname.startsWith(l.href))?.label ?? "Menu";
 
   return (
     <header className="bg-navy text-white sticky top-0 z-30 safe-top">
@@ -64,7 +76,7 @@ export default function NavBar() {
           <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
           <div className="absolute left-0 right-0 z-30 bg-navy border-t border-white/10 shadow-lg">
             <nav className="max-w-4xl mx-auto px-2 py-2 grid grid-cols-2 sm:grid-cols-3 gap-1">
-              {links.map((l) => (
+              {navLinks.map((l) => (
                 <Link key={l.href} href={l.href}
                   className={`px-3 py-2.5 rounded-md text-sm ${
                     pathname.startsWith(l.href) ? "bg-teal text-white" : "text-white/85 hover:bg-white/10"
