@@ -9,6 +9,7 @@ import CompleteWorkout from "@/components/CompleteWorkout";
 import { getToday, getOnboarding } from "@/lib/data";
 import { getDisplayName } from "@/lib/profile-data";
 import { getAchievements } from "@/lib/achievements-data";
+import { getAssessment } from "@/lib/load-data";
 import { BLOCK_LABEL, BLOCK_WEEKS } from "@/lib/programs";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -25,6 +26,7 @@ export default async function Dashboard() {
   const today = await getToday();
   const displayName = await getDisplayName();
   const ach = await getAchievements();
+  const { assessment } = await getAssessment();
   const blockColor =
     today.rx.block === "hypertrophy" ? "grad-navy"
     : today.rx.block === "strength" ? "grad-brand"
@@ -50,6 +52,18 @@ export default async function Dashboard() {
         </div>
 
         <AchievementStrip />
+
+        {assessment.status !== "no-data" && (
+          <Link href="/load" className="card card-hover block p-4 mb-5 animate-in">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="eyebrow">{assessment.taper ? "Taper week" : "Training load"}</p>
+                <p className="text-navy text-sm font-semibold mt-0.5 truncate">{assessment.message}</p>
+              </div>
+              <span className="text-teal text-sm font-semibold whitespace-nowrap shrink-0">View →</span>
+            </div>
+          </Link>
+        )}
 
         <DailyQuote />
 
