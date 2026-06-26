@@ -43,7 +43,7 @@ async function exercisesByName(names: string[]): Promise<ExerciseRow[]> {
   return names.map((n) => byName.get(n)).filter(Boolean) as ExerciseRow[];
 }
 
-export async function getToday(): Promise<TodayData & { programId: string; programName: string; programType: string; mode?: string; dayCount: number; scheduling: string; isCustom?: boolean }> {
+export async function getToday(): Promise<TodayData & { programId: string; programName: string; programType: string; mode?: string; dayCount: number; scheduling: string; isCustom?: boolean; phase?: string; principle?: string }> {
   const st = await getUserState();
   const program: Program = getProgram(st.programId);
   const isCustom = program.id === "custom";
@@ -56,6 +56,8 @@ export async function getToday(): Promise<TodayData & { programId: string; progr
   let dayIndex: number;
   let dayTitle: string;
   let dayCount: number;
+  let phase: string | undefined;
+  let principle: string | undefined;
 
   if (isCustom) {
     // custom days come from the user's saved rows
@@ -71,6 +73,8 @@ export async function getToday(): Promise<TodayData & { programId: string; progr
       : Math.min(st.selectedDay, program.days.length - 1);
     const day = program.days[dayIndex];
     dayTitle = day.title;
+    phase = day.phase;
+    principle = day.principle;
     dayCount = program.days.length;
     exercises = await exercisesByName(day.exerciseNames);
   }
@@ -95,7 +99,7 @@ export async function getToday(): Promise<TodayData & { programId: string; progr
   }
 
   return {
-    week, dayIndex, dayTitle, rx: rx as any, exercises, logs,
+    week, dayIndex, dayTitle, phase, principle, rx: rx as any, exercises, logs,
     programId: program.id, programName: program.name, programType: program.type,
     mode: program.mode, dayCount, scheduling: program.scheduling, isCustom,
   };

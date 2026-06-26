@@ -19,6 +19,8 @@ export interface ProgramDay {
   index: number;
   title: string;
   exerciseNames: string[];
+  phase?: string;        // e.g. "Foundations" — groups days into phases
+  principle?: string;    // the anatomy-first principle for this day/phase
 }
 
 export interface Program {
@@ -33,6 +35,78 @@ export interface Program {
 }
 
 export const PROGRAMS: Program[] = [
+  {
+    id: "the-practice",
+    name: "The Practice",
+    tagline: "90-day anatomy-first training for serious adult dancers. Foundations → Building → Integration. Method is taste, anatomy is law.",
+    type: "fixed",
+    scheduling: "manual",
+    fixedRx: {
+      block: "ballet", sets: 3, lo: 6, hi: 10, tempo: "3:1:3", rest: 75,
+      notes: "Anatomy first. Move with control — install the pattern correctly before adding load. Rotation, not gripping. Standing leg is where the work lives. Quality of every rep over quantity. Stop anything that causes joint pain.",
+    },
+    days: [
+      // ---- PHASE 1: FOUNDATIONS (days 0–2) ----
+      {
+        index: 0, title: "Foundations · Plié & Tendu",
+        phase: "Foundations",
+        principle: "Plié and tendu are the foundation, not the thing you rush past. Install them correctly before anything is loaded on top.",
+        exerciseNames: ["Deep Knee Bend", "Slant Board Squat", "Adductor Isometric Squat Hold", "Anterior Tibialis Raises", "Bent Knee Calf Raise"],
+      },
+      {
+        index: 1, title: "Foundations · Turnout & Standing Leg",
+        phase: "Foundations",
+        principle: "Turnout is rotation, not a feeling. The real ceiling is external rotation, and the standing leg is where the work lives.",
+        exerciseNames: ["Turnout Developer", "Turnout Developer Plank", "Single Leg Hip Flexor Raise", "Single Leg Deadlift", "Adductor Isometric Squat Hold"],
+      },
+      {
+        index: 2, title: "Foundations · Alignment & Control",
+        phase: "Foundations",
+        principle: "Gripping is not effort — it is two muscles fighting each other. Train control so the body stops bracing against itself.",
+        exerciseNames: ["Palloff Press", "Turnout Developer Plank", "Anterior Tibialis Raises", "Single Leg Hip Flexor Raise", "Arabesque Port De Bras"],
+      },
+
+      // ---- PHASE 2: BUILDING (days 3–5) ----
+      {
+        index: 3, title: "Building · Loaded Lower",
+        phase: "Building",
+        principle: "Load on top of a correct base. Strength and range get built without forcing — structured like an athlete's training, not just more class.",
+        exerciseNames: ["Barbell Back Squat", "Single Leg Deadlift", "Hip Extension Lunge", "Adductor Isometric Squat Hold", "Bent Knee Calf Raise", "Angled Calf Raise"],
+      },
+      {
+        index: 4, title: "Building · Rotation Under Load",
+        phase: "Building",
+        principle: "Once rotation is correct, load it. Strength in external rotation is what raises the structural ceiling.",
+        exerciseNames: ["Turnout Developer", "Reverse Lunge To Rond De Jambe", "Side Lunge To A La Second", "Extension Developer Side", "Single Leg Hip Flexor Raise"],
+      },
+      {
+        index: 5, title: "Building · Range & Extension",
+        phase: "Building",
+        principle: "Range is built on strength, not forced. Active end-range strength is what holds a line in real dancing.",
+        exerciseNames: ["Extension Developer Front", "Extension Developer Side", "Extension Developer Back", "Paralell Front Split Slides", "Side Split Walkouts", "Nordic Hamstring Curls"],
+      },
+
+      // ---- PHASE 3: INTEGRATION (days 6–8) ----
+      {
+        index: 6, title: "Integration · Power & Allégro",
+        phase: "Integration",
+        principle: "Put strength back into real dancing. Jumps land softer and rise higher off a correct, strong base.",
+        exerciseNames: ["Squat Jump", "Side Hop To Reverse Lunge", "Single Leg Deadlift", "Nordic Hamstring Curls", "Angled Calf Raise"],
+      },
+      {
+        index: 7, title: "Integration · Adage & Balance",
+        phase: "Integration",
+        principle: "Clean technique returned to the floor. Balance and control are strength expressed slowly.",
+        exerciseNames: ["Arabesque Kicks", "Arabesque Row", "Single Leg Hip Flexor Raise", "Turnout Developer Plank", "Battu Strength", "L-Sit Battu"],
+      },
+      {
+        index: 8, title: "Integration · Full Dancer",
+        phase: "Integration",
+        principle: "Everything together. Technique is the vehicle; this is where it returns to where it belongs — the floor.",
+        exerciseNames: ["Barbell Back Squat", "Single Leg Deadlift", "Turnout Developer", "Reverse Lunge To Rond De Jambe", "Extension Developer Side", "Squat Jump", "Palloff Press"],
+      },
+    ],
+  },
   {
     id: "periodized24",
     name: "24-Week Periodized",

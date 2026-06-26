@@ -58,7 +58,9 @@ export default async function Dashboard() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <p className="text-white/75 text-xs font-semibold tracking-wide uppercase">
-                {BLOCK_WEEKS[today.rx.block] ?? ""} · {BLOCK_LABEL[today.rx.block] ?? ""}
+                {today.phase
+                  ? `Phase · ${today.phase}`
+                  : `${BLOCK_WEEKS[today.rx.block] ?? ""} · ${BLOCK_LABEL[today.rx.block] ?? ""}`}
               </p>
               <h1 className="text-2xl font-extrabold mt-1">
                 {isPeriodized ? `Week ${today.week} — ` : ""}{today.dayTitle.replace(/^Day \d+ — /, "")}
@@ -86,6 +88,13 @@ export default async function Dashboard() {
             </div>
           )}
         </div>
+
+        {today.principle && (
+          <div className="card mt-3 p-4 border-l-2 border-teal animate-in">
+            <p className="eyebrow">The principle</p>
+            <p className="text-navy text-sm mt-2 leading-relaxed">{today.principle}</p>
+          </div>
+        )}
 
         {isManual && (
           <DaySelector
