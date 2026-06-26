@@ -17,19 +17,19 @@ export default function Celebrate({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const cv = canvasRef.current;
+    if (!cv) return;
+    const ctx = cv.getContext("2d");
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
-    function resize() {
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = window.innerWidth + "px";
-      canvas.style.height = window.innerHeight + "px";
+    const resize = () => {
+      cv.width = window.innerWidth * dpr;
+      cv.height = window.innerHeight * dpr;
+      cv.style.width = window.innerWidth + "px";
+      cv.style.height = window.innerHeight + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
+    };
     resize();
     window.addEventListener("resize", resize);
 
@@ -56,7 +56,7 @@ export default function Celebrate({
 
     let raf = 0;
     let t = 0;
-    function frame() {
+    const frame = () => {
       t += 1;
       ctx.clearRect(0, 0, W(), H());
       for (const b of bits) {
