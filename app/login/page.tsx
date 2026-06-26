@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
+import Dots from "@/components/Dots";
 
 // NOTE: open self-signup is intentionally disabled. Accounts are created only
 // when someone joins the Skool community (via the provisioning flow). Members
@@ -61,13 +62,7 @@ export default function LoginPage() {
               value={password} onChange={(e) => setPassword(e.target.value)} />
           )}
           <button className="btn-primary w-full" disabled={busy}>
-            {busy ? (
-              <span className="inline-flex items-center gap-1.5" aria-label="Loading">
-                <span className="dot-pulse" />
-                <span className="dot-pulse" style={{ animationDelay: "0.15s" }} />
-                <span className="dot-pulse" style={{ animationDelay: "0.3s" }} />
-              </span>
-            ) : mode === "login" ? "Log in" : "Send reset link"}
+            {busy ? <Dots /> : mode === "login" ? "Log in" : "Send reset link"}
           </button>
         </form>
 

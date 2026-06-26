@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
+import Dots from "@/components/Dots";
 
 export default function ResetPasswordPage() {
   const supabase = createClient();
@@ -109,7 +110,7 @@ export default function ResetPasswordPage() {
               <input className="input" type="password" placeholder="Confirm new password" required minLength={6}
                 value={confirm} onChange={(e) => setConfirm(e.target.value)} />
               <button className="btn-primary w-full" disabled={busy || done}>
-                {busy ? "…" : "Update password"}
+                {busy ? <Dots /> : "Update password"}
               </button>
             </form>
             {msg && <p className="text-sm text-grey mt-3 text-center">{msg}</p>}

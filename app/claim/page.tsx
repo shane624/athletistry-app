@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
+import Dots from "@/components/Dots";
 
 // Self-service "set up your account" page for existing Skool members whose
 // accounts were pre-created. They prove membership with the email they
@@ -69,7 +70,7 @@ export default function ClaimPage() {
           <input className="input" type="password" placeholder="Confirm password" required minLength={6}
             value={confirm} onChange={(e) => setConfirm(e.target.value)} />
           <button className="btn-primary w-full" disabled={busy}>
-            {busy ? "…" : "Create my login"}
+            {busy ? <Dots /> : "Create my login"}
           </button>
         </form>
 

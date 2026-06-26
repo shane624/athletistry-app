@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { acceptDisclaimer } from "@/lib/data";
+import Dots from "@/components/Dots";
 
 export default function DisclaimerClient() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function DisclaimerClient() {
         </label>
 
         <button className="btn-primary w-full mt-4 disabled:opacity-50" disabled={!checked || busy} onClick={accept}>
-          {busy ? "…" : "Agree & continue"}
+          {busy ? <Dots /> : "Agree & continue"}
         </button>
       </div>
     </div>

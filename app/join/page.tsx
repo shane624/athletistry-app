@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
+import Dots from "@/components/Dots";
 
 // Self-service signup gated by a shared access code, for legacy free-group
 // members. The code is posted inside the Skool community.
@@ -78,7 +79,7 @@ export default function JoinPage() {
           <input className="input" type="password" placeholder="Confirm password" required minLength={6}
             value={confirm} onChange={(e) => setConfirm(e.target.value)} />
           <button className="btn-primary w-full" disabled={busy}>
-            {busy ? "…" : "Create my login"}
+            {busy ? <Dots /> : "Create my login"}
           </button>
         </form>
 

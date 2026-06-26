@@ -5,6 +5,7 @@ import { logSet } from "@/lib/data";
 import type { ResolvedRx } from "@/lib/program";
 import { isHoldExercise, holdSeconds } from "@/lib/program";
 import ExerciseVideo from "@/components/ExerciseVideo";
+import Dots from "@/components/Dots";
 
 interface Props {
   exercise: { id: number; name: string; youtube_id: string; cloudinary_id?: string | null; level: number; category: string };
@@ -75,7 +76,7 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
               value={vals[s].reps}
               onChange={(e) => setVals((v) => ({ ...v, [s]: { ...v[s], reps: e.target.value } }))} />
             <button className="btn-primary py-1.5 text-sm shrink-0" onClick={() => save(s)}>
-              {saved[s] === "saving" ? "…" : saved[s] === "ok" ? "✓" : "Save"}
+              {saved[s] === "saving" ? <Dots /> : saved[s] === "ok" ? "✓" : "Save"}
             </button>
           </div>
         ))}
@@ -194,7 +195,7 @@ function HoldCard({ exercise, rx, programId, week, dayIndex, initialLogs }: any)
                 </button>
               )}
               <button className="btn-primary py-1.5 text-sm shrink-0" onClick={() => save(s)}>
-                {saved[s] === "saving" ? "…" : saved[s] === "ok" ? "✓" : "Save"}
+                {saved[s] === "saving" ? <Dots /> : saved[s] === "ok" ? "✓" : "Save"}
               </button>
             </div>
           );

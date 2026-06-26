@@ -5,8 +5,10 @@ import DailyQuote from "@/components/DailyQuote";
 import AchievementStrip from "@/components/AchievementStrip";
 import WarmUp from "@/components/WarmUp";
 import Greeting from "@/components/Greeting";
+import CompleteWorkout from "@/components/CompleteWorkout";
 import { getToday, getOnboarding } from "@/lib/data";
 import { getDisplayName } from "@/lib/profile-data";
+import { getAchievements } from "@/lib/achievements-data";
 import { BLOCK_LABEL, BLOCK_WEEKS } from "@/lib/programs";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -22,6 +24,7 @@ export default async function Dashboard() {
 
   const today = await getToday();
   const displayName = await getDisplayName();
+  const ach = await getAchievements();
   const blockColor =
     today.rx.block === "hypertrophy" ? "grad-navy"
     : today.rx.block === "strength" ? "grad-brand"
@@ -119,6 +122,14 @@ export default async function Dashboard() {
           <p className="text-grey mt-8 text-center">
             No exercises loaded. Make sure you ran <code>schema.sql</code> and <code>seed.sql</code> in Supabase.
           </p>
+        )}
+
+        {totalEx > 0 && (
+          <CompleteWorkout
+            levelIndex={ach.level.index}
+            levelName={ach.level.name}
+            nextLevelName={ach.nextLevel?.name}
+          />
         )}
       </main>
     </div>

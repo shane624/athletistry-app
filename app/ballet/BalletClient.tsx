@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { generateBalletWorkout, saveCustomDay, setActiveProgram, markOnboarded } from "@/lib/data";
 import { BALLET_MOVES } from "@/lib/ballet";
 import type { ExerciseRow } from "@/lib/types";
 import ExerciseVideo from "@/components/ExerciseVideo";
+import Dots from "@/components/Dots";
 
 export default function BalletClient() {
+  const router = useRouter();
   const [slug, setSlug] = useState(BALLET_MOVES[0].slug);
   const [result, setResult] = useState<{ move: string; focus: string; exercises: ExerciseRow[] } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -30,11 +33,13 @@ export default function BalletClient() {
     if (r.ok) {
       await setActiveProgram("custom");
       await markOnboarded();
-      setSavedMsg("Loaded as today's workout — open Today to start tracking.");
+      setSavedMsg("Loading your workout…");
+      router.push("/dashboard");
+      router.refresh();
     } else {
       setSavedMsg("Couldn't load that. Try again.");
+      setBusy(false);
     }
-    setBusy(false);
   }
 
   return (
@@ -60,7 +65,7 @@ export default function BalletClient() {
         <p className="eyebrow">{move.name} — what to build</p>
         <p className="text-grey text-sm mt-2">{move.why}</p>
         <button className="btn-primary mt-4" onClick={build} disabled={busy}>
-          {busy ? "…" : result ? "Rebuild workout" : `Build my ${move.name} workout`}
+          {busy ? <Dots /> : result ? "Rebuild workout" : `Build my ${move.name} workout`}
         </button>
       </div>
 

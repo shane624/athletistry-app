@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { generateWorkout, saveCustomDay, setActiveProgram, markOnboarded, saveWorkout } from "@/lib/data";
 import { styleRx } from "@/lib/program";
 import type { ExerciseRow, WorkoutStyle } from "@/lib/types";
 import ExerciseVideo from "@/components/ExerciseVideo";
+import Dots from "@/components/Dots";
 
 const STYLES: { id: WorkoutStyle; label: string; sub: string }[] = [
   { id: "hypertrophy", label: "Hypertrophy", sub: "8–12 reps · build muscle" },
@@ -19,6 +21,7 @@ const LEVELS = [
 ];
 
 export default function GeneratorClient() {
+  const router = useRouter();
   const [style, setStyle] = useState<WorkoutStyle>("hypertrophy");
   const [maxLevel, setMaxLevel] = useState(4);
   const [perSlot, setPerSlot] = useState(1);
@@ -39,12 +42,14 @@ export default function GeneratorClient() {
   async function useAsRoutine() {
     if (!workout) return;
     setBusy(true);
+    setSavedMsg("Loading your workout…");
     const ids = workout.flatMap((s) => s.exercises.map((e) => e.id));
     await saveCustomDay(0, ids);
     await setActiveProgram("custom");
     await markOnboarded();
-    setSavedMsg("Loaded — go to Today to log it with weights & reps.");
-    setBusy(false);
+    // go straight to Today so they can do the workout (keep busy true through nav)
+    router.push("/dashboard");
+    router.refresh();
   }
 
   async function saveNamed() {
