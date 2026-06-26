@@ -29,7 +29,8 @@ const PAGES: SearchItem[] = [
   { kind: "page", title: "Event Planner", subtitle: "Plan around a performance", href: "/plan", keywords: "competition exam taper performance schedule" },
   { kind: "page", title: "Achievements", subtitle: "Ranks, streaks & badges", href: "/achievements", keywords: "rank level streak ring badge etoile" },
   { kind: "page", title: "Library", subtitle: "Every exercise & video", href: "/exercises", keywords: "exercises catalogue demo video" },
-  { kind: "page", title: "How to Use the App", subtitle: "Guide & training principles", href: "/guide", keywords: "help guide great 8 hypertrophy strength endurance phases trimp" },
+  { kind: "page", title: "How to Use the App", subtitle: "Beginner guide", href: "/guide", keywords: "help guide getting started beginner how to" },
+  { kind: "page", title: "Training Science", subtitle: "The why behind the programs", href: "/training-science", keywords: "great 8 hypertrophy strength endurance phases trimp deload rpe science deeper" },
   { kind: "page", title: "Settings", subtitle: "Name, reminders, start date", href: "/settings", keywords: "account profile reminders" },
 ];
 
