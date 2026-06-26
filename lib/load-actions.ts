@@ -26,6 +26,37 @@ export async function logSession(input: {
   return { ok: true };
 }
 
+/** Log a recurring class: inserts one session per week on the same weekday,
+ *  starting from `date`, for `weeks` occurrences (including the first). */
+export async function logRecurring(input: {
+  durationMin: number; rpe: number; kind?: string; date: string; startTime?: string; weeks: number;
+}): Promise<{ ok: boolean; error?: string; count?: number }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const duration = Math.round(Number(input.durationMin));
+  const rpe = Math.round(Number(input.rpe));
+  const weeks = Math.max(1, Math.min(52, Math.round(Number(input.weeks))));
+  if (!(duration >= 1 && duration <= 600)) return { ok: false, error: "Duration must be 1–600 minutes" };
+  if (!(rpe >= 1 && rpe <= 10)) return { ok: false, error: "RPE must be 1–10" };
+  if (!input.date) return { ok: false, error: "Pick a start date" };
+
+  const [y, m, d] = input.date.split("-").map(Number);
+  const rows = [];
+  for (let i = 0; i < weeks; i++) {
+    const dt = new Date(y, m - 1, d + i * 7);
+    const iso = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+    rows.push({
+      user_id: user.id, duration_min: duration, rpe,
+      kind: input.kind || "workout", session_date: iso,
+      start_time: input.startTime || null,
+    });
+  }
+  const { error } = await supabase.from("training_sessions").insert(rows);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, count: rows.length };
+}
+
 export async function deleteSession(id: number): Promise<{ ok: boolean }> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();

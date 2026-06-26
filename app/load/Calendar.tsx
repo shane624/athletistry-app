@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { logSession, deleteSession } from "@/lib/load-actions";
-import { CLASS_PRESETS, classColor, classLabel, classPreset } from "@/lib/classes";
+import { logSession, logRecurring, deleteSession } from "@/lib/load-actions";
+import { CLASS_GROUPS, CLASS_PRESETS, classColor, classLabel, classPreset } from "@/lib/classes";
 import { sessionTrimp } from "@/lib/load";
 import Dots from "@/components/Dots";
 
@@ -26,6 +26,9 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
   const [time, setTime] = useState("");
   const [dur, setDur] = useState(90);
   const [rpe, setRpe] = useState(6);
+  const [search, setSearch] = useState("");
+  const [recurring, setRecurring] = useState(false);
+  const [weeks, setWeeks] = useState(8);
 
   // group sessions/events by date
   const byDay = new Map<string, SessionRow[]>();
@@ -54,14 +57,26 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
     if (p) { setDur(p.defaultMin); setRpe(p.defaultRpe); }
   }
 
+  function closeModal() { setAddDay(null); setTime(""); setSearch(""); setRecurring(false); }
+
   async function saveClass() {
     if (!addDay) return;
     setBusy(true);
-    await logSession({ kind, durationMin: dur, rpe, date: addDay, startTime: time || undefined });
-    setBusy(false); setAddDay(null); setTime("");
+    if (recurring) {
+      await logRecurring({ kind, durationMin: dur, rpe, date: addDay, startTime: time || undefined, weeks });
+    } else {
+      await logSession({ kind, durationMin: dur, rpe, date: addDay, startTime: time || undefined });
+    }
+    setBusy(false); closeModal();
     router.refresh();
   }
   async function removeSession(id: number) { setBusy(true); await deleteSession(id); setBusy(false); router.refresh(); }
+
+  // filtered preset groups for the search bar
+  const q = search.trim().toLowerCase();
+  const filteredGroups = CLASS_GROUPS
+    .map((g) => ({ title: g.title, items: g.items.filter((it) => !q || it.label.toLowerCase().includes(q)) }))
+    .filter((g) => g.items.length > 0);
 
   const todayISO = ymd(today);
 
@@ -118,22 +133,36 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
 
       {/* add modal */}
       {addDay && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: "rgba(31,42,68,.6)" }} onClick={() => setAddDay(null)}>
-          <div className="card w-full max-w-md p-5" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: "rgba(31,42,68,.6)" }} onClick={closeModal}>
+          <div className="card w-full max-w-md p-5 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <p className="font-extrabold text-navy">Add to {addDay}</p>
-              <button className="text-grey" onClick={() => setAddDay(null)}>✕</button>
+              <button className="text-grey" onClick={closeModal}>✕</button>
             </div>
 
-            <p className="eyebrow mt-4">Class type</p>
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {CLASS_PRESETS.map((p) => (
-                <button key={p.kind} onClick={() => pickKind(p.kind)}
-                  className={`rounded-full px-3 py-1.5 text-sm border ${kind === p.kind ? "text-white border-transparent" : "bg-white border-line text-grey"}`}
-                  style={kind === p.kind ? { background: p.color } : {}}>
-                  {p.label}
-                </button>
+            <p className="eyebrow mt-4">Class or activity</p>
+            <input
+              className="input mt-2"
+              placeholder="Search… ballet, swimming, gym…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <div className="mt-3 space-y-3">
+              {filteredGroups.map((g) => (
+                <div key={g.title}>
+                  <p className="text-grey text-[11px] font-semibold uppercase tracking-wide">{g.title}</p>
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    {g.items.map((p) => (
+                      <button key={p.kind} onClick={() => pickKind(p.kind)}
+                        className={`rounded-full px-3 py-1.5 text-sm border ${kind === p.kind ? "text-white border-transparent" : "bg-white border-line text-grey"}`}
+                        style={kind === p.kind ? { background: p.color } : {}}>
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
+              {filteredGroups.length === 0 && <p className="text-grey text-sm">No match — log it as “Other sport”.</p>}
             </div>
 
             <div className="flex flex-wrap gap-3 mt-4">
@@ -170,8 +199,23 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
               </div>
             )}
 
+            {/* recurring */}
+            <div className="mt-4 border-t border-line pt-3">
+              <label className="flex items-center gap-2 text-sm text-navy font-medium cursor-pointer">
+                <input type="checkbox" className="accent-teal w-4 h-4" checked={recurring} onChange={(e) => setRecurring(e.target.checked)} />
+                Repeat weekly (same weekday)
+              </label>
+              {recurring && (
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-sm text-grey">for</span>
+                  <input className="input w-16" inputMode="numeric" value={weeks} onChange={(e) => setWeeks(Math.max(1, Math.min(52, Number(e.target.value) || 1)))} />
+                  <span className="text-sm text-grey">weeks</span>
+                </div>
+              )}
+            </div>
+
             <button className="btn-primary w-full mt-4" disabled={busy || !dur} onClick={saveClass}>
-              {busy ? <Dots /> : `Add ${classLabel(kind)}`}
+              {busy ? <Dots /> : recurring ? `Add ${classLabel(kind)} × ${weeks} weeks` : `Add ${classLabel(kind)}`}
             </button>
           </div>
         </div>
