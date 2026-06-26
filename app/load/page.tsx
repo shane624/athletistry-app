@@ -1,6 +1,7 @@
 import NavBar from "@/components/NavBar";
 import { getAssessment, getLoadData } from "@/lib/load-data";
 import LoadClient from "./LoadClient";
+import Calendar from "./Calendar";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,11 @@ export default async function LoadPage() {
           events={events}
           nextEventName={nextEvent?.name || nextEvent?.kind || null}
         />
+
+        <div className="mt-8">
+          <p className="eyebrow mb-3">Your schedule</p>
+          <Calendar sessions={sessions} events={events} />
+        </div>
       </main>
     </div>
   );

@@ -6,7 +6,7 @@ import { logSession, deleteSession, addEvent, deleteEvent } from "@/lib/load-act
 import { sessionTrimp, type LoadAssessment, type WeekLoad } from "@/lib/load";
 import Dots from "@/components/Dots";
 
-interface SessionRow { id: number; session_date: string; kind: string; duration_min: number; rpe: number; note: string | null; }
+interface SessionRow { id: number; session_date: string; kind: string; duration_min: number; rpe: number; note: string | null; start_time: string | null; }
 interface EventRow { id: number; event_date: string; kind: string; name: string; }
 
 const KINDS = [

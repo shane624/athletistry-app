@@ -2,9 +2,9 @@
 
 import { createClient } from "@/lib/supabase-server";
 
-/** Log a training session (workout / class / rehearsal). TRIMP = duration × RPE. */
+/** Log a training session / class. TRIMP = duration × RPE. */
 export async function logSession(input: {
-  durationMin: number; rpe: number; kind?: string; date?: string; note?: string;
+  durationMin: number; rpe: number; kind?: string; date?: string; note?: string; startTime?: string;
 }): Promise<{ ok: boolean; error?: string }> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -19,6 +19,7 @@ export async function logSession(input: {
     rpe,
     kind: input.kind || "workout",
     session_date: input.date || new Date().toISOString().slice(0, 10),
+    start_time: input.startTime || null,
     note: input.note || null,
   });
   if (error) return { ok: false, error: error.message };

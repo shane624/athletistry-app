@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase-server";
 import { assessLoad, weeklyLoads, type SessionInput, type LoadAssessment, type WeekLoad } from "@/lib/load";
 
 export interface SessionRow {
-  id: number; session_date: string; kind: string; duration_min: number; rpe: number; note: string | null;
+  id: number; session_date: string; kind: string; duration_min: number; rpe: number; note: string | null; start_time: string | null;
 }
 export interface EventRow {
   id: number; event_date: string; kind: string; name: string;
@@ -16,7 +16,7 @@ export async function getLoadData(): Promise<{ sessions: SessionRow[]; events: E
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { sessions: [], events: [] };
   const [{ data: s }, { data: e }] = await Promise.all([
-    supabase.from("training_sessions").select("id, session_date, kind, duration_min, rpe, note").eq("user_id", user.id).order("session_date", { ascending: false }),
+    supabase.from("training_sessions").select("id, session_date, kind, duration_min, rpe, note, start_time").eq("user_id", user.id).order("session_date", { ascending: false }),
     supabase.from("events").select("id, event_date, kind, name").eq("user_id", user.id).order("event_date", { ascending: true }),
   ]);
   return { sessions: (s ?? []) as SessionRow[], events: (e ?? []) as EventRow[] };

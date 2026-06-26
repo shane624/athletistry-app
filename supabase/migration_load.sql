@@ -16,6 +16,9 @@ create table if not exists training_sessions (
 create index if not exists training_sessions_user_date_idx
   on training_sessions (user_id, session_date);
 
+-- optional start time-of-day for the class (for the calendar schedule view)
+alter table training_sessions add column if not exists start_time text;
+
 -- 2) events: performances / competitions / exams the taper plans around.
 create table if not exists events (
   id          bigint generated always as identity primary key,
