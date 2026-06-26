@@ -5,21 +5,40 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 
-const links = [
-  { href: "/dashboard", label: "Today" },
-  { href: "/programs", label: "Programs" },
-  { href: "/generate", label: "Random" },
-  { href: "/ballet", label: "Train for Ballet" },
-  { href: "/my-workouts", label: "My Workouts" },
-  { href: "/workouts", label: "Guided" },
-  { href: "/warmups", label: "Warm-Ups" },
-  { href: "/progress", label: "Progress" },
-  { href: "/load", label: "Training Calendar" },
-  { href: "/plan", label: "Event Planner" },
-  { href: "/achievements", label: "Achievements" },
-  { href: "/exercises", label: "Library" },
-  { href: "/guide", label: "Guide" },
-  { href: "/settings", label: "Settings" },
+type Item = { href: string; label: string };
+type Group = { title: string; items: Item[] };
+
+// Grouped menu — tidier than one long flat list.
+const GROUPS: Group[] = [
+  {
+    title: "Train",
+    items: [
+      { href: "/dashboard", label: "Today" },
+      { href: "/programs", label: "Programs" },
+      { href: "/generate", label: "Random" },
+      { href: "/ballet", label: "Train for Ballet" },
+      { href: "/warmups", label: "Warm-Ups" },
+      { href: "/workouts", label: "Guided Workouts" },
+      { href: "/my-workouts", label: "My Workouts" },
+    ],
+  },
+  {
+    title: "Track",
+    items: [
+      { href: "/progress", label: "Progress" },
+      { href: "/load", label: "Training Calendar" },
+      { href: "/plan", label: "Event Planner" },
+      { href: "/achievements", label: "Achievements" },
+    ],
+  },
+  {
+    title: "More",
+    items: [
+      { href: "/exercises", label: "Library" },
+      { href: "/guide", label: "How to Use the App" },
+      { href: "/settings", label: "Settings" },
+    ],
+  },
 ];
 
 const ADMIN_EMAIL = "swuerthner@gmail.com";
@@ -31,17 +50,21 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
 
-  // close the dropdown whenever the route changes
   useEffect(() => { setOpen(false); }, [pathname]);
 
-  // show the Admin link only for the admin (server still enforces access)
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setShowAdmin((data.user?.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase());
     });
   }, [supabase]);
 
-  const navLinks = showAdmin ? [...links, { href: "/admin", label: "Admin" }] : links;
+  const groups: Group[] = showAdmin
+    ? [...GROUPS, { title: "Admin", items: [{ href: "/admin", label: "Members" }] }]
+    : GROUPS;
+
+  // current page label for the menu button
+  const allItems = groups.flatMap((g) => g.items);
+  const current = allItems.find((l) => pathname.startsWith(l.href))?.label ?? "Menu";
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -49,15 +72,12 @@ export default function NavBar() {
     router.refresh();
   }
 
-  const current = navLinks.find((l) => pathname.startsWith(l.href))?.label ?? "Menu";
-
   return (
     <header className="bg-navy text-white sticky top-0 z-30 safe-top">
       <div className="max-w-4xl mx-auto px-4">
         <div className="h-12 flex items-center justify-between gap-2">
           <Link href="/dashboard" className="font-bold tracking-widest text-teal text-sm shrink-0">ATHLETISTRY</Link>
 
-          {/* dropdown menu button — used on every screen size for consistency */}
           <button
             onClick={() => setOpen((v) => !v)}
             className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/10 text-sm"
@@ -72,24 +92,32 @@ export default function NavBar() {
         </div>
       </div>
 
-      {/* dropdown panel — shown on every screen size */}
       {open && (
         <>
           <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 right-0 z-30 bg-navy border-t border-white/10 shadow-lg">
-            <nav className="max-w-4xl mx-auto px-2 py-2 grid grid-cols-2 sm:grid-cols-3 gap-1">
-              {navLinks.map((l) => (
-                <Link key={l.href} href={l.href}
-                  className={`px-3 py-2.5 rounded-md text-sm ${
-                    pathname.startsWith(l.href) ? "bg-teal text-white" : "text-white/85 hover:bg-white/10"
-                  }`}>
-                  {l.label}
-                </Link>
+          <div className="absolute left-0 right-0 z-30 bg-navy border-t border-white/10 shadow-lg max-h-[80vh] overflow-y-auto">
+            <nav className="max-w-4xl mx-auto px-3 py-3">
+              {groups.map((g) => (
+                <div key={g.title} className="mb-3 last:mb-0">
+                  <p className="text-teal/80 text-[10px] font-bold tracking-widest uppercase px-1 mb-1">{g.title}</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+                    {g.items.map((l) => (
+                      <Link key={l.href} href={l.href}
+                        className={`px-3 py-2.5 rounded-md text-sm ${
+                          pathname.startsWith(l.href) ? "bg-teal text-white" : "text-white/85 hover:bg-white/10"
+                        }`}>
+                        {l.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               ))}
-              <button onClick={signOut}
-                className="px-3 py-2.5 rounded-md text-sm text-left text-white/70 hover:bg-white/10 col-span-2">
-                Sign out
-              </button>
+              <div className="border-t border-white/10 mt-2 pt-2">
+                <button onClick={signOut}
+                  className="px-3 py-2.5 rounded-md text-sm text-left text-white/70 hover:bg-white/10 w-full">
+                  Sign out
+                </button>
+              </div>
             </nav>
           </div>
         </>

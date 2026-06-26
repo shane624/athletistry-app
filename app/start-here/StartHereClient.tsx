@@ -65,13 +65,16 @@ export default function StartHereClient() {
           <div>
             <h1 className="text-2xl font-bold text-navy mt-1">How Athletistry works</h1>
             <p className="text-ink text-sm leading-relaxed mt-3">
-              This app is your training home base. A quick tour of what you can do:
+              This app is your training home base — built for dancers. A quick tour of what&apos;s inside:
             </p>
             <ul className="mt-3 space-y-2 text-sm">
-              <li className="card p-3"><b>Follow a program</b> — pick a guided plan and the app tells you exactly what to do each day, with the right sets, reps, and tempo.</li>
-              <li className="card p-3"><b>Generate a random workout</b> — choose a style and difficulty and get a balanced session on the spot.</li>
-              <li className="card p-3"><b>Build &amp; save your own</b> — make routines from the exercise library and reuse them.</li>
-              <li className="card p-3"><b>Watch &amp; track</b> — every exercise has a demo video; log your weights and reps and watch your progress climb.</li>
+              <li className="card p-3"><b>Follow a program</b> — pick a guided plan (including The Practice and the 24-week periodised plan) and the app tells you exactly what to do each day.</li>
+              <li className="card p-3"><b>Warm up first</b> — a warm-up shows at the top of every session, plus a Warm-Ups section for before class, rehearsal or a performance.</li>
+              <li className="card p-3"><b>Train for a ballet move</b> — pick a move you want to improve and get a workout of the exercises that build it. Filter by level and equipment.</li>
+              <li className="card p-3"><b>Random or build-your-own</b> — generate a balanced session on the spot, or make and save your own routines.</li>
+              <li className="card p-3"><b>Watch &amp; track</b> — every exercise has a demo video. Log weights, reps, and hold times; watch your lifts and muscle-group balance climb.</li>
+              <li className="card p-3"><b>Stay consistent</b> — earn ballet ranks, streaks and achievements as you train, with a daily warm welcome.</li>
+              <li className="card p-3"><b>Plan around dancing</b> — log every class on the Training Calendar; the app tracks your weekly load and tapers you before performances.</li>
             </ul>
           </div>
         )}
