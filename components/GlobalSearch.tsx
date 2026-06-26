@@ -28,7 +28,7 @@ export default function GlobalSearch() {
         kind: "exercise" as const,
         title: e.name,
         subtitle: `${e.category} · level ${e.level}`,
-        href: "/exercises",
+        href: `/exercises?focus=${e.id}`,
         keywords: `${e.name} ${e.category}`.toLowerCase(),
       })));
     } catch { /* leave exercises out if it fails */ }

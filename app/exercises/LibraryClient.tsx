@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ExerciseRow } from "@/lib/types";
 import ExerciseVideo from "@/components/ExerciseVideo";
 
@@ -8,6 +8,24 @@ export default function LibraryClient({ exercises }: { exercises: ExerciseRow[] 
   const [q, setQ] = useState("");
   const [level, setLevel] = useState<number | "">("");
   const [open, setOpen] = useState<number | null>(null);
+  const [focusId, setFocusId] = useState<number | null>(null);
+
+  // deep link from global search: /exercises?focus=<id> → scroll to, highlight,
+  // and open that exercise's video.
+  useEffect(() => {
+    const f = Number(new URLSearchParams(window.location.search).get("focus"));
+    if (f && exercises.some((e) => e.id === f)) {
+      setFocusId(f);
+      setOpen(f);
+      // wait a tick for the card to render, then scroll to it
+      setTimeout(() => {
+        document.getElementById(`ex-${f}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 60);
+      // clear the highlight after a few seconds
+      const t = setTimeout(() => setFocusId(null), 3500);
+      return () => clearTimeout(t);
+    }
+  }, [exercises]);
 
   const filtered = useMemo(() => {
     return exercises.filter((e) => {
@@ -29,7 +47,10 @@ export default function LibraryClient({ exercises }: { exercises: ExerciseRow[] 
 
       <div className="grid sm:grid-cols-2 gap-3 mt-4">
         {filtered.map((e) => (
-          <div key={e.id} className="card p-3">
+          <div key={e.id} id={`ex-${e.id}`}
+            className={`card p-3 transition-shadow duration-500 ${
+              focusId === e.id ? "ring-2 ring-teal shadow-lg" : ""
+            }`}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium text-navy">{e.name}</p>
