@@ -7,6 +7,9 @@ import { styleRx } from "@/lib/program";
 import type { ExerciseRow, WorkoutStyle } from "@/lib/types";
 import ExerciseVideo from "@/components/ExerciseVideo";
 import Dots from "@/components/Dots";
+import { EQUIPMENT_LABEL } from "@/lib/equipment";
+
+const EQUIP = ["band", "dumbbell", "barbell", "slant_board", "step", "partner"];
 
 const STYLES: { id: WorkoutStyle; label: string; sub: string }[] = [
   { id: "hypertrophy", label: "Hypertrophy", sub: "8–12 reps · build muscle" },
@@ -25,6 +28,8 @@ export default function GeneratorClient() {
   const [style, setStyle] = useState<WorkoutStyle>("hypertrophy");
   const [maxLevel, setMaxLevel] = useState(4);
   const [perSlot, setPerSlot] = useState(1);
+  const [equip, setEquip] = useState<Set<string>>(new Set());
+  const [equipOpen, setEquipOpen] = useState(false);
   const [workout, setWorkout] = useState<{ slot: string; exercises: ExerciseRow[] }[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [openVid, setOpenVid] = useState<number | null>(null);
@@ -32,9 +37,13 @@ export default function GeneratorClient() {
 
   const rx = styleRx(style);
 
+  function toggleEquip(e: string) {
+    setEquip((prev) => { const n = new Set(prev); n.has(e) ? n.delete(e) : n.add(e); return n; });
+  }
+
   async function generate() {
     setBusy(true); setSavedMsg(null);
-    const w = await generateWorkout(style, perSlot, maxLevel);
+    const w = await generateWorkout(style, perSlot, maxLevel, equip.size ? [...equip] : undefined);
     setWorkout(w);
     setBusy(false);
   }
@@ -107,6 +116,25 @@ export default function GeneratorClient() {
           </div>
         </div>
       </div>
+
+      {/* equipment filter */}
+      <button onClick={() => setEquipOpen((v) => !v)} className="text-sm text-teal font-semibold mt-4">
+        {equip.size ? `Equipment: ${equip.size} selected` : "Filter by equipment"} {equipOpen ? "▴" : "▾"}
+      </button>
+      {equipOpen && (
+        <div className="card mt-2 p-4">
+          <p className="text-sm text-grey">Select what you have — handy when travelling. Bodyweight always shows; leave empty for everything.</p>
+          <div className="flex flex-wrap gap-2 mt-3">
+            {EQUIP.map((e) => (
+              <button key={e} onClick={() => toggleEquip(e)}
+                className={`rounded-full px-3 py-1.5 text-sm border ${equip.has(e) ? "bg-navy text-white border-navy" : "bg-white border-line text-grey"}`}>
+                {EQUIPMENT_LABEL[e as keyof typeof EQUIPMENT_LABEL]}
+              </button>
+            ))}
+          </div>
+          {equip.size > 0 && <button className="text-teal text-sm mt-3 font-semibold" onClick={() => setEquip(new Set())}>Clear</button>}
+        </div>
+      )}
 
       <button className="btn-primary mt-5 w-full sm:w-auto" onClick={generate} disabled={busy}>
         {busy ? "Rolling…" : workout ? "🎲 Regenerate" : "🎲 Generate workout"}

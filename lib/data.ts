@@ -223,14 +223,20 @@ export async function listExercises(): Promise<ExerciseRow[]> {
    styleRx + SLOT_CATEGORIES live in lib/program.ts (pure helpers).
    ============================================================ */
 
-/** Generate a balanced one-day workout. perSlot = exercises per slot (1 or 2). maxLevel caps difficulty. */
-export async function generateWorkout(style: WorkoutStyle, perSlot = 1, maxLevel = 4): Promise<{ slot: string; exercises: ExerciseRow[] }[]> {
+/** Generate a balanced one-day workout. perSlot = exercises per slot (1 or 2).
+ *  maxLevel caps difficulty. equipment (optional) limits to what's available. */
+export async function generateWorkout(style: WorkoutStyle, perSlot = 1, maxLevel = 4, equipment?: string[]): Promise<{ slot: string; exercises: ExerciseRow[] }[]> {
+  const { fitsEquipment } = await import("@/lib/equipment");
   const all = await listExercises();
   let usable = all.filter((e) => e.level <= maxLevel);
   // Isometric / hold exercises don't suit a hypertrophy rep scheme — keep them
   // out of hypertrophy-style generated workouts (they belong in strength/skill work).
   if (style === "hypertrophy") {
     usable = usable.filter((e) => !isHoldExercise(e.name));
+  }
+  if (equipment && equipment.length) {
+    const allowed = new Set(equipment as any[]);
+    usable = usable.filter((e) => fitsEquipment(e.name, allowed as any));
   }
   const pick = <T,>(arr: T[], n: number): T[] => {
     const copy = [...arr]; const out: T[] = [];
@@ -244,16 +250,27 @@ export async function generateWorkout(style: WorkoutStyle, perSlot = 1, maxLevel
 }
 
 /** Build a targeted workout for a ballet move: the library exercises that
- *  benefit that move (only those that actually exist in the library). */
-export async function generateBalletWorkout(moveSlug: string): Promise<{ move: string; focus: string; exercises: ExerciseRow[] } | null> {
+ *  benefit that move, optionally filtered by max level and available
+ *  equipment (e.g. band-only for a traveller). */
+export async function generateBalletWorkout(
+  moveSlug: string,
+  opts?: { maxLevel?: number; equipment?: string[] }
+): Promise<{ move: string; focus: string; exercises: ExerciseRow[] } | null> {
   const { balletMove } = await import("@/lib/ballet");
+  const { fitsEquipment } = await import("@/lib/equipment");
   const move = balletMove(moveSlug);
   if (!move) return null;
   const all = await listExercises();
   const byName = new Map(all.map((e) => [e.name.toLowerCase(), e]));
+  const maxLevel = opts?.maxLevel ?? 4;
+  const allowed = opts?.equipment && opts.equipment.length
+    ? new Set(opts.equipment as any[])
+    : null; // null = no equipment filter
   const exercises = move.exercises
     .map((n) => byName.get(n.toLowerCase()))
-    .filter((e): e is ExerciseRow => !!e);
+    .filter((e): e is ExerciseRow => !!e)
+    .filter((e) => e.level <= maxLevel)
+    .filter((e) => !allowed || fitsEquipment(e.name, allowed as any));
   return { move: move.name, focus: move.focus, exercises };
 }
 

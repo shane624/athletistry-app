@@ -14,6 +14,7 @@ const links = [
   { href: "/workouts", label: "Guided" },
   { href: "/warmups", label: "Warm-Ups" },
   { href: "/progress", label: "Progress" },
+  { href: "/plan", label: "Event Planner" },
   { href: "/achievements", label: "Achievements" },
   { href: "/exercises", label: "Library" },
   { href: "/guide", label: "Guide" },
