@@ -57,7 +57,7 @@ export default async function Dashboard() {
           <Link href="/load" className="card card-hover block p-4 mb-5 animate-in">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="eyebrow">{assessment.taper ? "Taper week" : "Training load"}</p>
+                <p className="eyebrow">{assessment.taper ? "Taper week" : "Training calendar"}</p>
                 <p className="text-navy text-sm font-semibold mt-0.5 truncate">{assessment.message}</p>
               </div>
               <span className="text-teal text-sm font-semibold whitespace-nowrap shrink-0">View →</span>
