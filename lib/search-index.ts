@@ -31,6 +31,7 @@ const PAGES: SearchItem[] = [
   { kind: "page", title: "Library", subtitle: "Every exercise & video", href: "/exercises", keywords: "exercises catalogue demo video" },
   { kind: "page", title: "How to Use the App", subtitle: "Beginner guide", href: "/guide", keywords: "help guide getting started beginner how to" },
   { kind: "page", title: "Training Science", subtitle: "The why behind the programs", href: "/training-science", keywords: "great 8 hypertrophy strength endurance phases trimp deload rpe science deeper" },
+  { kind: "page", title: "Understand Anatomy", subtitle: "The Dancer's Body course", href: "/anatomy", keywords: "anatomy biomechanics hip knee foot ankle shoulder core turnout dancer body regions plie develop arabesque" },
   { kind: "page", title: "Settings", subtitle: "Name, reminders, start date", href: "/settings", keywords: "account profile reminders" },
 ];
 

@@ -33,10 +33,17 @@ const GROUPS: Group[] = [
     ],
   },
   {
+    title: "Learn",
+    items: [
+      { href: "/guide", label: "How to Use the App" },
+      { href: "/anatomy", label: "Understand Anatomy" },
+      { href: "/training-science", label: "Training Science" },
+    ],
+  },
+  {
     title: "More",
     items: [
       { href: "/exercises", label: "Library" },
-      { href: "/guide", label: "How to Use the App" },
       { href: "/settings", label: "Settings" },
     ],
   },
