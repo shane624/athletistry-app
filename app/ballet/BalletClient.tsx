@@ -23,6 +23,12 @@ export default function BalletClient() {
   const router = useRouter();
   const [slug, setSlug] = useState(BALLET_MOVES[0].slug);
   const [maxLevel, setMaxLevel] = useState(4);
+
+  // deep link: /ballet?move=fondu pre-selects that move (from global search)
+  useEffect(() => {
+    const m = new URLSearchParams(window.location.search).get("move");
+    if (m && BALLET_MOVES.some((x) => x.slug === m)) setSlug(m);
+  }, []);
   const [equipOpen, setEquipOpen] = useState(false);
   // which equipment the dancer HAS (empty = no filter, show everything)
   const [equip, setEquip] = useState<Set<Equipment>>(new Set());
