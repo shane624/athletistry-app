@@ -34,6 +34,7 @@ const PAGES: SearchItem[] = [
   { kind: "page", title: "Training Science", subtitle: "The why behind the programs", href: "/training-science", keywords: "great 8 hypertrophy strength endurance phases trimp deload rpe science deeper" },
   { kind: "page", title: "Understand Anatomy", subtitle: "The Dancer's Body course", href: "/anatomy", keywords: "anatomy biomechanics hip knee foot ankle shoulder core turnout dancer body regions plie develop arabesque" },
   { kind: "page", title: "Settings", subtitle: "Name, reminders, start date", href: "/settings", keywords: "account profile reminders" },
+  { kind: "page", title: "Menu", subtitle: "Everything in one place", href: "/menu", keywords: "menu all sections more home navigation" },
 ];
 
 // ---- ballet moves ----

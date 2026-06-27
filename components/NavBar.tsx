@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import GlobalSearch from "@/components/GlobalSearch";
+import BottomTabBar from "@/components/BottomTabBar";
 
 type Item = { href: string; label: string };
 type Group = { title: string; items: Item[] };
@@ -82,6 +83,7 @@ export default function NavBar() {
   }
 
   return (
+    <>
     <header className="bg-navy text-white sticky top-0 z-30 safe-top">
       <div className="max-w-4xl mx-auto px-4">
         <div className="h-12 flex items-center gap-2">
@@ -135,5 +137,7 @@ export default function NavBar() {
         </>
       )}
     </header>
+    <BottomTabBar />
+    </>
   );
 }
