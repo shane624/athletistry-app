@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { generateCircuit } from "@/lib/data";
 import {
   CIRCUIT_FORMATS, COMPOSITIONS, defaultConfig, exerciseCount, circuitSummary,
@@ -19,7 +18,6 @@ const COMP_IDS: Composition[] = ["full", "legs", "push", "pull", "core"];
 const EQUIP = ["band", "dumbbell", "barbell", "slant_board", "step", "partner"];
 
 export default function CircuitClient() {
-  const params = useSearchParams();
   const [format, setFormat] = useState<CircuitFormat>("intervals");
   const [comp, setComp] = useState<Composition>("full");
   const [cfg, setCfg] = useState<CircuitConfig>(defaultConfig("intervals"));
@@ -36,11 +34,12 @@ export default function CircuitClient() {
 
   // apply presets passed from the Random generator (?format=&focus=)
   useEffect(() => {
-    const f = params.get("format");
-    const focus = params.get("focus");
+    if (typeof window === "undefined") return;
+    const sp = new URLSearchParams(window.location.search);
+    const f = sp.get("format");
+    const focus = sp.get("focus");
     if (f && (FORMAT_IDS as string[]).includes(f)) { setFormat(f as CircuitFormat); setCfg(defaultConfig(f as CircuitFormat)); }
     if (focus && (COMP_IDS as string[]).includes(focus)) setComp(focus as Composition);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function pickFormat(f: CircuitFormat) {
@@ -274,7 +273,7 @@ function CircuitTimer({ format, cfg, exercises }: { format: CircuitFormat; cfg: 
   function begin() {
     setStarted(true);
     setPhase(0);
-    setLeft(isAmrap ? (cfg.amrapMin ?? 12) * 60 : phases[0].sec);
+    setLeft(isAmrap ? (cfg.amrapMin ?? 12) * 60 : (phases[0]?.sec ?? 0));
     run();
   }
   function toggle() { if (running) { clear(); setRunning(false); } else run(); }
@@ -283,7 +282,7 @@ function CircuitTimer({ format, cfg, exercises }: { format: CircuitFormat; cfg: 
     clear();
     const np = phase + 1;
     if (np >= phases.length) { setRunning(false); setLeft(0); return; }
-    setPhase(np); setLeft(phases[np].sec); run();
+    setPhase(np); setLeft(phases[np]?.sec ?? 0); run();
   }
   function restart() { clear(); setStarted(false); setRunning(false); setPhase(0); setLeft(phases[0]?.sec ?? 0); }
 
