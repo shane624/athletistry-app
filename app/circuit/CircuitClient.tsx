@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { generateCircuit } from "@/lib/data";
 import {
   CIRCUIT_FORMATS, COMPOSITIONS, defaultConfig, exerciseCount, circuitSummary,
@@ -236,55 +236,62 @@ function CircuitRunner({ format, cfg, exercises, openVid, setOpenVid }: {
 }
 
 function CircuitTimer({ format, cfg, exercises }: { format: CircuitFormat; cfg: CircuitConfig; exercises: ExerciseRow[] }) {
-  const phases = buildPhases(format, cfg, exercises.length);
+  // phases are stable for a given format/cfg/count; memoise so identity is steady
+  const phases = useMemo(
+    () => buildPhases(format, cfg, exercises.length),
+    [format, cfg, exercises.length]
+  );
   const isAmrap = format === "amrap";
+  const amrapTotal = (cfg.amrapMin ?? 12) * 60;
 
   const [started, setStarted] = useState(false);
   const [running, setRunning] = useState(false); // false = paused
   const [phase, setPhase] = useState(0);
-  const [left, setLeft] = useState(phases[0]?.sec ?? 0);
-  const tick = useRef<any>(null);
+  const [left, setLeft] = useState(0);
 
-  useEffect(() => () => { if (tick.current) clearInterval(tick.current); }, []);
-
-  function clear() { if (tick.current) { clearInterval(tick.current); tick.current = null; } }
-
-  // one interval; advances phases (or counts down the AMRAP clock)
-  function run() {
-    clear();
-    setRunning(true);
-    tick.current = setInterval(() => {
-      setLeft((l) => {
-        if (l > 1) return l - 1;
-        // phase finished
-        if (isAmrap) { clear(); setRunning(false); buzz(true); return 0; }
-        let np = -1;
-        setPhase((p) => { np = p + 1; return np; });
-        if (np >= phases.length) { clear(); setRunning(false); buzz(true); return 0; }
-        buzz(false);
-        return phases[np].sec;
-      });
-    }, 1000);
-  }
   function buzz(end: boolean) {
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(end ? [120, 60, 120] : 60);
   }
 
+  // Single countdown effect. Ticks `left`; when it hits 0 it advances the phase
+  // (or stops for AMRAP / at the end). No nested state updaters, no stale reads.
+  useEffect(() => {
+    if (!started || !running) return;
+    const id = setInterval(() => {
+      setLeft((l) => {
+        if (l > 1) return l - 1;
+        // this phase just ended
+        if (isAmrap) { setRunning(false); buzz(true); return 0; }
+        setPhase((p) => {
+          const np = p + 1;
+          if (np >= phases.length) { setRunning(false); buzz(true); return p; }
+          buzz(false);
+          return np;
+        });
+        return 0; // will be reset by the phase-change effect below
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [started, running, isAmrap, phases.length]);
+
+  // When the phase changes (and we're not AMRAP), load that phase's duration.
+  useEffect(() => {
+    if (!started || isAmrap) return;
+    setLeft(phases[phase]?.sec ?? 0);
+  }, [phase, started, isAmrap, phases]);
+
   function begin() {
     setStarted(true);
     setPhase(0);
-    setLeft(isAmrap ? (cfg.amrapMin ?? 12) * 60 : (phases[0]?.sec ?? 0));
-    run();
+    setLeft(isAmrap ? amrapTotal : (phases[0]?.sec ?? 0));
+    setRunning(true);
   }
-  function toggle() { if (running) { clear(); setRunning(false); } else run(); }
+  function toggle() { setRunning((r) => !r); }
   function skip() {
     if (isAmrap) return;
-    clear();
-    const np = phase + 1;
-    if (np >= phases.length) { setRunning(false); setLeft(0); return; }
-    setPhase(np); setLeft(phases[np]?.sec ?? 0); run();
+    setPhase((p) => Math.min(p + 1, phases.length - 1));
   }
-  function restart() { clear(); setStarted(false); setRunning(false); setPhase(0); setLeft(phases[0]?.sec ?? 0); }
+  function restart() { setRunning(false); setStarted(false); setPhase(0); setLeft(0); }
 
   // ---- AMRAP: continuous clock, all videos shown below ----
   if (isAmrap) {
