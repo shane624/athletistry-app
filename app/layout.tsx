@@ -3,7 +3,7 @@ import "./globals.css";
 import SplashGate from "@/components/SplashGate";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://athletistry-app.vercel.app"),
+  metadataBase: new URL("https://athletistry.app"),
   title: "Athletistry",
   description: "Train smarter — programs, workouts, and progress tracking for dancers.",
   manifest: "/manifest.json",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Athletistry",
     description: "Train smarter — programs, workouts, and progress tracking for dancers.",
-    url: "https://athletistry-app.vercel.app",
+    url: "https://athletistry.app",
     siteName: "Athletistry",
     images: [{ url: "/og-image.png", width: 1200, height: 1200, alt: "Athletistry" }],
     type: "website",
