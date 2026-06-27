@@ -16,6 +16,12 @@ import { EQUIPMENT_LABEL } from "@/lib/equipment";
 const FORMAT_IDS: CircuitFormat[] = ["intervals", "tabata", "emom", "amrap"];
 const COMP_IDS: Composition[] = ["full", "legs", "push", "pull", "core"];
 const EQUIP = ["band", "dumbbell", "barbell", "slant_board", "step", "partner"];
+const LEVELS = [
+  { v: 1, label: "Beginner" },
+  { v: 2, label: "Intermediate" },
+  { v: 3, label: "Advanced" },
+  { v: 4, label: "All levels" },
+];
 
 export default function CircuitClient() {
   const [format, setFormat] = useState<CircuitFormat>("intervals");
@@ -24,6 +30,7 @@ export default function CircuitClient() {
   const [exercises, setExercises] = useState<ExerciseRow[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [openVid, setOpenVid] = useState<number | null>(null);
+  const [maxLevel, setMaxLevel] = useState(4);
   const [equip, setEquip] = useState<Set<string>>(new Set());
   const [equipOpen, setEquipOpen] = useState(false);
 
@@ -53,6 +60,7 @@ export default function CircuitClient() {
     const ex = await generateCircuit({
       composition: comp,
       count: exerciseCount(cfg),
+      maxLevel,
       equipment: equip.size ? [...equip] : undefined,
     });
     setExercises(ex);
@@ -86,6 +94,19 @@ export default function CircuitClient() {
             <button key={c.id} onClick={() => { setComp(c.id); setExercises(null); }}
               className={`rounded-full px-3 py-1.5 text-sm border ${comp === c.id ? "bg-teal text-white border-teal" : "bg-white border-line text-grey"}`}>
               {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* difficulty (same as Random) */}
+      <div>
+        <p className="eyebrow mb-2">Difficulty</p>
+        <div className="flex flex-wrap gap-1.5">
+          {LEVELS.map((l) => (
+            <button key={l.v} onClick={() => { setMaxLevel(l.v); setExercises(null); }}
+              className={`rounded-full px-3 py-1.5 text-sm border ${maxLevel === l.v ? "bg-teal text-white border-teal" : "bg-white border-line text-grey"}`}>
+              {l.label}
             </button>
           ))}
         </div>
