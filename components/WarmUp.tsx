@@ -13,6 +13,7 @@ const WARMUPS = [
 export default function WarmUp() {
   const [choice, setChoice] = useState<string>(WARMUPS[0].id);
   const [done, setDone] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const selected = WARMUPS.find((w) => w.id === choice)!;
 
   return (
@@ -41,7 +42,7 @@ export default function WarmUp() {
         {WARMUPS.map((w) => (
           <button
             key={w.id}
-            onClick={() => setChoice(w.id)}
+            onClick={() => { setChoice(w.id); setPlaying(false); }}
             className={`flex-1 text-left rounded-xl border p-3 transition ${
               choice === w.id ? "border-teal bg-light" : "border-line hover:border-teal"
             }`}
@@ -57,16 +58,35 @@ export default function WarmUp() {
         ))}
       </div>
 
-      {/* video */}
+      {/* video — poster first, load the embed on tap (reliable on mobile) */}
       <div className="mt-3 aspect-video w-full overflow-hidden rounded-lg bg-black">
-        <iframe
-          key={selected.id}
-          className="w-full h-full"
-          src={`https://www.youtube-nocookie.com/embed/${selected.id}?rel=0&playsinline=1`}
-          title={`${selected.label} video`}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+        {playing ? (
+          <iframe
+            key={selected.id}
+            className="w-full h-full"
+            src={`https://www.youtube-nocookie.com/embed/${selected.id}?rel=0&playsinline=1&autoplay=1`}
+            title={`${selected.label} video`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          <button
+            onClick={() => setPlaying(true)}
+            aria-label={`Play ${selected.label}`}
+            className="group relative block w-full h-full"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`https://i.ytimg.com/vi/${selected.id}/hqdefault.jpg`}
+              alt={`${selected.label} preview`}
+              className="w-full h-full object-cover"
+            />
+            <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
+            <span className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-teal text-white shadow-lg transition group-hover:scale-110">
+              <svg viewBox="0 0 24 24" className="ml-0.5 h-6 w-6" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+            </span>
+          </button>
+        )}
       </div>
 
       <p className="text-grey text-xs mt-2">
