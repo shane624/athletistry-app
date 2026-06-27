@@ -62,6 +62,27 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
   const maxTrimp = Math.max(1, ...weeks.map((w) => w.trimp), a.targetTrimp ?? 0);
   const recentWeeks = weeks.slice(-8);
 
+  // --- this week, day by day (Mon–Sun) so the dancer sees daily load change ---
+  const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const now = new Date();
+  const monday = new Date(now);
+  const dow = (now.getDay() + 6) % 7; // 0 = Monday
+  monday.setDate(now.getDate() - dow);
+  monday.setHours(0, 0, 0, 0);
+  const dayKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const weekDays = DAY_LABELS.map((label, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const key = dayKey(d);
+    const trimp = sessions
+      .filter((s) => s.session_date === key)
+      .reduce((sum, s) => sum + sessionTrimp(s.duration_min, s.rpe), 0);
+    const isToday = key === dayKey(now);
+    return { label, key, trimp, isToday };
+  });
+  const maxDay = Math.max(1, ...weekDays.map((d) => d.trimp));
+  const weekDayTotal = weekDays.reduce((s, d) => s + d.trimp, 0);
+
   return (
     <div className="mt-5 space-y-6">
       {/* STATUS */}
@@ -81,6 +102,32 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
             {a.changePct != null ? ` (${a.changePct > 0 ? "+" : ""}${a.changePct}% vs last week)` : ""}
           </p>
         )}
+      </div>
+
+      {/* THIS WEEK, DAY BY DAY */}
+      <div className="card p-5 animate-in">
+        <div className="flex items-center justify-between">
+          <p className="eyebrow">This week, day by day</p>
+          <span className="text-grey text-xs">{weekDayTotal} TRIMP total</span>
+        </div>
+        <div className="flex items-end gap-2 mt-4 h-28">
+          {weekDays.map((d) => (
+            <div key={d.key} className="flex-1 flex flex-col items-center justify-end">
+              <span className="text-[10px] text-grey">{d.trimp > 0 ? d.trimp : ""}</span>
+              <div
+                className={`w-full rounded-t ${d.trimp > 0 ? "grad-brand" : "bg-line"} ${d.isToday ? "ring-2 ring-teal" : ""}`}
+                style={{ height: d.trimp > 0 ? `${Math.max((d.trimp / maxDay) * 100, 6)}%` : "4px" }}
+                title={`${d.label}: ${d.trimp} TRIMP`}
+              />
+              <span className={`text-[10px] mt-1 ${d.isToday ? "text-teal font-bold" : "text-grey"}`}>{d.label}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-grey text-xs mt-3">
+          {weekDayTotal > 0
+            ? "Each bar is that day's load (duration × RPE). Spread hard days out and keep an easy day or two."
+            : "No sessions logged this week yet — add one below and it'll show here."}
+        </p>
       </div>
 
       {/* WEEKLY HISTORY */}
