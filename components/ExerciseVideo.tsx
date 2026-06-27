@@ -72,7 +72,7 @@ function PosterButton({ poster, title, onPlay }: { poster: string; title?: strin
       {/* subtle gradient so the play button reads on any frame */}
       <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
       {/* play button */}
-      <span className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-teal/95 text-white shadow-lg transition group-hover:scale-110">
+      <span className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-teal text-white shadow-lg transition group-hover:scale-110">
         <svg viewBox="0 0 24 24" className="ml-0.5 h-6 w-6" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
       </span>
     </button>

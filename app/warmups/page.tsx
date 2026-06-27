@@ -28,7 +28,7 @@ export default function WarmupsPage() {
                 {w.advanced && (
                   <span className="absolute top-2 right-2 badge bg-navy text-white text-[10px]">Advanced</span>
                 )}
-                <span className="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-teal/95 text-white shadow-lg">
+                <span className="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-teal text-white shadow-lg">
                   <svg viewBox="0 0 24 24" className="ml-0.5 h-5 w-5" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
                 </span>
               </div>

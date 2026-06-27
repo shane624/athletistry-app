@@ -64,8 +64,8 @@ export default async function AchievementsPage() {
             <p className="eyebrow self-start">This week</p>
             <div className="relative mt-2" style={{ width: 132, height: 132 }}>
               <svg width="132" height="132" viewBox="0 0 132 132" className="-rotate-90">
-                <circle cx="66" cy="66" r={R} fill="none" stroke="#eef6f5" strokeWidth="12" />
-                <circle cx="66" cy="66" r={R} fill="none" stroke="#27ae9f" strokeWidth="12"
+                <circle cx="66" cy="66" r={R} fill="none" stroke="var(--c-line)" strokeWidth="12" />
+                <circle cx="66" cy="66" r={R} fill="none" stroke="var(--c-teal)" strokeWidth="12"
                   strokeLinecap="round" strokeDasharray={`${ringDash} ${C}`}
                   style={{ transition: "stroke-dasharray .8s ease" }} />
               </svg>
@@ -111,7 +111,7 @@ function BadgeCard({ b }: { b: { id: string; name: string; desc: string; earned:
           {b.earned ? (
             <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
           ) : (
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="#5b6470" strokeWidth="2"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="var(--c-grey)" strokeWidth="2"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
           )}
         </div>
         <div className="min-w-0">
@@ -121,7 +121,7 @@ function BadgeCard({ b }: { b: { id: string; name: string; desc: string; earned:
       <p className="text-grey text-xs mt-2 leading-snug">{b.desc}</p>
       {!b.earned && b.progress > 0 && (
         <div className="mt-2 h-1.5 rounded-full bg-light overflow-hidden">
-          <div className="h-full bg-teal/70 rounded-full" style={{ width: `${Math.round(b.progress * 100)}%` }} />
+          <div className="h-full bg-teal rounded-full" style={{ width: `${Math.round(b.progress * 100)}%` }} />
         </div>
       )}
     </div>

@@ -113,7 +113,7 @@ export default function NavBar() {
             <nav className="max-w-4xl mx-auto px-3 py-3">
               {groups.map((g) => (
                 <div key={g.title} className="mb-3 last:mb-0">
-                  <p className="text-teal/80 text-[10px] font-bold tracking-widest uppercase px-1 mb-1">{g.title}</p>
+                  <p className="text-teal text-[10px] font-bold tracking-widest uppercase px-1 mb-1">{g.title}</p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
                     {g.items.map((l) => (
                       <Link key={l.href} href={l.href}

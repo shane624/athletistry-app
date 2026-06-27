@@ -2,20 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: light; }
+:root {
+  color-scheme: light;
+  /* Light palette — the design tokens (see tailwind.config) read these. */
+  --c-navy: #1f2a44;
+  --c-navy2: #3a4a6b;
+  --c-teal: #27ae9f;
+  --c-tealdark: #1f8b7f;
+  --c-light: #eef6f5;
+  --c-rowalt: #f6f9f9;
+  --c-line: #d6e0df;
+  --c-ink: #2c3038;
+  --c-grey: #5b6470;
+  --c-surface: #ffffff;
+  --c-page: #eef6f5;
+  --card-border: rgba(31,42,68,.06);
+  --card-shadow: 0 6px 20px rgba(31,42,68,.07);
+  --card-shadow-hover: 0 12px 30px rgba(31,42,68,.12);
+}
 
-/* Navy at the html level so the FIRST paint (before React/JS loads, and the
-   PWA cold-start frame on phones) is brand navy, not a white flash. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    /* Dark palette. navy/navy2 stay the brand DARK (used as surfaces like the
+       header & hero), so they don't invert. Heading text that used text-navy
+       is remapped to ink below. */
+    --c-navy: #1f2a44;
+    --c-navy2: #2a3650;
+    --c-teal: #34c9b6;        /* a touch brighter so it pops on dark */
+    --c-tealdark: #2bb3a2;
+    --c-light: #161d2e;       /* "light" surfaces become deep navy */
+    --c-rowalt: #1c2438;
+    --c-line: #2c3650;
+    --c-ink: #e8edf6;
+    --c-grey: #9aa6bd;
+    --c-surface: #1b2236;     /* card background */
+    --c-page: #10151f;        /* page background */
+    --card-border: rgba(255,255,255,.07);
+    --card-shadow: 0 6px 20px rgba(0,0,0,.34);
+    --card-shadow-hover: 0 12px 30px rgba(0,0,0,.46);
+  }
+}
+
+/* Brand navy at the html level so the FIRST paint (before React/JS loads, and
+   the PWA cold-start frame on phones) is brand navy, not a white flash. */
 html {
   -webkit-text-size-adjust: 100%;
-  background-color: #1f2a44;
+  background-color: var(--c-page, #1f2a44);
 }
 
 body {
-  @apply bg-light text-ink;
+  background: var(--c-page);
+  color: var(--c-ink);
   -webkit-overflow-scrolling: touch;
   /* respect iOS notch / home-indicator safe areas */
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Raw Tailwind core colors used in markup don't know about dark mode, so map
+   the common ones to tokens. bg-white → card surface; black text → ink. */
+@media (prefers-color-scheme: dark) {
+  .bg-white { background-color: var(--c-surface) !important; }
+  .text-black { color: var(--c-ink) !important; }
+  .border-white\/40 { border-color: rgba(255,255,255,.22) !important; }
+  /* headings used text-navy (dark text on light) — flip to ink (light on dark).
+     bg-navy surfaces are unaffected since they use the background token. */
+  .text-navy { color: var(--c-ink) !important; }
 }
 
 /* On phones, leave room for the fixed bottom tab bar so content isn't hidden
@@ -25,16 +77,16 @@ body {
 }
 
 .card {
-  @apply bg-white;
-  border: 0.5px solid rgba(31,42,68,.06);
+  background: var(--c-surface);
+  border: 0.5px solid var(--card-border);
   border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(31,42,68,.07);
+  box-shadow: var(--card-shadow);
   transition: transform .25s ease, box-shadow .25s ease;
 }
 /* cards that should lift when hovered/tapped (exercise cards, program tiles) */
 .card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(31,42,68,.12);
+  box-shadow: var(--card-shadow-hover);
 }
 .btn {
   @apply inline-flex items-center justify-center font-semibold transition;
@@ -50,12 +102,17 @@ body {
 }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(39,174,159,.36); }
 .btn-ghost {
-  @apply btn border bg-white hover:bg-rowalt;
-  border-color: var(--line, #d6e0df);
+  @apply btn border hover:bg-rowalt;
+  background: var(--c-surface);
+  color: var(--c-ink);
+  border-color: var(--c-line);
 }
 .btn-ghost:hover { transform: translateY(-2px); }
 .input {
-  @apply w-full border border-line px-3 py-2 outline-none focus:border-teal;
+  @apply w-full px-3 py-2 outline-none focus:border-teal;
+  background: var(--c-surface);
+  color: var(--c-ink);
+  border: 1px solid var(--c-line);
   border-radius: 11px;
   /* 16px font stops iOS Safari from auto-zooming when an input is focused */
   font-size: 16px;

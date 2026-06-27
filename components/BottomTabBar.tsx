@@ -42,7 +42,8 @@ export default function BottomTabBar() {
       aria-label="Primary"
       className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-line"
       style={{
-        background: "rgba(255,255,255,0.88)",
+        background: "var(--c-surface)",
+        opacity: 0.97,
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
         paddingBottom: "env(safe-area-inset-bottom)",

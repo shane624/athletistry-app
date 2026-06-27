@@ -22,9 +22,9 @@ export default async function AchievementStrip() {
         {/* big weekly ring */}
         <div className="relative shrink-0" style={{ width: 84, height: 84 }}>
           <svg width="84" height="84" viewBox="0 0 36 36" className="-rotate-90">
-            <circle cx="18" cy="18" r={R} fill="none" stroke="#eef6f5" strokeWidth="3.4" />
+            <circle cx="18" cy="18" r={R} fill="none" stroke="var(--c-line)" strokeWidth="3.4" />
             <circle
-              cx="18" cy="18" r={R} fill="none" stroke="#27ae9f" strokeWidth="3.4"
+              cx="18" cy="18" r={R} fill="none" stroke="var(--c-teal)" strokeWidth="3.4"
               strokeLinecap="round" strokeDasharray={C} strokeDashoffset={offset}
             />
           </svg>
