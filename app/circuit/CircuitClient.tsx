@@ -328,28 +328,40 @@ function CircuitTimer({ format, cfg, exercises }: { format: CircuitFormat; cfg: 
 
   // ---- intervals / tabata / emom: phase machine with intro + looping video ----
   const cur = phases[phase];
-  const ex = cur?.exIndex != null ? exercises[cur.exIndex] : undefined;
+  // during the last 10s of a rest, preview the upcoming exercise
+  const previewing = cur?.kind === "rest" && cur.nextIndex != null && left <= INTRO_SEC;
+  const ex =
+    cur?.exIndex != null ? exercises[cur.exIndex]
+    : previewing ? exercises[cur.nextIndex!]
+    : undefined;
+  const showVideo = started && !!ex && (cur?.kind === "intro" || cur?.kind === "work" || previewing);
   const tone =
     !started ? "grad-navy" :
+    previewing ? "bg-teal" :
     cur?.kind === "rest" ? "bg-navy2" :
     cur?.kind === "intro" ? "bg-teal" : "grad-navy";
 
+  const banner =
+    !started ? "Ready when you are"
+    : previewing ? "Get ready — up next"
+    : cur?.kind === "intro" ? "Get ready — up next"
+    : cur?.kind === "rest" ? "Rest"
+    : "Work";
+  const title =
+    !started ? `${phases.length} phases queued`
+    : previewing && ex ? ex.name
+    : (cur?.label ?? "");
+
   return (
     <div className={`rounded-xl overflow-hidden text-white ${tone}`}>
-      {/* active-exercise video (intro preview + work loop) */}
-      {started && ex && (cur.kind === "intro" || cur.kind === "work") && (
+      {showVideo && ex && (
         <div className="aspect-video w-full bg-black">
           <LoopVideo ex={ex} />
         </div>
       )}
       <div className="p-5">
-        <p className="text-white/80 text-xs uppercase tracking-wide">
-          {!started ? "Ready when you are"
-            : cur?.kind === "intro" ? `Get ready — up next`
-            : cur?.kind === "rest" ? "Rest"
-            : "Work"}
-        </p>
-        <p className="text-lg font-bold mt-0.5">{started ? (cur?.label ?? "") : `${phases.length} phases queued`}</p>
+        <p className="text-white/80 text-xs uppercase tracking-wide">{banner}</p>
+        <p className="text-lg font-bold mt-0.5">{title}</p>
         <p className="text-5xl font-extrabold tabular-nums mt-1">{started ? `${left}s` : `${INTRO_SEC}s`}</p>
         {started && <p className="text-white/70 text-xs mt-1">Phase {phase + 1} / {phases.length}</p>}
         <Controls started={started} running={running} onBegin={begin} onToggle={toggle} onRestart={restart} showSkip onSkip={skip} />
@@ -378,33 +390,42 @@ function Controls({ started, running, onBegin, onToggle, onRestart, showSkip, on
   );
 }
 
-type Phase = { label: string; sec: number; kind: "intro" | "work" | "rest"; exIndex?: number };
+type Phase = { label: string; sec: number; kind: "intro" | "work" | "rest"; exIndex?: number; nextIndex?: number };
+// One 10s intro at the very start only. After that, the rest period IS the
+// transition: its last 10s preview the next exercise (no separate intro), so a
+// 30s rest stays 30s rather than 30 + 10.
 function buildPhases(format: CircuitFormat, cfg: CircuitConfig, count: number): Phase[] {
   const out: Phase[] = [];
   const idxs = Array.from({ length: count }, (_, i) => i);
+
   if (format === "intervals") {
     const s = cfg.intervalSec ?? 30;
     const rounds = cfg.rounds ?? 3;
-    for (let r = 0; r < rounds; r++) {
-      for (const i of idxs) {
-        out.push({ label: `Exercise ${i + 1}`, sec: INTRO_SEC, kind: "intro", exIndex: i });
-        out.push({ label: `Work`, sec: s, kind: "work", exIndex: i });
-        out.push({ label: "Rest", sec: s, kind: "rest" });
-      }
-    }
+    const seq: number[] = [];
+    for (let r = 0; r < rounds; r++) for (const i of idxs) seq.push(i);
+    seq.forEach((i, pos) => {
+      if (pos === 0) out.push({ label: `Exercise ${i + 1}`, sec: INTRO_SEC, kind: "intro", exIndex: i });
+      out.push({ label: `Work`, sec: s, kind: "work", exIndex: i });
+      const next = seq[pos + 1];
+      if (next != null) out.push({ label: "Rest", sec: s, kind: "rest", nextIndex: next });
+    });
   } else if (format === "tabata") {
-    for (const i of idxs) {
-      out.push({ label: `Exercise ${i + 1}`, sec: INTRO_SEC, kind: "intro", exIndex: i });
+    idxs.forEach((i, pos) => {
+      if (pos === 0) out.push({ label: `Exercise ${i + 1}`, sec: INTRO_SEC, kind: "intro", exIndex: i });
       for (let r = 0; r < 8; r++) {
         out.push({ label: `Round ${r + 1}/8`, sec: 20, kind: "work", exIndex: i });
-        out.push({ label: "Rest", sec: 10, kind: "rest" });
+        const lastRoundOfLastEx = r === 7 && pos === idxs.length - 1;
+        if (!lastRoundOfLastEx) {
+          const next = r === 7 ? idxs[pos + 1] : i; // next exercise after round 8, else same
+          out.push({ label: "Rest", sec: 10, kind: "rest", nextIndex: next });
+        }
       }
-    }
+    });
   } else if (format === "emom") {
     const rounds = cfg.emomRounds ?? 10;
     for (let r = 0; r < rounds; r++) {
       const i = r % count;
-      out.push({ label: `Min ${r + 1} — get ready`, sec: INTRO_SEC, kind: "intro", exIndex: i });
+      if (r === 0) out.push({ label: `Min 1 — get ready`, sec: INTRO_SEC, kind: "intro", exIndex: i });
       out.push({ label: `Min ${r + 1}: ${cfg.emomReps} reps`, sec: 60, kind: "work", exIndex: i });
     }
   }
