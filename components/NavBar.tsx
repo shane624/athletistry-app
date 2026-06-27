@@ -87,18 +87,17 @@ export default function NavBar() {
     <header className="bg-navy text-white sticky top-0 z-30 safe-top">
       <div className="max-w-4xl mx-auto px-4">
         <div className="h-12 flex items-center gap-2">
-          <Link href="/dashboard" className="font-bold tracking-widest text-teal text-sm shrink-0 hidden sm:block">ATHLETISTRY</Link>
+          <Link href="/dashboard" className="font-bold tracking-widest text-teal text-sm shrink-0">ATHLETISTRY</Link>
 
           <GlobalSearch />
 
           <button
             onClick={() => setOpen((v) => !v)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 text-sm shrink-0 ml-auto"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 text-sm shrink-0 ml-auto"
             aria-expanded={open}
             aria-label="Open menu"
           >
-            <span className="text-white/90 hidden sm:inline max-w-[120px] truncate">{current}</span>
-            <span className="text-white/90 sm:hidden">Menu</span>
+            <span className="text-white/90 max-w-[120px] truncate">{current}</span>
             <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" className={`transition-transform ${open ? "rotate-180" : ""}`}>
               <path d="M5.5 7.5L10 12l4.5-4.5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
