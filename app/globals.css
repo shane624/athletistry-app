@@ -76,6 +76,14 @@ body {
   body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
 }
 
+/* On desktop (lg+), the fixed 15rem sidebar sits on the left — shift all app
+   content right so it clears the sidebar. The landing/login pages don't render
+   the sidebar, so guard with .has-sidenav on <body> when NavBar is present.
+   Simpler: the sidebar is hidden < lg, so this only applies on wide screens. */
+@media (min-width: 1024px) {
+  body:has(aside) { padding-left: 15rem; }
+}
+
 .card {
   background: var(--c-surface);
   border: 0.5px solid var(--card-border);

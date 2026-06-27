@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import GlobalSearch from "@/components/GlobalSearch";
 import BottomTabBar from "@/components/BottomTabBar";
+import SideNav from "@/components/SideNav";
 
 type Item = { href: string; label: string };
 type Group = { title: string; items: Item[] };
@@ -84,16 +85,17 @@ export default function NavBar() {
 
   return (
     <>
+    <SideNav />
     <header className="bg-navy text-white sticky top-0 z-30 safe-top">
       <div className="max-w-4xl mx-auto px-4">
         <div className="h-12 flex items-center gap-2">
-          <Link href="/dashboard" className="font-bold tracking-widest text-teal text-sm shrink-0">ATHLETISTRY</Link>
+          <Link href="/dashboard" className="font-bold tracking-widest text-teal text-sm shrink-0 lg:hidden">ATHLETISTRY</Link>
 
           <GlobalSearch />
 
           <button
             onClick={() => setOpen((v) => !v)}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 text-sm shrink-0 ml-auto"
+            className="hidden sm:flex lg:hidden items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 text-sm shrink-0 ml-auto"
             aria-expanded={open}
             aria-label="Open menu"
           >
