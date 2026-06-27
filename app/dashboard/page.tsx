@@ -1,6 +1,7 @@
 import NavBar from "@/components/NavBar";
 import ExerciseCard from "@/components/ExerciseCard";
 import EquipmentNeeded from "@/components/EquipmentNeeded";
+import Icon from "@/components/Icon";
 import DaySelector from "@/components/DaySelector";
 import DailyQuote from "@/components/DailyQuote";
 import AchievementStrip from "@/components/AchievementStrip";
@@ -90,6 +91,11 @@ export default async function Dashboard() {
           </div>
           <p className="text-white/85 text-sm mt-3">{today.rx.notes}</p>
 
+          <div className="flex items-center gap-3 mt-3 text-white/85 text-sm">
+            <span className="inline-flex items-center gap-1.5"><Icon name="dumbbell" className="w-4 h-4" />{totalEx} exercises</span>
+            {today.rx.tempo !== "smooth" && <span className="inline-flex items-center gap-1.5"><Icon name="clock" className="w-4 h-4" />tempo {today.rx.tempo}</span>}
+          </div>
+
           {/* session progress bar */}
           {totalEx > 0 && (
             <div className="mt-4">
@@ -98,10 +104,14 @@ export default async function Dashboard() {
                 <span>{pct}%</span>
               </div>
               <div className="h-1.5 rounded-full bg-white/20 overflow-hidden">
-                <div className="h-full bg-white/90 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                <div className="h-full bg-white/90 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
               </div>
             </div>
           )}
+
+          <a href="#today-exercises" className="mt-4 w-full bg-white text-navy font-bold rounded-2xl py-3 flex items-center justify-center gap-2 active:scale-[.98] transition-transform">
+            <Icon name="play" className="w-5 h-5" />{startedEx > 0 ? "Continue workout" : "Start workout"}
+          </a>
         </div>
 
         {today.principle && (
@@ -121,7 +131,7 @@ export default async function Dashboard() {
 
         {totalEx > 0 && (
           <>
-            <p className="eyebrow mt-6 mb-3">Warm-up first</p>
+            <p id="today-exercises" className="eyebrow mt-6 mb-3 scroll-mt-16">Warm-up first</p>
             <WarmUp />
             <EquipmentNeeded names={today.exercises.map((ex) => ex.name)} className="mb-4" />
             <p className="eyebrow mb-3">Today&apos;s exercises</p>

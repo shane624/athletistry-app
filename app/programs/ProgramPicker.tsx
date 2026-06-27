@@ -4,8 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { setActiveProgram, markOnboarded } from "@/lib/data";
+import Icon, { type IconName } from "@/components/Icon";
 
 interface P { id: string; name: string; tagline: string; dayCount: number; exerciseCount: number; }
+
+// per-program accent gradient + icon for the hero strip
+function programLook(id: string): { grad: string; icon: IconName } {
+  if (id.includes("practice")) return { grad: "linear-gradient(135deg,#1f2a44,#27ae9f)", icon: "sparkle" };
+  if (id.includes("return") || id.includes("ballet")) return { grad: "linear-gradient(135deg,#3a4a6b,#27ae9f)", icon: "ballet" };
+  if (id.includes("kid")) return { grad: "linear-gradient(135deg,#2bb3a2,#1f8b7f)", icon: "heart" };
+  return { grad: "linear-gradient(135deg,#1f2a44,#3a4a6b)", icon: "stack" };
+}
 
 export default function ProgramPicker({ programs, active, first, customActive }: { programs: P[]; active: string; first?: boolean; customActive?: boolean }) {
   const router = useRouter();
@@ -21,49 +30,61 @@ export default function ProgramPicker({ programs, active, first, customActive }:
   }
 
   return (
-    <div className="grid md:grid-cols-2 gap-4 mt-5">
-      {programs.map((p) => (
+    <div className="grid md:grid-cols-2 gap-4 mt-5 stagger">
+      {programs.map((p) => {
+        const look = programLook(p.id);
+        const isActive = p.id === active;
+        return (
         <button
           key={p.id}
           onClick={() => choose(p.id)}
           disabled={!!busy}
-          className={`text-left card card-hover p-5 border-2 transition ${
-            p.id === active ? "border-teal bg-light" : "border-line hover:border-teal"
-          }`}
+          className={`text-left card card-hover overflow-hidden p-0 transition ${isActive ? "ring-2 ring-teal" : ""}`}
         >
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-navy">{p.name}</h3>
-            {p.id === active && <span className="badge bg-teal text-white">Active</span>}
+          {/* gradient hero strip */}
+          <div className="relative h-24 flex items-center px-5" style={{ background: look.grad }}>
+            <span className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center text-white">
+              <Icon name={look.icon} className="w-6 h-6" />
+            </span>
+            <h3 className="text-white font-bold text-lg ml-3">{p.name}</h3>
+            {isActive && <span className="absolute top-3 right-3 badge bg-white/25 text-white">Active</span>}
           </div>
-          <p className="text-grey text-sm mt-1">{p.tagline}</p>
-          <p className="text-grey text-xs mt-2">{p.dayCount} day{p.dayCount > 1 ? "s" : ""} · {p.exerciseCount} exercises</p>
-          {busy === p.id && <p className="text-teal text-xs mt-2">Switching…</p>}
+          <div className="p-4">
+            <p className="text-grey text-sm">{p.tagline}</p>
+            <div className="flex items-center gap-2 mt-3">
+              <span className="badge bg-light text-tealdark inline-flex items-center gap-1"><Icon name="calendar" className="w-3.5 h-3.5" />{p.dayCount} day{p.dayCount > 1 ? "s" : ""}</span>
+              <span className="badge bg-light text-tealdark inline-flex items-center gap-1"><Icon name="dumbbell" className="w-3.5 h-3.5" />{p.exerciseCount} exercises</span>
+            </div>
+            {busy === p.id && <p className="text-teal text-xs mt-2">Switching…</p>}
+          </div>
         </button>
-      ))}
+        );
+      })}
 
-      {/* Build Your Own */}
-      <Link href="/build" className={`text-left card card-hover p-5 border-2 transition block ${customActive ? "border-teal bg-light" : "border-line hover:border-teal"}`}>
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-navy">Build Your Own</h3>
-          {customActive && <span className="badge bg-teal text-white">Active</span>}
-        </div>
-        <p className="text-grey text-sm mt-1">Pick exercises from the library and build your own routine. Full reps &amp; weight tracking.</p>
-        <p className="text-teal text-xs mt-2 font-medium">Open builder →</p>
-      </Link>
-
-      {/* Random Workout Generator */}
-      <Link href="/generate" className="text-left card card-hover p-5 border-2 border-line hover:border-teal transition block">
-        <h3 className="font-semibold text-navy">Random Workout</h3>
-        <p className="text-grey text-sm mt-1">Generate a balanced session on the spot — legs, push, pull, and core — at the difficulty you choose.</p>
-        <p className="text-teal text-xs mt-2 font-medium">Generate →</p>
-      </Link>
-
-      {/* Circuit Training */}
-      <Link href="/circuit" className="text-left card card-hover p-5 border-2 border-line hover:border-teal transition block">
-        <h3 className="font-semibold text-navy">Circuit Training</h3>
-        <p className="text-grey text-sm mt-1">Timed conditioning — 1:1 intervals, Tabata, EMOM or AMRAP. Built-in timer for each format.</p>
-        <p className="text-teal text-xs mt-2 font-medium">Choose a format →</p>
-      </Link>
+      <ActionCard href="/build" icon="stack" title="Build Your Own" active={customActive}
+        desc="Pick exercises from the library and build your own routine. Full reps & weight tracking." cta="Open builder" />
+      <ActionCard href="/generate" icon="bolt" title="Random Workout"
+        desc="A balanced session on the spot — legs, push, pull and core — at the difficulty you choose." cta="Generate" />
+      <ActionCard href="/circuit" icon="circuit" title="Circuit Training"
+        desc="Timed conditioning — 1:1 intervals, Tabata, EMOM or AMRAP, with a built-in timer." cta="Choose a format" />
     </div>
+  );
+}
+
+function ActionCard({ href, icon, title, desc, cta, active }: {
+  href: string; icon: IconName; title: string; desc: string; cta: string; active?: boolean;
+}) {
+  return (
+    <Link href={href} className={`card card-hover block p-5 transition ${active ? "ring-2 ring-teal" : ""}`}>
+      <div className="flex items-center gap-3">
+        <span className="w-10 h-10 rounded-2xl bg-light flex items-center justify-center text-teal shrink-0">
+          <Icon name={icon} className="w-5 h-5" />
+        </span>
+        <h3 className="font-bold text-navy">{title}</h3>
+        {active && <span className="badge bg-teal text-white ml-auto">Active</span>}
+      </div>
+      <p className="text-grey text-sm mt-3">{desc}</p>
+      <p className="text-teal text-sm mt-3 font-semibold inline-flex items-center gap-1">{cta}<Icon name="chevron" className="w-4 h-4" /></p>
+    </Link>
   );
 }

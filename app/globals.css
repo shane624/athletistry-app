@@ -138,6 +138,20 @@ body {
 @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform:none; } }
 .animate-in { animation: fadeUp .5s cubic-bezier(.2,.7,.2,1) both; }
 
+/* staggered entrance — apply .stagger to a parent; children fade in in sequence */
+.stagger > * { animation: fadeUp .5s cubic-bezier(.2,.7,.2,1) both; }
+.stagger > *:nth-child(1){ animation-delay:.02s } .stagger > *:nth-child(2){ animation-delay:.07s }
+.stagger > *:nth-child(3){ animation-delay:.12s } .stagger > *:nth-child(4){ animation-delay:.17s }
+.stagger > *:nth-child(5){ animation-delay:.22s } .stagger > *:nth-child(6){ animation-delay:.27s }
+
+/* tactile press feedback on tappable cards/buttons */
+.card-hover:active { transform: scale(.985); }
+a.card:active, button.card:active { transform: scale(.985); }
+
+/* ring draws itself on first paint */
+@keyframes ringDraw { from { stroke-dashoffset: var(--ring-c, 100); } }
+.ring-draw { animation: ringDraw 1s cubic-bezier(.2,.7,.2,1) both; }
+
 /* ---- landing hero (matches the showcase rendering) ---- */
 .hero-bg { background: radial-gradient(1100px 560px at 72% -12%, #2c3c5e 0%, #1f2a44 56%); }
 .hero-glow {

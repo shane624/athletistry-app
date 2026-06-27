@@ -26,6 +26,7 @@ export default async function AchievementStrip() {
             <circle
               cx="18" cy="18" r={R} fill="none" stroke="var(--c-teal)" strokeWidth="3.4"
               strokeLinecap="round" strokeDasharray={C} strokeDashoffset={offset}
+              className="ring-draw" style={{ ["--ring-c" as string]: String(C) }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
