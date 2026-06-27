@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import PageHeader from "@/components/PageHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -7,8 +8,8 @@ export default function GuidePage() {
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-3xl mx-auto px-4 py-6">
-        <p className="eyebrow animate-in">Welcome</p>
-        <h1 className="text-3xl font-extrabold text-navy mt-1 animate-in">How to Use the App</h1>
+        <PageHeader icon="book" eyebrow="Welcome" title="How to Use the App"
+          subtitle="A plain-English guide — no fitness background needed." />
 
         {/* reassurance */}
         <div className="card mt-4 p-5 border-l-2 border-teal animate-in">

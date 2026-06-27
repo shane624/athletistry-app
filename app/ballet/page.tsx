@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import PageHeader from "@/components/PageHeader";
 import BalletClient from "./BalletClient";
 
 export const dynamic = "force-dynamic";
@@ -8,12 +9,8 @@ export default function BalletPage() {
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-3xl mx-auto px-4 py-6">
-        <p className="eyebrow">Train for your dancing</p>
-        <h1 className="text-2xl font-extrabold text-navy mt-1">Train for a Ballet Move</h1>
-        <p className="text-grey text-sm mt-1">
-          Pick a move you want to improve, and the app builds a workout from the exercises that
-          strengthen exactly what that move needs.
-        </p>
+        <PageHeader icon="ballet" eyebrow="Train for your dancing" title="Train for a Ballet Move"
+          subtitle="Pick a move to improve — the app builds a workout for exactly what it needs." />
         <BalletClient />
       </main>
     </div>

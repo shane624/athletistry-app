@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import PageHeader from "@/components/PageHeader";
 import { getAchievements } from "@/lib/achievements-data";
 import { LEVELS } from "@/lib/achievements";
 
@@ -17,8 +18,8 @@ export default async function AchievementsPage() {
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-4xl mx-auto px-4 py-6">
-        <p className="eyebrow animate-in">Your journey</p>
-        <h1 className="text-2xl font-extrabold text-navy mt-1 animate-in">Achievements</h1>
+        <PageHeader icon="trophy" eyebrow="Your journey" title="Achievements"
+          subtitle="Ranks, streaks and badges for showing up." />
 
         {/* top: level + streak + ring */}
         <div className="grid md:grid-cols-3 gap-4 mt-5">

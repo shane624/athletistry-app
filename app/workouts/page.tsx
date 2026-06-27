@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -13,8 +14,8 @@ export default function WorkoutsPage() {
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-3xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-navy">Guided Workouts</h1>
-        <p className="text-grey text-sm mt-1">Full follow-along sessions you can do anytime.</p>
+        <PageHeader icon="play" eyebrow="Press play" title="Guided Workouts"
+          subtitle="Full follow-along video sessions you can do anytime." />
         <div className="grid sm:grid-cols-2 gap-4 mt-5">
           {GUIDED.map((g) => (
             <Link key={g.slug} href={`/workouts/${g.slug}`} className="card overflow-hidden block hover:border-teal border-2 border-line transition">

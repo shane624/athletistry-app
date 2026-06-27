@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import PageHeader from "@/components/PageHeader";
 import LibraryClient from "./LibraryClient";
 import { listExercises } from "@/lib/data";
 
@@ -10,8 +11,8 @@ export default async function ExercisesPage() {
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-4xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-navy">Exercise Library</h1>
-        <p className="text-grey text-sm mt-1">All {exercises.length} exercises. Search, filter by level, and watch any video inline.</p>
+        <PageHeader icon="library" eyebrow="Reference" title="Exercise Library"
+          subtitle={`All ${exercises.length} exercises — search, filter by level, watch any video.`} />
         <LibraryClient exercises={exercises} />
       </main>
     </div>

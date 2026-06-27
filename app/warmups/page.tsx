@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -13,12 +14,8 @@ export default function WarmupsPage() {
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-3xl mx-auto px-4 py-6">
-        <p className="eyebrow animate-in">Prepare your body</p>
-        <h1 className="text-2xl font-extrabold text-navy mt-1 animate-in">Warm-Ups</h1>
-        <p className="text-grey text-sm mt-1 animate-in">
-          Do a warm-up before training — and any time you need to prepare: before class, a
-          performance, or an exam. Choose the level that suits you.
-        </p>
+        <PageHeader icon="warmup" eyebrow="Prepare your body" title="Warm-Ups"
+          subtitle="Before training, class, a performance or an exam. Pick the level that suits you." />
         <div className="grid sm:grid-cols-2 gap-4 mt-5">
           {WARMUPS.map((w) => (
             <Link key={w.slug} href={`/warmups/${w.slug}`}

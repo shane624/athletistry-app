@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import PageHeader from "@/components/PageHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -8,13 +9,10 @@ export default function TrainingSciencePage() {
       <NavBar />
       <main className="max-w-3xl mx-auto px-4 py-6">
         <a href="/guide" className="text-teal text-sm">← Back to How to Use the App</a>
-        <p className="eyebrow mt-3 animate-in">Go deeper</p>
-        <h1 className="text-3xl font-extrabold text-navy mt-1 animate-in">Training Science</h1>
-        <p className="text-grey text-sm mt-2 animate-in">
-          The principles behind every program — for dancers and teachers who want the why, not just
-          the what. None of this is required to train well; the app handles it for you. It&apos;s here
-          for when you want to understand it.
-        </p>
+        <div className="mt-3">
+          <PageHeader icon="flask" eyebrow="Go deeper" title="Training Science"
+            subtitle="The principles behind every program — the why, for when you want it. The app handles it for you." />
+        </div>
 
         <nav className="card mt-6 p-4 animate-in">
           <p className="eyebrow">In this guide</p>

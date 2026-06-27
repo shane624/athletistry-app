@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import PageHeader from "@/components/PageHeader";
 import { getAssessment, getLoadData } from "@/lib/load-data";
 import LoadClient from "./LoadClient";
 import Calendar from "./Calendar";
@@ -13,12 +14,8 @@ export default async function LoadPage() {
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-3xl mx-auto px-4 py-6">
-        <p className="eyebrow">Train like an athlete</p>
-        <h1 className="text-2xl font-extrabold text-navy mt-1">Training Calendar</h1>
-        <p className="text-grey text-sm mt-1">
-          Log every session — gym, class, or rehearsal — as duration and effort (RPE). The app tracks
-          your weekly load and guides the ~10% weekly build, then tapers you two weeks out from an event.
-        </p>
+        <PageHeader icon="calendar" eyebrow="Train like an athlete" title="Training Calendar"
+          subtitle="Log every session as time + effort (RPE). The app tracks your weekly load and tapers you before an event." />
         <LoadClient
           assessment={assessment}
           weeks={weeks}

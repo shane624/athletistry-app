@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import PageHeader from "@/components/PageHeader";
 import { ANATOMY_MODULES } from "@/lib/anatomy";
 
 export const dynamic = "force-dynamic";
@@ -8,14 +9,8 @@ export default function AnatomyPage() {
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-3xl mx-auto px-4 py-6">
-        {/* thesis */}
-        <p className="eyebrow animate-in">Strength for dancers</p>
-        <h1 className="text-3xl font-extrabold text-navy mt-1 animate-in">Understand Anatomy</h1>
-        <p className="text-grey text-sm mt-2 leading-relaxed animate-in max-w-xl">
-          The Dancer&apos;s Body — a region-by-region study of anatomy, biomechanics, and the ballet you
-          already dance, built on the same eight movement patterns that make a dancer strong. We&apos;re
-          not chasing tricks. We&apos;re building a dancer who understands their own machine.
-        </p>
+        <PageHeader icon="body" eyebrow="Strength for dancers" title="Understand Anatomy"
+          subtitle="The Dancer's Body — a region-by-region study of anatomy, biomechanics, and the ballet you already dance." />
 
         <div className="flex gap-6 mt-5 animate-in">
           <Stat n="10" label="Modules" />

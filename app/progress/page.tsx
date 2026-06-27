@@ -1,4 +1,5 @@
 import NavBar from "@/components/NavBar";
+import PageHeader from "@/components/PageHeader";
 import ProgressClient from "./ProgressClient";
 import MuscleBalance from "@/components/MuscleBalance";
 import { listExercises } from "@/lib/data";
@@ -19,8 +20,8 @@ export default async function ProgressPage() {
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-4xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-navy">Progress</h1>
-        <p className="text-grey text-sm mt-1">See which muscle groups you&apos;ve trained, and watch individual lifts climb week to week.</p>
+        <PageHeader icon="chart" eyebrow="Your trends" title="Progress"
+          subtitle="See which muscle groups you've trained, and watch lifts climb week to week." />
 
         <div className="mt-5"><MuscleBalance /></div>
 
