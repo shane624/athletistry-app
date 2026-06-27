@@ -15,8 +15,8 @@ export default function Home() {
               Train the body<br />that <span className="text-teal">actually dances.</span>
             </h1>
             <p className="text-[#c9d2e2] text-lg leading-relaxed mt-5 max-w-md mx-auto md:mx-0 animate-in">
-              Your training home base — guided programs built for dancers, a demo video for
-              every move, and progress you can see week to week.
+              Your training home base — guided programs built for dancers, timed circuits, a demo
+              video for every move, training-load tracking, and progress you can see week to week.
             </p>
             <div className="mt-8 flex gap-3 justify-center md:justify-start flex-wrap animate-in">
               <Link href="/login" className="btn-primary">Member log in</Link>
@@ -26,8 +26,8 @@ export default function Home() {
             </div>
             <div className="mt-9 flex gap-7 justify-center md:justify-start text-sm text-[#aab4c8] animate-in">
               <div><span className="block text-white text-2xl font-extrabold">58+</span>demo videos</div>
-              <div><span className="block text-white text-2xl font-extrabold">4</span>programs</div>
-              <div><span className="block text-white text-2xl font-extrabold">24-wk</span>periodized plan</div>
+              <div><span className="block text-white text-2xl font-extrabold">5+</span>programs</div>
+              <div><span className="block text-white text-2xl font-extrabold">90-day</span>anatomy plan</div>
             </div>
           </div>
 
@@ -44,11 +44,39 @@ export default function Home() {
         <h2 className="text-2xl md:text-3xl font-extrabold text-navy text-center mt-3">
           Built for how dancers train
         </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
-          <Feature title="Programs" desc="Periodized, full-body, ballet return & kids." />
-          <Feature title="Random Workout" desc="A balanced session on demand." />
-          <Feature title="Build & Save" desc="Make your own routines and reuse them." />
-          <Feature title="Track Progress" desc="Log lifts and watch them improve." />
+
+        <p className="eyebrow text-center mt-10 mb-4">Train</p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Feature title="Guided Programs" desc="Ready-made plans from gentle to serious — including The Practice, a 90-day anatomy-first journey." />
+          <Feature title="Circuit Training" desc="Timed conditioning: intervals, Tabata, EMOM & AMRAP — built-in timer, looping videos and rest preview." />
+          <Feature title="Random Workout" desc="A balanced legs / push / pull / core session generated on demand at your level." />
+          <Feature title="Train for Ballet" desc="Pick a move — plié, fondu, arabesque — and get the exercises that strengthen it." />
+          <Feature title="Warm-Ups" desc="Gentle and Winning warm-ups for before class, rehearsal or a performance." />
+          <Feature title="Build & Save Your Own" desc="Make custom routines, filter by equipment and level, and reuse them any time." />
+        </div>
+
+        <p className="eyebrow text-center mt-12 mb-4">Track</p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Feature title="Achievements" desc="Ballet ranks up to Étoile, streaks, weekly rings and badges — with a celebration when you level up." />
+          <Feature title="Progress & Balance" desc="See your lifts improve over time and a muscle-group balance view." />
+          <Feature title="Training Calendar" desc="Log classes and training; track weekly load so you build up safely and taper before a show." />
+          <Feature title="Event Planner" desc="Set a performance or exam date and it plans your taper automatically." />
+          <Feature title="Complete & Rate" desc="Finish a workout, rate your effort (RPE) and it counts toward your training load." />
+          <Feature title="Rest Timers" desc="An auto rest timer on every set — with pause, ±15s and skip." />
+        </div>
+
+        <p className="eyebrow text-center mt-12 mb-4">Learn</p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Feature title="How to Use the App" desc="A plain-English beginner guide — no fitness jargon required." />
+          <Feature title="Understand Anatomy" desc="The Dancer's Body course, restyled to the app." />
+          <Feature title="Training Science" desc="The why behind the programs, for when you want to go deeper." />
+          <Feature title="58+ Demo Videos" desc="A looping demonstration for every exercise, with real video thumbnails." />
+          <Feature title="Equipment Lists" desc="Every built workout shows exactly what you'll need — band, chair, weights or just your body." />
+          <Feature title="Global Search" desc="Type any exercise, move or page to jump straight to it." />
+        </div>
+
+        <div className="text-center mt-14">
+          <Link href="/login" className="btn-primary">Member log in</Link>
         </div>
       </section>
     </main>

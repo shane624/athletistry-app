@@ -1,5 +1,6 @@
 import NavBar from "@/components/NavBar";
 import ExerciseCard from "@/components/ExerciseCard";
+import EquipmentNeeded from "@/components/EquipmentNeeded";
 import DaySelector from "@/components/DaySelector";
 import DailyQuote from "@/components/DailyQuote";
 import AchievementStrip from "@/components/AchievementStrip";
@@ -122,6 +123,7 @@ export default async function Dashboard() {
           <>
             <p className="eyebrow mt-6 mb-3">Warm-up first</p>
             <WarmUp />
+            <EquipmentNeeded names={today.exercises.map((ex) => ex.name)} className="mb-4" />
             <p className="eyebrow mb-3">Today&apos;s exercises</p>
           </>
         )}

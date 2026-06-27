@@ -10,6 +10,7 @@ import {
 import type { ExerciseRow } from "@/lib/types";
 import ExerciseVideo from "@/components/ExerciseVideo";
 import FinishSession from "@/components/FinishSession";
+import EquipmentNeeded from "@/components/EquipmentNeeded";
 import Dots from "@/components/Dots";
 import { EQUIPMENT_LABEL } from "@/lib/equipment";
 
@@ -229,6 +230,7 @@ function CircuitRunner({ format, cfg, exercises, openVid, setOpenVid }: {
   return (
     <div>
       <p className="eyebrow">Your circuit · {exercises.length} exercises</p>
+      <EquipmentNeeded names={exercises.map((e) => e.name)} className="mt-2" />
       <div className="mt-3"><CircuitTimer format={format} cfg={cfg} exercises={exercises} /></div>
 
       <p className="eyebrow mt-5 mb-2">The exercises</p>

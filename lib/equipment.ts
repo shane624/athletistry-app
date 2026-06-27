@@ -51,3 +51,15 @@ export function fitsEquipment(name: string, allowed: Set<Equipment>): boolean {
   if (eq === "bodyweight") return true;
   return allowed.has(eq);
 }
+
+/** The distinct kit a list of exercises needs — for a "what you'll need" list.
+ *  Bodyweight is excluded (nothing to gather). If everything is bodyweight,
+ *  returns []. Order follows EQUIPMENT_LABEL for consistency. */
+export function equipmentNeeded(names: string[]): Equipment[] {
+  const set = new Set<Equipment>();
+  for (const n of names) {
+    const eq = equipmentFor(n);
+    if (eq !== "bodyweight") set.add(eq);
+  }
+  return (Object.keys(EQUIPMENT_LABEL) as Equipment[]).filter((e) => e !== "bodyweight" && set.has(e));
+}

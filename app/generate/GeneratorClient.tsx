@@ -7,6 +7,7 @@ import { generateWorkout, saveCustomDay, setActiveProgram, markOnboarded, saveWo
 import { styleRx } from "@/lib/program";
 import type { ExerciseRow, WorkoutStyle } from "@/lib/types";
 import ExerciseVideo from "@/components/ExerciseVideo";
+import EquipmentNeeded from "@/components/EquipmentNeeded";
 import Dots from "@/components/Dots";
 import { EQUIPMENT_LABEL } from "@/lib/equipment";
 import { CIRCUIT_FORMATS, COMPOSITIONS, type CircuitFormat, type Composition } from "@/lib/circuit";
@@ -196,6 +197,8 @@ export default function GeneratorClient() {
             </p>
             <p className="text-grey text-xs mt-1">{rx.notes}</p>
           </div>
+
+          <EquipmentNeeded names={workout.flatMap((s) => s.exercises.map((e) => e.name))} className="mt-3" />
 
           <div className="mt-3 space-y-3">
             <p className="text-xs text-grey">Warm up 5 min (dynamic stretches) before you start.</p>
