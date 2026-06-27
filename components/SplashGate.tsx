@@ -6,7 +6,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 // Shows the branded splash for ~5 seconds when the app first opens in a
 // session, then reveals the app. Only fires once per browser session (so it
 // doesn't replay on every internal navigation).
-const HOLD_MS = 5000;
+const HOLD_MS = 3000;
 
 export default function SplashGate({ children }: { children: React.ReactNode }) {
   const [showSplash, setShowSplash] = useState(false);

@@ -152,6 +152,25 @@ a.card:active, button.card:active { transform: scale(.985); }
 @keyframes ringDraw { from { stroke-dashoffset: var(--ring-c, 100); } }
 .ring-draw { animation: ringDraw 1s cubic-bezier(.2,.7,.2,1) both; }
 
+/* ---- splash / loading screen ---- */
+@keyframes splashPop {
+  0%   { opacity:0; transform: scale(.82); }
+  60%  { opacity:1; transform: scale(1.04); }
+  100% { opacity:1; transform: scale(1); }
+}
+.splash-pop { animation: splashPop .7s cubic-bezier(.2,.8,.2,1) both; }
+
+@keyframes splashRise { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform:none; } }
+.splash-rise { animation: splashRise .6s cubic-bezier(.2,.7,.2,1) both; }
+
+@keyframes splashBar { from { width: 0%; } to { width: 100%; } }
+.splash-bar { animation: splashBar linear forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-pop, .splash-rise { animation: none; opacity: 1; transform: none; }
+  .splash-bar { animation: none; width: 100%; }
+}
+
 /* ---- landing hero (matches the showcase rendering) ---- */
 .hero-bg { background: radial-gradient(1100px 560px at 72% -12%, #2c3c5e 0%, #1f2a44 56%); }
 .hero-glow {
