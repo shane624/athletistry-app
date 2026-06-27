@@ -27,7 +27,7 @@ export default function ExerciseVideo({
     if (playing) {
       return (
         <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
-          <video className="w-full h-full" src={src} poster={poster} controls autoPlay playsInline preload="metadata" />
+          <video className="w-full h-full" src={src} poster={poster} controls autoPlay loop playsInline preload="metadata" />
         </div>
       );
     }
@@ -42,7 +42,7 @@ export default function ExerciseVideo({
         <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
           <iframe
             className="w-full h-full"
-            src={`https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&playsinline=1&autoplay=1`}
+            src={`https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&playsinline=1&autoplay=1&loop=1&playlist=${youtubeId}`}
             title={title ?? "Exercise video"}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen

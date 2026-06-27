@@ -10,6 +10,7 @@ import {
 } from "@/lib/circuit";
 import type { ExerciseRow } from "@/lib/types";
 import ExerciseVideo from "@/components/ExerciseVideo";
+import FinishSession from "@/components/FinishSession";
 import Dots from "@/components/Dots";
 import { EQUIPMENT_LABEL } from "@/lib/equipment";
 
@@ -182,15 +183,36 @@ function Pill({ on, onClick, children }: { on: boolean; onClick: () => void; chi
   );
 }
 
-/* ---------- the runner with the format-appropriate timer ---------- */
+const INTRO_SEC = 10; // "get ready" countdown before each exercise
+
+const CLOUD = "dsbtk5hpq";
+/** Muted, auto-looping clip of the exercise (no controls) for the active-exercise view. */
+function LoopVideo({ ex }: { ex: ExerciseRow }) {
+  if (ex.cloudinary_id) {
+    const src = `https://res.cloudinary.com/${CLOUD}/video/upload/f_auto,q_auto/${ex.cloudinary_id}.mp4`;
+    return (
+      <video key={ex.cloudinary_id} className="w-full h-full object-cover" src={src}
+        autoPlay muted loop playsInline preload="auto" />
+    );
+  }
+  if (ex.youtube_id) {
+    const yt = `https://www.youtube.com/embed/${ex.youtube_id}?autoplay=1&mute=1&loop=1&playlist=${ex.youtube_id}&controls=0&playsinline=1`;
+    return <iframe className="w-full h-full" src={yt} allow="autoplay" title={ex.name} />;
+  }
+  return <div className="w-full h-full flex items-center justify-center text-white/60 text-sm">No video</div>;
+}
+
+/* ---------- the runner: intro → work (looping video) → rest → repeat ---------- */
 function CircuitRunner({ format, cfg, exercises, openVid, setOpenVid }: {
   format: CircuitFormat; cfg: CircuitConfig; exercises: ExerciseRow[]; openVid: number | null; setOpenVid: (n: number | null) => void;
 }) {
   return (
     <div>
       <p className="eyebrow">Your circuit · {exercises.length} exercises</p>
-      <div className="mt-3"><CircuitTimer format={format} cfg={cfg} exerciseNames={exercises.map((e) => e.name)} /></div>
-      <div className="grid sm:grid-cols-2 gap-3 mt-4">
+      <div className="mt-3"><CircuitTimer format={format} cfg={cfg} exercises={exercises} /></div>
+
+      <p className="eyebrow mt-5 mb-2">The exercises</p>
+      <div className="grid sm:grid-cols-2 gap-3">
         {exercises.map((ex, i) => (
           <div key={ex.id} className="card p-4">
             <div className="flex items-center gap-2">
@@ -208,104 +230,155 @@ function CircuitRunner({ format, cfg, exercises, openVid, setOpenVid }: {
           </div>
         ))}
       </div>
+
+      <FinishSession kind="Circuit" label="Complete circuit" defaultDuration={20} />
     </div>
   );
 }
 
-function CircuitTimer({ format, cfg, exerciseNames }: { format: CircuitFormat; cfg: CircuitConfig; exerciseNames: string[] }) {
-  // generic phase-based timer: build a sequence of {label, seconds} phases
-  const phases = buildPhases(format, cfg, exerciseNames);
-  const [running, setRunning] = useState(false);
+function CircuitTimer({ format, cfg, exercises }: { format: CircuitFormat; cfg: CircuitConfig; exercises: ExerciseRow[] }) {
+  const phases = buildPhases(format, cfg, exercises.length);
+  const isAmrap = format === "amrap";
+
+  const [started, setStarted] = useState(false);
+  const [running, setRunning] = useState(false); // false = paused
   const [phase, setPhase] = useState(0);
   const [left, setLeft] = useState(phases[0]?.sec ?? 0);
-  const [elapsed, setElapsed] = useState(0); // for amrap count-up
   const tick = useRef<any>(null);
 
   useEffect(() => () => { if (tick.current) clearInterval(tick.current); }, []);
 
-  function start() {
+  function clear() { if (tick.current) { clearInterval(tick.current); tick.current = null; } }
+
+  // one interval; advances phases (or counts down the AMRAP clock)
+  function run() {
+    clear();
     setRunning(true);
-    if (format === "amrap") {
-      const total = (cfg.amrapMin ?? 12) * 60;
-      setLeft(total);
-      tick.current = setInterval(() => {
-        setLeft((l) => {
-          if (l <= 1) { clearInterval(tick.current); setRunning(false); if (navigator.vibrate) navigator.vibrate([120, 60, 120]); return 0; }
-          return l - 1;
-        });
-        setElapsed((e) => e + 1);
-      }, 1000);
-      return;
-    }
-    let p = 0; setPhase(0); setLeft(phases[0].sec);
     tick.current = setInterval(() => {
       setLeft((l) => {
-        if (l <= 1) {
-          p += 1;
-          if (p >= phases.length) { clearInterval(tick.current); setRunning(false); if (navigator.vibrate) navigator.vibrate([120, 60, 120]); return 0; }
-          setPhase(p);
-          if (navigator.vibrate) navigator.vibrate(60);
-          return phases[p].sec;
-        }
-        return l - 1;
+        if (l > 1) return l - 1;
+        // phase finished
+        if (isAmrap) { clear(); setRunning(false); buzz(true); return 0; }
+        let np = -1;
+        setPhase((p) => { np = p + 1; return np; });
+        if (np >= phases.length) { clear(); setRunning(false); buzz(true); return 0; }
+        buzz(false);
+        return phases[np].sec;
       });
     }, 1000);
   }
-  function stop() { if (tick.current) clearInterval(tick.current); setRunning(false); }
+  function buzz(end: boolean) {
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(end ? [120, 60, 120] : 60);
+  }
 
+  function begin() {
+    setStarted(true);
+    setPhase(0);
+    setLeft(isAmrap ? (cfg.amrapMin ?? 12) * 60 : phases[0].sec);
+    run();
+  }
+  function toggle() { if (running) { clear(); setRunning(false); } else run(); }
+  function skip() {
+    if (isAmrap) return;
+    clear();
+    const np = phase + 1;
+    if (np >= phases.length) { setRunning(false); setLeft(0); return; }
+    setPhase(np); setLeft(phases[np].sec); run();
+  }
+  function restart() { clear(); setStarted(false); setRunning(false); setPhase(0); setLeft(phases[0]?.sec ?? 0); }
+
+  // ---- AMRAP: continuous clock, all videos shown below ----
+  if (isAmrap) {
+    return (
+      <div className="rounded-xl p-5 text-white grad-navy">
+        <p className="text-white/75 text-xs uppercase tracking-wide">AMRAP · time remaining</p>
+        <p className="text-5xl font-extrabold tabular-nums mt-1">{started ? fmt(left) : fmt((cfg.amrapMin ?? 12) * 60)}</p>
+        <p className="text-white/85 text-sm mt-1">As many rounds as possible — cycle through all {exercises.length} exercises and count your laps.</p>
+        <Controls started={started} running={running} onBegin={begin} onToggle={toggle} onRestart={restart} showSkip={false} onSkip={skip} />
+      </div>
+    );
+  }
+
+  // ---- intervals / tabata / emom: phase machine with intro + looping video ----
   const cur = phases[phase];
-  const isRest = cur?.kind === "rest";
+  const ex = cur?.exIndex != null ? exercises[cur.exIndex] : undefined;
+  const tone =
+    !started ? "grad-navy" :
+    cur?.kind === "rest" ? "bg-navy2" :
+    cur?.kind === "intro" ? "bg-teal" : "grad-navy";
 
   return (
-    <div className={`rounded-xl p-5 text-white ${isRest ? "bg-navy2" : "grad-navy"}`}>
-      {format === "amrap" ? (
-        <>
-          <p className="text-white/75 text-xs uppercase tracking-wide">AMRAP · time remaining</p>
-          <p className="text-4xl font-extrabold tabular-nums mt-1">{fmt(left)}</p>
-          <p className="text-white/85 text-sm mt-1">As many rounds as possible — keep moving through all {exerciseNames.length} exercises.</p>
-        </>
-      ) : (
-        <>
-          <p className="text-white/75 text-xs uppercase tracking-wide">{cur?.label ?? "Ready"}</p>
-          <p className="text-4xl font-extrabold tabular-nums mt-1">{running ? `${left}s` : "Ready"}</p>
-          <p className="text-white/70 text-xs mt-1">{phase + 1} / {phases.length} phases</p>
-        </>
+    <div className={`rounded-xl overflow-hidden text-white ${tone}`}>
+      {/* active-exercise video (intro preview + work loop) */}
+      {started && ex && (cur.kind === "intro" || cur.kind === "work") && (
+        <div className="aspect-video w-full bg-black">
+          <LoopVideo ex={ex} />
+        </div>
       )}
-      <div className="mt-3 flex gap-2">
-        {!running ? (
-          <button className="bg-white text-navy font-bold rounded-lg px-4 py-2 text-sm" onClick={start}>▶ Start</button>
-        ) : (
-          <button className="bg-white/20 text-white font-bold rounded-lg px-4 py-2 text-sm" onClick={stop}>■ Stop</button>
-        )}
+      <div className="p-5">
+        <p className="text-white/80 text-xs uppercase tracking-wide">
+          {!started ? "Ready when you are"
+            : cur?.kind === "intro" ? `Get ready — up next`
+            : cur?.kind === "rest" ? "Rest"
+            : "Work"}
+        </p>
+        <p className="text-lg font-bold mt-0.5">{started ? (cur?.label ?? "") : `${phases.length} phases queued`}</p>
+        <p className="text-5xl font-extrabold tabular-nums mt-1">{started ? `${left}s` : `${INTRO_SEC}s`}</p>
+        {started && <p className="text-white/70 text-xs mt-1">Phase {phase + 1} / {phases.length}</p>}
+        <Controls started={started} running={running} onBegin={begin} onToggle={toggle} onRestart={restart} showSkip onSkip={skip} />
       </div>
     </div>
   );
 }
 
-type Phase = { label: string; sec: number; kind: "work" | "rest" };
-function buildPhases(format: CircuitFormat, cfg: CircuitConfig, names: string[]): Phase[] {
+function Controls({ started, running, onBegin, onToggle, onRestart, showSkip, onSkip }: {
+  started: boolean; running: boolean; onBegin: () => void; onToggle: () => void; onRestart: () => void; showSkip: boolean; onSkip: () => void;
+}) {
+  return (
+    <div className="mt-4 flex gap-2 flex-wrap">
+      {!started ? (
+        <button className="bg-white text-navy font-bold rounded-lg px-5 py-2 text-sm" onClick={onBegin}>▶ Start</button>
+      ) : (
+        <>
+          <button className="bg-white text-navy font-bold rounded-lg px-4 py-2 text-sm" onClick={onToggle}>
+            {running ? "❚❚ Pause" : "▶ Resume"}
+          </button>
+          {showSkip && <button className="bg-white/20 text-white font-bold rounded-lg px-4 py-2 text-sm" onClick={onSkip}>Skip ▸</button>}
+          <button className="bg-white/20 text-white font-bold rounded-lg px-4 py-2 text-sm" onClick={onRestart}>Restart</button>
+        </>
+      )}
+    </div>
+  );
+}
+
+type Phase = { label: string; sec: number; kind: "intro" | "work" | "rest"; exIndex?: number };
+function buildPhases(format: CircuitFormat, cfg: CircuitConfig, count: number): Phase[] {
   const out: Phase[] = [];
+  const idxs = Array.from({ length: count }, (_, i) => i);
   if (format === "intervals") {
     const s = cfg.intervalSec ?? 30;
     const rounds = cfg.rounds ?? 3;
     for (let r = 0; r < rounds; r++) {
-      for (const n of names) {
-        out.push({ label: `${n}`, sec: s, kind: "work" });
+      for (const i of idxs) {
+        out.push({ label: `Exercise ${i + 1}`, sec: INTRO_SEC, kind: "intro", exIndex: i });
+        out.push({ label: `Work`, sec: s, kind: "work", exIndex: i });
         out.push({ label: "Rest", sec: s, kind: "rest" });
       }
     }
   } else if (format === "tabata") {
-    for (const n of names) {
+    for (const i of idxs) {
+      out.push({ label: `Exercise ${i + 1}`, sec: INTRO_SEC, kind: "intro", exIndex: i });
       for (let r = 0; r < 8; r++) {
-        out.push({ label: `${n} (${r + 1}/8)`, sec: 20, kind: "work" });
+        out.push({ label: `Round ${r + 1}/8`, sec: 20, kind: "work", exIndex: i });
         out.push({ label: "Rest", sec: 10, kind: "rest" });
       }
     }
   } else if (format === "emom") {
     const rounds = cfg.emomRounds ?? 10;
     for (let r = 0; r < rounds; r++) {
-      const n = names[r % names.length];
-      out.push({ label: `Min ${r + 1}: ${cfg.emomReps} × ${n}`, sec: 60, kind: "work" });
+      const i = r % count;
+      out.push({ label: `Min ${r + 1} — get ready`, sec: INTRO_SEC, kind: "intro", exIndex: i });
+      out.push({ label: `Min ${r + 1}: ${cfg.emomReps} reps`, sec: 60, kind: "work", exIndex: i });
     }
   }
   return out.length ? out : [{ label: "Ready", sec: 0, kind: "work" }];

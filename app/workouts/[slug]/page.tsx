@@ -1,6 +1,7 @@
 import NavBar from "@/components/NavBar";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import FinishSession from "@/components/FinishSession";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,8 @@ export default function GuidedWorkout({ params }: { params: { slug: string } }) 
         <a className="text-grey text-xs mt-3 inline-block" target="_blank" rel="noopener" href={`https://www.youtube.com/watch?v=${g.yid}`}>
           Open on YouTube ↗
         </a>
+
+        <FinishSession kind="Guided workout" label="Complete this workout" defaultDuration={30} />
       </main>
     </div>
   );
