@@ -11,9 +11,11 @@ import {
 import type { ExerciseRow } from "@/lib/types";
 import ExerciseVideo from "@/components/ExerciseVideo";
 import Dots from "@/components/Dots";
+import { EQUIPMENT_LABEL } from "@/lib/equipment";
 
 const FORMAT_IDS: CircuitFormat[] = ["intervals", "tabata", "emom", "amrap"];
 const COMP_IDS: Composition[] = ["full", "legs", "push", "pull", "core"];
+const EQUIP = ["band", "dumbbell", "barbell", "slant_board", "step", "partner"];
 
 export default function CircuitClient() {
   const params = useSearchParams();
@@ -23,6 +25,13 @@ export default function CircuitClient() {
   const [exercises, setExercises] = useState<ExerciseRow[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [openVid, setOpenVid] = useState<number | null>(null);
+  const [equip, setEquip] = useState<Set<string>>(new Set());
+  const [equipOpen, setEquipOpen] = useState(false);
+
+  function toggleEquip(e: string) {
+    setEquip((prev) => { const n = new Set(prev); n.has(e) ? n.delete(e) : n.add(e); return n; });
+    setExercises(null);
+  }
 
   // apply presets passed from the Random generator (?format=&focus=)
   useEffect(() => {
@@ -41,7 +50,11 @@ export default function CircuitClient() {
 
   async function build() {
     setBusy(true);
-    const ex = await generateCircuit({ composition: comp, count: exerciseCount(cfg) });
+    const ex = await generateCircuit({
+      composition: comp,
+      count: exerciseCount(cfg),
+      equipment: equip.size ? [...equip] : undefined,
+    });
     setExercises(ex);
     setBusy(false);
   }
@@ -76,6 +89,27 @@ export default function CircuitClient() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* equipment filter (same as Random / Build) */}
+      <div>
+        <button onClick={() => setEquipOpen((v) => !v)} className="text-sm text-teal font-semibold">
+          {equip.size ? `Equipment: ${equip.size} selected` : "Filter by equipment"} {equipOpen ? "▴" : "▾"}
+        </button>
+        {equipOpen && (
+          <div className="card mt-2 p-4">
+            <p className="text-sm text-grey">Select what you have — handy when travelling. Bodyweight always shows; leave empty for everything.</p>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {EQUIP.map((e) => (
+                <button key={e} onClick={() => toggleEquip(e)}
+                  className={`rounded-full px-3 py-1.5 text-sm border ${equip.has(e) ? "bg-navy text-white border-navy" : "bg-white border-line text-grey"}`}>
+                  {EQUIPMENT_LABEL[e as keyof typeof EQUIPMENT_LABEL]}
+                </button>
+              ))}
+            </div>
+            {equip.size > 0 && <button className="text-teal text-sm mt-3 font-semibold" onClick={() => { setEquip(new Set()); setExercises(null); }}>Clear</button>}
+          </div>
+        )}
       </div>
 
       <div className="card p-4 bg-light">
