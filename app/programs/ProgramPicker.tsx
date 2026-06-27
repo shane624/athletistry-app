@@ -57,6 +57,13 @@ export default function ProgramPicker({ programs, active, first, customActive }:
         <p className="text-grey text-sm mt-1">Generate a balanced session on the spot — legs, push, pull, and core — at the difficulty you choose.</p>
         <p className="text-teal text-xs mt-2 font-medium">Generate →</p>
       </Link>
+
+      {/* Circuit Training */}
+      <Link href="/circuit" className="text-left card card-hover p-5 border-2 border-line hover:border-teal transition block">
+        <h3 className="font-semibold text-navy">Circuit Training</h3>
+        <p className="text-grey text-sm mt-1">Timed conditioning — 1:1 intervals, Tabata, EMOM or AMRAP. Built-in timer for each format.</p>
+        <p className="text-teal text-xs mt-2 font-medium">Choose a format →</p>
+      </Link>
     </div>
   );
 }

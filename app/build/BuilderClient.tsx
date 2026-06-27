@@ -70,6 +70,11 @@ export default function BuilderClient({ allExercises, initial }: { allExercises:
 
   return (
     <div className="mt-5">
+      <div className="card p-3 mb-4 bg-light flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-sm text-navy">Want a timed conditioning day instead? Try a circuit — intervals, Tabata, EMOM or AMRAP with a built-in timer.</p>
+        <a href="/circuit" className="btn-ghost text-sm shrink-0">Open Circuit builder →</a>
+      </div>
+
       {/* day tabs */}
       <div className="flex gap-2 flex-wrap items-center">
         {days.map((d) => (

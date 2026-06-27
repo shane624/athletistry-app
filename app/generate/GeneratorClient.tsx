@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { generateWorkout, saveCustomDay, setActiveProgram, markOnboarded, saveWorkout } from "@/lib/data";
 import { styleRx } from "@/lib/program";
@@ -8,13 +9,17 @@ import type { ExerciseRow, WorkoutStyle } from "@/lib/types";
 import ExerciseVideo from "@/components/ExerciseVideo";
 import Dots from "@/components/Dots";
 import { EQUIPMENT_LABEL } from "@/lib/equipment";
+import { CIRCUIT_FORMATS, COMPOSITIONS, type CircuitFormat, type Composition } from "@/lib/circuit";
 
 const EQUIP = ["band", "dumbbell", "barbell", "slant_board", "step", "partner"];
 
-const STYLES: { id: WorkoutStyle; label: string; sub: string }[] = [
+// "circuit" is a 4th meta-style that hands off to the dedicated Circuit builder
+type Style = WorkoutStyle | "circuit";
+const STYLES: { id: Style; label: string; sub: string }[] = [
   { id: "hypertrophy", label: "Hypertrophy", sub: "8–12 reps · build muscle" },
   { id: "strength", label: "Strength", sub: "3–5 reps · lift heavy" },
   { id: "endurance", label: "Endurance", sub: "15–25+ reps · circuit" },
+  { id: "circuit", label: "Circuit", sub: "timed: intervals, Tabata…" },
 ];
 const LEVELS = [
   { v: 1, label: "Beginner" },
@@ -25,7 +30,7 @@ const LEVELS = [
 
 export default function GeneratorClient() {
   const router = useRouter();
-  const [style, setStyle] = useState<WorkoutStyle>("hypertrophy");
+  const [style, setStyle] = useState<Style>("hypertrophy");
   const [maxLevel, setMaxLevel] = useState(4);
   const [perSlot, setPerSlot] = useState(1);
   const [equip, setEquip] = useState<Set<string>>(new Set());
@@ -34,16 +39,21 @@ export default function GeneratorClient() {
   const [busy, setBusy] = useState(false);
   const [openVid, setOpenVid] = useState<number | null>(null);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
+  // circuit sub-choices (only used when style === "circuit")
+  const [cFormat, setCFormat] = useState<CircuitFormat>("intervals");
+  const [cComp, setCComp] = useState<Composition>("full");
 
-  const rx = styleRx(style);
+  const isCircuit = style === "circuit";
+  const rx = styleRx(isCircuit ? "endurance" : style);
 
   function toggleEquip(e: string) {
     setEquip((prev) => { const n = new Set(prev); n.has(e) ? n.delete(e) : n.add(e); return n; });
   }
 
   async function generate() {
+    if (isCircuit) return; // circuit uses the dedicated builder via the link below
     setBusy(true); setSavedMsg(null);
-    const w = await generateWorkout(style, perSlot, maxLevel, equip.size ? [...equip] : undefined);
+    const w = await generateWorkout(style as WorkoutStyle, perSlot, maxLevel, equip.size ? [...equip] : undefined);
     setWorkout(w);
     setBusy(false);
   }
@@ -67,7 +77,7 @@ export default function GeneratorClient() {
     if (!name) return;
     setBusy(true);
     const ids = workout.flatMap((s) => s.exercises.map((e) => e.id));
-    const res = await saveWorkout(name, ids, style);
+    const res = await saveWorkout(name, ids, style as WorkoutStyle);
     setSavedMsg(res.ok ? `Saved “${name}” to My Workouts ✓` : (res.error ?? "Could not save"));
     setBusy(false);
   }
@@ -76,7 +86,7 @@ export default function GeneratorClient() {
     <div className="mt-5">
       {/* style */}
       <p className="text-sm font-medium text-navy">Training style</p>
-      <div className="grid grid-cols-3 gap-2 mt-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
         {STYLES.map((s) => {
           const selected = style === s.id;
           return (
@@ -91,7 +101,42 @@ export default function GeneratorClient() {
         })}
       </div>
 
-      {/* difficulty + per slot */}
+      {/* circuit sub-choices + hand-off to the dedicated builder */}
+      {isCircuit && (
+        <div className="card p-4 mt-4 space-y-4">
+          <div>
+            <p className="text-sm font-medium text-navy mb-2">Format</p>
+            <div className="flex flex-wrap gap-1.5">
+              {CIRCUIT_FORMATS.map((f) => (
+                <button key={f.id} onClick={() => setCFormat(f.id)}
+                  className={`rounded-full px-3 py-1.5 text-sm border ${cFormat === f.id ? "bg-navy text-white border-navy" : "bg-white border-line text-grey"}`}>
+                  {f.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-grey mt-1.5">{CIRCUIT_FORMATS.find((f) => f.id === cFormat)?.blurb}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-navy mb-2">Focus</p>
+            <div className="flex flex-wrap gap-1.5">
+              {COMPOSITIONS.map((c) => (
+                <button key={c.id} onClick={() => setCComp(c.id)}
+                  className={`rounded-full px-3 py-1.5 text-sm border ${cComp === c.id ? "bg-teal text-white border-teal" : "bg-white border-line text-grey"}`}>
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <Link href={`/circuit?format=${cFormat}&focus=${cComp}`} className="btn-primary inline-block">
+            Build this circuit →
+          </Link>
+          <p className="text-xs text-grey">Opens the Circuit builder with a live timer for each format.</p>
+        </div>
+      )}
+
+      {/* difficulty + per slot (rep-based styles only) */}
+      {!isCircuit && (
+      <>
       <div className="flex flex-wrap gap-4 mt-4">
         <div>
           <p className="text-sm font-medium text-navy">Difficulty</p>
@@ -139,6 +184,8 @@ export default function GeneratorClient() {
       <button className="btn-primary mt-5 w-full sm:w-auto" onClick={generate} disabled={busy}>
         {busy ? "Rolling…" : workout ? "🎲 Regenerate" : "🎲 Generate workout"}
       </button>
+      </>
+      )}
 
       {workout && (
         <div className="mt-5">

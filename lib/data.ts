@@ -249,6 +249,64 @@ export async function generateWorkout(style: WorkoutStyle, perSlot = 1, maxLevel
   });
 }
 
+/** Build the exercise list for a circuit, honouring the composition rules:
+ *  full-body = one per category (legs, push, pull, core); single-part = many
+ *  from one category. Compounds lead; the legs slot always opens with a big
+ *  movement; lower-leg/isolation only appear after a compound.
+ *  `count` is how many exercises the format needs. */
+export async function generateCircuit(opts: {
+  composition: "full" | "legs" | "push" | "pull" | "core";
+  count: number;
+  maxLevel?: number;
+  equipment?: string[];
+}): Promise<ExerciseRow[]> {
+  const { SLOT_CATS } = await import("@/lib/circuit");
+  const { isCompound, isBigLeg, isAccessory, compoundFirst } = await import("@/lib/exercise-meta");
+  const { fitsEquipment } = await import("@/lib/equipment");
+
+  const all = await listExercises();
+  const maxLevel = opts.maxLevel ?? 4;
+  const allowed = opts.equipment?.length ? new Set(opts.equipment as any[]) : null;
+  const usable = all
+    .filter((e) => e.level <= maxLevel)
+    .filter((e) => !allowed || fitsEquipment(e.name, allowed as any));
+
+  const pickRandom = <T,>(arr: T[]): T | undefined => arr[Math.floor(Math.random() * arr.length)];
+
+  if (opts.composition === "full") {
+    // one per category in order: legs, push, pull, core
+    const order = ["legs", "push", "pull", "core"];
+    const chosen: ExerciseRow[] = [];
+    for (const slot of order) {
+      if (chosen.length >= opts.count) break;
+      const cats = SLOT_CATS[slot];
+      let pool = usable.filter((e) => cats.includes(e.category) && !chosen.includes(e));
+      if (slot === "legs") pool = pool.filter((e) => isBigLeg(e)); // legs must be a big movement
+      else pool = pool.filter((e) => isCompound(e)); // prefer compounds for the others
+      if (!pool.length) pool = usable.filter((e) => cats.includes(e.category) && !chosen.includes(e));
+      const pick = pickRandom(pool);
+      if (pick) chosen.push(pick);
+    }
+    return chosen.slice(0, opts.count);
+  }
+
+  // single body part: many from one category, compounds first
+  const cats = SLOT_CATS[opts.composition];
+  let pool = usable.filter((e) => cats.includes(e.category));
+  // ensure at least one compound leads (and for legs, a big movement)
+  const compounds = pool.filter((e) => opts.composition === "legs" ? isBigLeg(e) : isCompound(e));
+  const accessories = pool.filter((e) => isAccessory(e) && !compounds.includes(e));
+  const lead = pickRandom(compounds);
+  const out: ExerciseRow[] = lead ? [lead] : [];
+  // fill the rest: more compounds, then accessories
+  const rest = compoundFirst(pool.filter((e) => e !== lead));
+  for (const e of rest) {
+    if (out.length >= opts.count) break;
+    out.push(e);
+  }
+  return out.slice(0, opts.count);
+}
+
 /** Build a targeted workout for a ballet move: the library exercises that
  *  benefit that move, optionally filtered by max level and available
  *  equipment (e.g. band-only for a traveller). */

@@ -20,6 +20,7 @@ const PAGES: SearchItem[] = [
   { kind: "page", title: "Today", subtitle: "Your daily workout", href: "/dashboard", keywords: "home dashboard session workout warm up" },
   { kind: "page", title: "Programs", subtitle: "Choose a guided plan", href: "/programs", keywords: "the practice 24 week periodised ballet return kids build your own" },
   { kind: "page", title: "Random Workout", subtitle: "Balanced session on demand", href: "/generate", keywords: "generate quick legs push pull core" },
+  { kind: "page", title: "Circuit Training", subtitle: "Intervals, Tabata, EMOM & AMRAP", href: "/circuit", keywords: "circuit conditioning intervals tabata emom amrap superset triset grandset timer rounds hiit" },
   { kind: "page", title: "Train for Ballet", subtitle: "Workouts for a ballet move", href: "/ballet", keywords: "plie fondu frappe rond de jambe move technique" },
   { kind: "page", title: "My Workouts", subtitle: "Your saved routines", href: "/my-workouts", keywords: "saved custom routine library" },
   { kind: "page", title: "Guided Workouts", subtitle: "Follow-along videos", href: "/workouts", keywords: "video follow along mobility strength" },

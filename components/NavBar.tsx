@@ -17,6 +17,7 @@ const GROUPS: Group[] = [
       { href: "/dashboard", label: "Today" },
       { href: "/programs", label: "Programs" },
       { href: "/generate", label: "Random" },
+      { href: "/circuit", label: "Circuit Training" },
       { href: "/ballet", label: "Train for Ballet" },
       { href: "/warmups", label: "Warm-Ups" },
       { href: "/workouts", label: "Guided Workouts" },

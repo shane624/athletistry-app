@@ -5,6 +5,7 @@ import { logSet } from "@/lib/data";
 import type { ResolvedRx } from "@/lib/program";
 import { isHoldExercise, holdSeconds } from "@/lib/program";
 import ExerciseVideo from "@/components/ExerciseVideo";
+import RestTimer from "@/components/RestTimer";
 import Dots from "@/components/Dots";
 
 interface Props {
@@ -40,6 +41,7 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
     return init;
   });
   const [saved, setSaved] = useState<Record<number, "idle" | "saving" | "ok">>({});
+  const [restKey, setRestKey] = useState(0); // bump to auto-start the rest timer
 
   async function save(setNumber: number) {
     setSaved((s) => ({ ...s, [setNumber]: "saving" }));
@@ -49,7 +51,10 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
       reps: parseInt(vals[setNumber].reps || "0"),
     });
     setSaved((s) => ({ ...s, [setNumber]: res.ok ? "ok" : "idle" }));
-    if (res.ok) setTimeout(() => setSaved((s) => ({ ...s, [setNumber]: "idle" })), 1200);
+    if (res.ok) {
+      setRestKey((k) => k + 1); // auto-start rest between sets
+      setTimeout(() => setSaved((s) => ({ ...s, [setNumber]: "idle" })), 1200);
+    }
   }
 
   const topReps = sets.filter((s) => parseInt(vals[s].reps || "0") >= rx.repHigh).length;
@@ -81,6 +86,8 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
           </div>
         ))}
       </div>
+
+      <RestTimer defaultSec={rx.restSec ?? 60} autoStartKey={restKey} />
 
       {hint && <p className="mt-3 text-sm text-tealdark bg-light rounded-md px-3 py-2">{hint}</p>}
     </div>
@@ -119,6 +126,7 @@ function HoldCard({ exercise, rx, programId, week, dayIndex, initialLogs }: any)
   const [saved, setSaved] = useState<Record<number, "idle" | "saving" | "ok">>({});
   const [activeSet, setActiveSet] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [restKey, setRestKey] = useState(0);
   const timer = useRef<any>(null);
 
   useEffect(() => () => { if (timer.current) clearInterval(timer.current); }, []);
@@ -149,7 +157,10 @@ function HoldCard({ exercise, rx, programId, week, dayIndex, initialLogs }: any)
       weight: 0, reps: value,
     });
     setSaved((s) => ({ ...s, [setNumber]: res.ok ? "ok" : "idle" }));
-    if (res.ok) setTimeout(() => setSaved((s) => ({ ...s, [setNumber]: "idle" })), 1200);
+    if (res.ok) {
+      setRestKey((k) => k + 1);
+      setTimeout(() => setSaved((s) => ({ ...s, [setNumber]: "idle" })), 1200);
+    }
   }
 
   return (
@@ -201,6 +212,8 @@ function HoldCard({ exercise, rx, programId, week, dayIndex, initialLogs }: any)
           );
         })}
       </div>
+
+      <RestTimer defaultSec={rx.restSec ?? 60} autoStartKey={restKey} />
     </div>
   );
 }
