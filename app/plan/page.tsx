@@ -1,17 +1,26 @@
 import NavBar from "@/components/NavBar";
 import PageHeader from "@/components/PageHeader";
 import PlanClient from "./PlanClient";
+import { getLoadData } from "@/lib/load-data";
 
 export const dynamic = "force-dynamic";
 
-export default function PlanPage() {
+export default async function PlanPage() {
+  // pull recent logged classes so we can pre-fill the schedule
+  const { sessions } = await getLoadData();
+  // keep only class-like sessions, most recent ~21 days, to infer a typical week
+  const recent = sessions
+    .filter((s) => ["class", "rehearsal"].includes(s.kind))
+    .slice(0, 30)
+    .map((s) => ({ date: s.session_date, mins: s.duration_min, rpe: s.rpe }));
+
   return (
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-3xl mx-auto px-4 py-6">
         <PageHeader icon="target" eyebrow="Plan around your dancing" title="Event Planner"
-          subtitle="Enter a performance or exam — we map the weeks back, building then tapering so you arrive fresh." />
-        <PlanClient />
+          subtitle="Tell us your event and your classes — we build a dated, day-by-day plan that climbs, then tapers." />
+        <PlanClient loggedClasses={recent} />
       </main>
     </div>
   );
