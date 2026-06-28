@@ -8,7 +8,9 @@ import AchievementStrip from "@/components/AchievementStrip";
 import WarmUp from "@/components/WarmUp";
 import Greeting from "@/components/Greeting";
 import CompleteWorkout from "@/components/CompleteWorkout";
+import EventPlanDay from "@/components/EventPlanDay";
 import { getToday, getOnboarding } from "@/lib/data";
+import { getEventPlanToday } from "@/lib/event-plan-data";
 import { getDisplayName } from "@/lib/profile-data";
 import { getAchievements } from "@/lib/achievements-data";
 import { getAssessment } from "@/lib/load-data";
@@ -25,8 +27,25 @@ export default async function Dashboard() {
   if (!ob.learningCompleted) redirect("/start-here");
   if (!ob.onboarded) redirect("/onboarding");
 
-  const today = await getToday();
+  // If an event plan is active, it drives the Today screen.
+  const eventPlan = await getEventPlanToday();
   const displayName = await getDisplayName();
+  if (eventPlan.active) {
+    return (
+      <div className="min-h-screen">
+        <NavBar />
+        <main className="max-w-4xl mx-auto px-4 py-6">
+          <div className="mb-4 animate-in">
+            <Greeting name={displayName} programName={eventPlan.label ?? "Event plan"} />
+          </div>
+          <AchievementStrip />
+          <EventPlanDay plan={eventPlan} />
+        </main>
+      </div>
+    );
+  }
+
+  const today = await getToday();
   const ach = await getAchievements();
   const { assessment } = await getAssessment();
   const blockColor =

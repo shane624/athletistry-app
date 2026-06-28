@@ -6,9 +6,18 @@ import {
   buildEventPlan, buildDailySchedule, planSummary,
   type EventPlan, type PlanTone, type PlanDay, type PlanDemand, type DemandFocus, type SessionType,
 } from "@/lib/event-plan";
+import { useRouter } from "next/navigation";
+import { saveEventPlan } from "@/lib/event-plan-actions";
+import { EQUIPMENT_LABEL, type Equipment } from "@/lib/equipment";
 import Icon, { type IconName } from "@/components/Icon";
+import Dots from "@/components/Dots";
 
 type LoggedClass = { date: string; mins: number; rpe: number };
+const EQUIP: Equipment[] = ["band", "dumbbell", "barbell", "slant_board", "step", "partner"];
+const LEVELS = [
+  { v: 1, label: "Beginner" }, { v: 2, label: "Intermediate" },
+  { v: 3, label: "Advanced" }, { v: 4, label: "All levels" },
+];
 
 // Event Planner. The dancer tells us their event, their weekly CLASS load, and
 // how many gym days they want. We generate a week-by-week periodized plan:
@@ -56,10 +65,23 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
   const [plan, setPlan] = useState<EventPlan | null>(null);
   const [schedule, setSchedule] = useState<PlanDay[] | null>(null);
 
+  const router = useRouter();
+
   // event demand
   const [stamina, setStamina] = useState(false);
   const [explosive, setExplosive] = useState(false);
   const [focus, setFocus] = useState<Set<DemandFocus>>(new Set());
+
+  // exercise preferences
+  const [maxLevel, setMaxLevel] = useState(4);
+  const [equip, setEquip] = useState<Set<Equipment>>(new Set());
+  const [equipOpen, setEquipOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedMsg, setSavedMsg] = useState<string | null>(null);
+
+  function toggleEquip(e: Equipment) {
+    setEquip((prev) => { const n = new Set(prev); n.has(e) ? n.delete(e) : n.add(e); return n; });
+  }
 
   // weekly class schedule: each day can hold one or more classes
   const [sched, setSched] = useState<Schedule>(() =>
@@ -115,6 +137,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
 
   function go(e: React.FormEvent) {
     e.preventDefault();
+    setSavedMsg(null);
     const p = buildEventPlan({ eventISO: date, classLoad, gymDays, gymStart });
     setPlan(p);
     if (p) {
@@ -122,6 +145,26 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
       setSchedule(buildDailySchedule(p, classWeekdays, gymDays, demand));
     } else {
       setSchedule(null);
+    }
+  }
+
+  async function activate() {
+    if (!schedule || !schedule.length) return;
+    setSaving(true); setSavedMsg(null);
+    const res = await saveEventPlan({
+      label: `${type} plan`,
+      days: schedule.map((d) => ({ iso: d.iso, type: d.type, title: d.title, detail: d.detail, weekIndex: d.weekIndex })),
+      maxLevel,
+      equipment: equip.size ? [...equip] : undefined,
+      focus: [...focus],
+    });
+    setSaving(false);
+    if (res.ok) {
+      setSavedMsg("Plan activated — your Today screen will follow it.");
+      router.push("/dashboard");
+      router.refresh();
+    } else {
+      setSavedMsg(res.error ?? "Couldn't activate the plan.");
     }
   }
 
@@ -241,6 +284,37 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           </div>
         </div>
 
+        {/* exercise preferences */}
+        <div>
+          <p className="eyebrow mb-2">Exercise options</p>
+          <p className="text-sm font-medium text-navy">Difficulty</p>
+          <div className="flex gap-1.5 mt-1 flex-wrap">
+            {LEVELS.map((l) => (
+              <button key={l.v} type="button" onClick={() => setMaxLevel(l.v)}
+                className={`rounded-full px-3 py-1.5 text-sm border ${maxLevel === l.v ? "bg-teal text-white border-teal" : "bg-white border-line text-grey"}`}>
+                {l.label}
+              </button>
+            ))}
+          </div>
+          <button type="button" onClick={() => setEquipOpen((v) => !v)} className="text-sm text-teal font-semibold mt-3">
+            {equip.size ? `Equipment: ${equip.size} selected` : "Filter by equipment"} {equipOpen ? "▴" : "▾"}
+          </button>
+          {equipOpen && (
+            <div className="card mt-2 p-4">
+              <p className="text-sm text-grey">Select what you have. Bodyweight always shows; leave empty for everything.</p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {EQUIP.map((e) => (
+                  <button key={e} type="button" onClick={() => toggleEquip(e)}
+                    className={`rounded-full px-3 py-1.5 text-sm border ${equip.has(e) ? "bg-navy text-white border-navy" : "bg-white border-line text-grey"}`}>
+                    {EQUIPMENT_LABEL[e]}
+                  </button>
+                ))}
+              </div>
+              {equip.size > 0 && <button type="button" className="text-teal text-sm mt-3 font-semibold" onClick={() => setEquip(new Set())}>Clear</button>}
+            </div>
+          )}
+        </div>
+
         <button className="btn-primary" disabled={!date || classLoad === 0}>Build my plan</button>
       </form>
 
@@ -287,6 +361,16 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           {/* DATED DAY-BY-DAY SCHEDULE */}
           {schedule && schedule.length > 0 && (
             <div className="mt-8">
+              <div className="card p-4 mb-4 grad-navy text-white">
+                <p className="font-bold">Make this your plan</p>
+                <p className="text-white/85 text-sm mt-1">Activate it and your Today screen will show each day&apos;s session — or a rest day — automatically, until the event.</p>
+                <button onClick={activate} disabled={saving}
+                  className="mt-3 bg-white text-navy font-bold rounded-xl px-4 py-2 text-sm inline-flex items-center gap-2 active:scale-[.98] transition">
+                  {saving ? <Dots /> : <><Icon name="check" className="w-4 h-4" /> Activate this plan</>}
+                </button>
+                {savedMsg && <p className="text-white/90 text-sm mt-2">{savedMsg}</p>}
+              </div>
+
               <p className="eyebrow">Your day-by-day plan</p>
               <p className="text-grey text-sm mt-1 mb-3">Exactly what to do each day from now to the event — strength, conditioning, or rest with recovery ideas.</p>
               <div className="space-y-5">
