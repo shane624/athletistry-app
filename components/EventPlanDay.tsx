@@ -28,7 +28,12 @@ export default function EventPlanDay({ plan }: { plan: EventPlanToday }) {
           <span className="badge bg-teal text-white">Event plan</span>
           <span className="text-grey">{plan.label ?? "Your event plan is guiding Today"}</span>
         </div>
-        <ClearEventPlan />
+        <div className="flex items-center gap-4">
+          <Link href="/load" className="text-teal text-sm font-semibold inline-flex items-center gap-1">
+            <Icon name="calendar" className="w-4 h-4" /> View full plan
+          </Link>
+          <ClearEventPlan />
+        </div>
       </div>
 
       {/* today's prescribed session */}

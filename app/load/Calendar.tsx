@@ -9,12 +9,23 @@ import Dots from "@/components/Dots";
 
 interface SessionRow { id: number; session_date: string; kind: string; duration_min: number; rpe: number; note: string | null; start_time: string | null; }
 interface EventRow { id: number; event_date: string; kind: string; name: string; }
+interface PlanDay { date: string; sessionType: string; title: string; }
 
 function ymd(d: Date) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-export default function Calendar({ sessions, events }: { sessions: SessionRow[]; events: EventRow[] }) {
+// short label + colour for a plan session chip
+const PLAN_LABEL: Record<string, string> = {
+  strength: "Strength", hypertrophy: "Hypertrophy", endurance: "Endurance",
+  cardio: "Cardio", tabata: "Tabata", rest: "Rest",
+};
+const PLAN_COLOR: Record<string, string> = {
+  strength: "#1f8b7f", hypertrophy: "#27ae9f", endurance: "#56c2b0",
+  cardio: "#4aa3df", tabata: "#e0833a", rest: "#9aa3b5",
+};
+
+export default function Calendar({ sessions, events, planDays = [] }: { sessions: SessionRow[]; events: EventRow[]; planDays?: PlanDay[] }) {
   const router = useRouter();
   const today = new Date();
   const [cursor, setCursor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
@@ -36,6 +47,8 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
   for (const s of sessions) { (byDay.get(s.session_date) ?? byDay.set(s.session_date, []).get(s.session_date)!).push(s); }
   const evByDay = new Map<string, EventRow[]>();
   for (const e of events) { (evByDay.get(e.event_date) ?? evByDay.set(e.event_date, []).get(e.event_date)!).push(e); }
+  const planByDay = new Map<string, PlanDay>();
+  for (const p of planDays) planByDay.set(p.date, p);
 
   // build the grid: weeks of 7, Monday-first
   const year = cursor.getFullYear(), month = cursor.getMonth();
@@ -104,6 +117,7 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
           const iso = ymd(date);
           const daySessions = byDay.get(iso) ?? [];
           const dayEvents = evByDay.get(iso) ?? [];
+          const planDay = planByDay.get(iso);
           const isToday = iso === todayISO;
           return (
             <button
@@ -115,6 +129,13 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
             >
               <div className={`text-[11px] font-semibold ${isToday ? "text-teal" : "text-grey"}`}>{date.getDate()}</div>
               <div className="mt-0.5 space-y-0.5">
+                {planDay && planDay.sessionType !== "rest" && (
+                  <div className="text-[8px] font-bold text-white rounded px-1 py-0.5 truncate"
+                    style={{ background: PLAN_COLOR[planDay.sessionType] ?? "#27ae9f" }}
+                    title={`Plan: ${planDay.title}`}>
+                    ◆ {PLAN_LABEL[planDay.sessionType] ?? "Session"}
+                  </div>
+                )}
                 {dayEvents.map((e) => (
                   <div key={"e" + e.id} className="text-[8px] font-bold text-white rounded px-1 py-0.5 truncate" style={{ background: "#1f2a44" }} title={e.name || e.kind}>
                     ★ {e.name || e.kind}
@@ -132,7 +153,7 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
         })}
       </div>
 
-      <p className="text-grey text-xs mt-3">Tap any day to add a class. ★ = event (taper plans around it).</p>
+      <p className="text-grey text-xs mt-3">Tap any day to add a class. ★ = event (taper plans around it).{planDays.length ? " ◆ = your plan's session for that day." : ""}</p>
 
       {/* add modal */}
       {addDay && (

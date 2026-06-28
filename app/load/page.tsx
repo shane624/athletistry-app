@@ -1,6 +1,7 @@
 import NavBar from "@/components/NavBar";
 import PageHeader from "@/components/PageHeader";
 import { getAssessment, getLoadData } from "@/lib/load-data";
+import { getEventPlanDays } from "@/lib/event-plan-data";
 import LoadClient from "./LoadClient";
 import Calendar from "./Calendar";
 
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function LoadPage() {
   const { assessment, weeks, nextEvent } = await getAssessment();
   const { sessions, events } = await getLoadData();
+  const eventPlan = await getEventPlanDays();
 
   return (
     <div className="min-h-screen">
@@ -26,7 +28,12 @@ export default async function LoadPage() {
 
         <div className="mt-8">
           <p className="eyebrow mb-3">Your schedule</p>
-          <Calendar sessions={sessions} events={events} />
+          {eventPlan.active && (
+            <p className="text-grey text-sm mb-3">
+              Your <b className="text-navy">{eventPlan.label ?? "event plan"}</b> is laid out below — each day&apos;s prescribed session shows on the calendar.
+            </p>
+          )}
+          <Calendar sessions={sessions} events={events} planDays={eventPlan.days} />
         </div>
       </main>
     </div>
