@@ -9,8 +9,13 @@ import {
 import { useRouter } from "next/navigation";
 import { saveEventPlan } from "@/lib/event-plan-actions";
 import { EQUIPMENT_LABEL, type Equipment } from "@/lib/equipment";
+import { CLASS_GROUPS } from "@/lib/classes";
 import Icon, { type IconName } from "@/components/Icon";
 import Dots from "@/components/Dots";
+
+// dance + other-sport presets for the planner picker (skip the General group;
+// gym/cardio are scheduled by the plan itself).
+const PLAN_CLASS_GROUPS = CLASS_GROUPS.filter((g) => g.title !== "General");
 
 type LoggedClass = { date: string; mins: number; rpe: number };
 const EQUIP: Equipment[] = ["band", "dumbbell", "barbell", "slant_board", "step", "partner"];
@@ -40,9 +45,6 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 type ClassEntry = { id: number; name: string; mins: number; rpe: number };
 type Schedule = Record<string, ClassEntry[]>;
 let CLASS_ID = 1;
-
-// common class types for quick naming
-const CLASS_NAMES = ["Ballet", "Pointe", "Jazz", "Contemporary", "Tap", "Rehearsal", "Conditioning"];
 
 const FOCUS_OPTS: { id: DemandFocus; label: string }[] = [
   { id: "turnout", label: "Turnout & hips" },
@@ -118,8 +120,12 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
     setFocus((prev) => { const n = new Set(prev); n.has(f) ? n.delete(f) : n.add(f); return n; });
   }
 
-  function addClass(day: string) {
-    setSched((s) => ({ ...s, [day]: [...s[day], { id: CLASS_ID++, name: "Ballet", mins: 90, rpe: 6 }] }));
+  // add a class from a preset kind (chosen in the dropdown)
+  function addClassByKind(day: string, kind: string) {
+    if (!kind) return;
+    const preset = PLAN_CLASS_GROUPS.flatMap((g) => g.items).find((c) => c.kind === kind);
+    if (!preset) return;
+    setSched((s) => ({ ...s, [day]: [...s[day], { id: CLASS_ID++, name: preset.label, mins: preset.defaultMin, rpe: preset.defaultRpe }] }));
   }
   function removeClass(day: string, id: number) {
     setSched((s) => ({ ...s, [day]: s[day].filter((c) => c.id !== id) }));
@@ -202,17 +208,26 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
             Add each class and rehearsal on the day you do it, with its length and how hard it usually is. This stays constant — we plan your gym training around it.
             {loggedClasses.length > 0 && classCount > 0 && <span className="text-tealdark"> Pre-filled from your logged classes — adjust as needed.</span>}
           </p>
-          <datalist id="class-names">
-            {CLASS_NAMES.map((n) => <option key={n} value={n} />)}
-          </datalist>
           <div className="space-y-2">
             {DAYS.map((day) => (
               <div key={day} className="rounded-xl border border-line p-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-navy text-sm w-12">{day}</span>
-                  <button type="button" onClick={() => addClass(day)} className="text-teal text-sm font-semibold inline-flex items-center gap-1">
-                    <Icon name="sparkle" className="w-3.5 h-3.5" /> Add class
-                  </button>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-navy text-sm w-12 shrink-0">{day}</span>
+                  <select
+                    value=""
+                    onChange={(e) => { addClassByKind(day, e.target.value); e.currentTarget.value = ""; }}
+                    className="input py-1 text-sm max-w-[180px] text-teal font-semibold"
+                    aria-label={`Add a class on ${day}`}
+                  >
+                    <option value="">+ Add class…</option>
+                    {PLAN_CLASS_GROUPS.map((g) => (
+                      <optgroup key={g.title} label={g.title}>
+                        {g.items.map((c) => (
+                          <option key={c.kind} value={c.kind}>{c.label}</option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
                 </div>
                 {sched[day].length === 0 ? (
                   <p className="text-grey text-xs mt-1">Rest day</p>
@@ -221,12 +236,12 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                     {sched[day].map((c) => (
                       <div key={c.id} className="bg-light rounded-lg px-2.5 py-2">
                         <div className="flex items-center gap-2">
-                          <input className="input flex-1 py-1" list="class-names" placeholder="Class name (e.g. Ballet)"
+                          <input className="input flex-1 min-w-0 py-1" placeholder="Class name"
                             value={c.name} onChange={(e) => updateClass(day, c.id, { name: e.target.value })} />
-                          <input className="input w-16 py-1" inputMode="numeric" value={c.mins}
+                          <input className="input w-14 py-1 shrink-0 text-center" inputMode="numeric" value={c.mins}
                             onChange={(e) => updateClass(day, c.id, { mins: Math.max(15, Math.min(300, Number(e.target.value.replace(/[^0-9]/g, "")) || 0)) })} />
-                          <span className="text-grey text-xs">min</span>
-                          <button type="button" onClick={() => removeClass(day, c.id)} className="text-grey hover:text-red-600 text-sm">✕</button>
+                          <span className="text-grey text-xs shrink-0">min</span>
+                          <button type="button" onClick={() => removeClass(day, c.id)} className="text-grey hover:text-red-600 text-sm shrink-0" aria-label="Remove class">✕</button>
                         </div>
                         <div className="flex items-center gap-2 mt-1.5">
                           <span className="text-grey text-xs">RPE</span>
