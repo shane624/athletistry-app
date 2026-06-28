@@ -1,6 +1,27 @@
 import { createClient } from "@/lib/supabase-server";
 import { cookies } from "next/headers";
 import type { ExerciseRow } from "@/lib/types";
+import { styleRx } from "@/lib/program";
+import type { ResolvedRx, WorkoutStyle } from "@/lib/program";
+
+// Plan-day logs are stored in set_logs under this synthetic program id, with
+// week = plan week index and day_index = days-since-epoch (so each dated day is
+// unique and re-readable). ExerciseCard logs/read through the same keys.
+export const EVENT_PLAN_PROGRAM_ID = "event-plan";
+
+export function planDayIndex(iso: string): number {
+  // days since 1970-01-01 in UTC — stable integer key per calendar date
+  return Math.floor(Date.parse(iso + "T00:00:00Z") / 86400000);
+}
+
+// map a plan session_type/block to an rx the logging card can use
+function planRx(sessionType: string, block: string | null, week: number): ResolvedRx {
+  const style: WorkoutStyle =
+    block === "strength" || sessionType === "strength" ? "strength"
+    : block === "endurance" || sessionType === "endurance" ? "endurance"
+    : "hypertrophy";
+  return { ...styleRx(style), week: Math.max(1, week) };
+}
 
 export interface EventPlanToday {
   active: boolean;
@@ -12,6 +33,9 @@ export interface EventPlanToday {
   block: string | null;         // rx block to resolve
   exercises: ExerciseRow[];     // the day's exercises (empty for rest/cardio/tabata)
   weekIndex: number;
+  rx: ResolvedRx;               // sets/reps for logging
+  dayIndex: number;             // stable per-date key for set_logs
+  logs: Record<number, Record<number, { weight: number; reps: number }>>; // exId -> set -> log
 }
 
 // The dancer's LOCAL date — read from a cookie the client sets (LocalDateCookie)
@@ -57,6 +81,7 @@ export async function getEventPlanToday(): Promise<EventPlanToday | { active: fa
       active: true, label: state.event_plan_label ?? null, date: iso,
       sessionType: "rest", title: "Rest day", detail: "Nothing scheduled today — gentle mobility if you like, otherwise rest and recover.",
       block: null, exercises: [], weekIndex: 0,
+      rx: planRx("rest", null, 1), dayIndex: planDayIndex(iso), logs: {},
     };
   }
 
@@ -72,6 +97,25 @@ export async function getEventPlanToday(): Promise<EventPlanToday | { active: fa
     exercises = ids.map((id) => byId.get(id)).filter((e): e is ExerciseRow => !!e);
   }
 
+  const weekIndex = row.week_index ?? 0;
+  const dayIndex = planDayIndex(row.plan_date);
+
+  // read back any sets already logged for this plan day so the cards pre-fill
+  const logs: Record<number, Record<number, { weight: number; reps: number }>> = {};
+  if (ids.length) {
+    const { data: logRows } = await supabase
+      .from("set_logs")
+      .select("exercise_id, set_number, weight, reps")
+      .eq("user_id", user.id)
+      .eq("program_id", EVENT_PLAN_PROGRAM_ID)
+      .eq("week", Math.max(1, weekIndex))
+      .eq("day_index", dayIndex)
+      .in("exercise_id", ids);
+    for (const r of logRows ?? []) {
+      (logs[r.exercise_id] ??= {})[r.set_number] = { weight: Number(r.weight), reps: Number(r.reps) };
+    }
+  }
+
   return {
     active: true,
     label: state.event_plan_label ?? null,
@@ -81,7 +125,10 @@ export async function getEventPlanToday(): Promise<EventPlanToday | { active: fa
     detail: row.detail,
     block: row.block ?? null,
     exercises,
-    weekIndex: row.week_index ?? 0,
+    weekIndex,
+    rx: planRx(row.session_type, row.block ?? null, weekIndex),
+    dayIndex,
+    logs,
   };
 }
 

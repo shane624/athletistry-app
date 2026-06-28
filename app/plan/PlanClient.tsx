@@ -355,14 +355,23 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
 
       {plan && (
         <div className="mt-6">
-          <div className="card p-4 bg-light">
-            <p className="text-navy font-semibold text-sm">{planSummary(plan)}</p>
-            <p className="text-grey text-xs mt-1">
-              Each week shows your target total load (class + gym). Keep your classes the same; adjust your gym sessions to hit the gym target shown.
+          {/* PRIMARY: activate the plan, with a brief periodisation overview */}
+          <div className="card p-5 grad-navy text-white">
+            <p className="text-white/75 text-xs font-semibold uppercase tracking-wide">Your plan is ready</p>
+            <p className="font-extrabold text-lg mt-1">{planSummary(plan)}</p>
+            <p className="text-white/85 text-sm mt-2 leading-relaxed">
+              We&apos;ve periodised the weeks to your event: a steady build (~10% more load each week), then a taper that cuts volume ~30% in the final stretch while keeping intensity, so you peak fresh. Activate it and your Today screen runs the plan day-by-day — strength, conditioning or rest — automatically until the event.
             </p>
+            <button onClick={activate} disabled={saving}
+              className="mt-4 bg-white text-navy font-bold rounded-xl px-5 py-2.5 text-sm inline-flex items-center gap-2 active:scale-[.98] transition">
+              {saving ? <Dots /> : <><Icon name="check" className="w-4 h-4" /> Activate this plan</>}
+            </button>
+            {savedMsg && <p className="text-white/90 text-sm mt-2">{savedMsg}</p>}
           </div>
 
-          <div className="mt-4 space-y-3">
+          <p className="eyebrow mt-8 mb-1">Week by week</p>
+          <p className="text-grey text-xs mb-3">Each week shows your target total load (class + gym). Keep your classes the same; your gym sessions flex to hit the gym target shown.</p>
+          <div className="space-y-3">
             {plan.weeks.map((w) => (
               <div key={w.index} className={`${toneClass[w.tone]} text-white rounded-2xl p-4`}>
                 <div className="flex items-center justify-between flex-wrap gap-1">
@@ -383,12 +392,6 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                 )}
 
                 <p className="text-white/90 text-sm mt-2">{w.focus}</p>
-
-                {(w.tone === "build" || w.tone === "base") && (
-                  <Link href="/generate" className="inline-flex items-center gap-1.5 mt-3 bg-white/15 hover:bg-white/25 rounded-lg px-3 py-1.5 text-sm font-semibold transition">
-                    <Icon name="bolt" className="w-4 h-4" /> Generate this week&apos;s session
-                  </Link>
-                )}
               </div>
             ))}
           </div>
@@ -396,18 +399,8 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           {/* DATED DAY-BY-DAY SCHEDULE */}
           {schedule && schedule.length > 0 && (
             <div className="mt-8">
-              <div className="card p-4 mb-4 grad-navy text-white">
-                <p className="font-bold">Make this your plan</p>
-                <p className="text-white/85 text-sm mt-1">Activate it and your Today screen will show each day&apos;s session — or a rest day — automatically, until the event.</p>
-                <button onClick={activate} disabled={saving}
-                  className="mt-3 bg-white text-navy font-bold rounded-xl px-4 py-2 text-sm inline-flex items-center gap-2 active:scale-[.98] transition">
-                  {saving ? <Dots /> : <><Icon name="check" className="w-4 h-4" /> Activate this plan</>}
-                </button>
-                {savedMsg && <p className="text-white/90 text-sm mt-2">{savedMsg}</p>}
-              </div>
-
               <p className="eyebrow">Your day-by-day plan</p>
-              <p className="text-grey text-sm mt-1 mb-3">Exactly what to do each day from now to the event — strength, conditioning, or rest with recovery ideas.</p>
+              <p className="text-grey text-sm mt-1 mb-3">A preview of each day from now to the event — strength, conditioning, or rest with recovery ideas. Activate the plan above and these appear on your Today screen, one day at a time.</p>
               <div className="space-y-5">
                 {groupByWeek(schedule).map((wk) => {
                   const weeksOut = (plan?.weeksOut ?? 0) - (wk.weekIndex - 1);
@@ -430,9 +423,6 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                             <span className="block text-sm font-semibold text-navy">{d.title}</span>
                             <span className="block text-grey text-xs leading-snug">{d.detail}</span>
                           </span>
-                          {d.type !== "rest" && (
-                            <Link href={sessionLink(d.type)} className="ml-auto shrink-0 text-teal text-xs font-semibold self-center">Start →</Link>
-                          )}
                         </div>
                       ))}
                     </div>
@@ -461,11 +451,4 @@ function groupByWeek(days: PlanDay[]): { weekIndex: number; days: PlanDay[] }[] 
     byWeek.get(d.weekIndex)!.push(d);
   }
   return [...byWeek.entries()].sort((a, b) => a[0] - b[0]).map(([weekIndex, ds]) => ({ weekIndex, days: ds }));
-}
-
-// where a session type sends the dancer
-function sessionLink(type: SessionType): string {
-  if (type === "tabata") return "/circuit?format=tabata";
-  if (type === "cardio") return "/load";
-  return "/generate";
 }

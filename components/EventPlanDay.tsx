@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Icon, { type IconName } from "@/components/Icon";
-import ExerciseVideo from "@/components/ExerciseVideo";
 import ClearEventPlan from "@/components/ClearEventPlan";
+import ExerciseCard from "@/components/ExerciseCard";
+import { EVENT_PLAN_PROGRAM_ID } from "@/lib/event-plan-data";
 import type { EventPlanToday, PlanUpcomingDay } from "@/lib/event-plan-data";
 
 const SESSION_ICON: Record<string, IconName> = {
@@ -61,24 +62,29 @@ export default function EventPlanDay({ plan, upcoming = [] }: { plan: EventPlanT
         )}
       </div>
 
-      {/* the day's exercises (strength / hypertrophy / endurance) */}
+      {/* the day's exercises (strength / hypertrophy / endurance) — log sets here */}
       {plan.exercises.length > 0 && (
         <>
           <p id="plan-exercises" className="eyebrow mt-6 mb-3 scroll-mt-20">Today&apos;s exercises</p>
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="card p-4 bg-light mb-3">
+            <p className="text-sm text-ink">
+              <b>{plan.rx.block[0].toUpperCase() + plan.rx.block.slice(1)}</b> · {plan.rx.sets} sets × {plan.rx.repLow}–{plan.rx.repHigh} reps · rest {plan.rx.restSec}s
+            </p>
+            <p className="text-grey text-xs mt-1">{plan.rx.notes}</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
             {plan.exercises.map((ex) => (
-              <div key={ex.id} className="card p-4">
-                <h3 className="font-semibold text-navy text-sm">{ex.name}</h3>
-                <p className="text-xs text-grey mt-0.5">Level {ex.level} · {ex.category}</p>
-                <div className="mt-2">
-                  <ExerciseVideo cloudinaryId={ex.cloudinary_id} youtubeId={ex.youtube_id} title={ex.name} />
-                </div>
-              </div>
+              <ExerciseCard
+                key={ex.id}
+                exercise={ex}
+                rx={plan.rx}
+                programId={EVENT_PLAN_PROGRAM_ID}
+                week={Math.max(1, plan.weekIndex)}
+                dayIndex={plan.dayIndex}
+                initialLogs={plan.logs[ex.id] ?? {}}
+              />
             ))}
           </div>
-          <p className="text-grey text-xs mt-4">
-            Log these in the <Link href="/load" className="text-teal font-medium">Training Calendar</Link> so your load tracks against the plan&apos;s targets.
-          </p>
         </>
       )}
 
