@@ -22,17 +22,36 @@ const RPE_LABEL: Record<number, string> = {
   4: "easy", 5: "steady", 6: "moderate", 7: "hard", 8: "very hard",
 };
 
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+type ClassEntry = { id: number; mins: number; rpe: number };
+type Schedule = Record<string, ClassEntry[]>;
+let CLASS_ID = 1;
+
 export default function PlanClient() {
   const [date, setDate] = useState("");
   const [type, setType] = useState("Performance");
-  const [classesPerWeek, setClassesPerWeek] = useState(3);
-  const [classMins, setClassMins] = useState(90);
-  const [classRpe, setClassRpe] = useState(6);
   const [gymDays, setGymDays] = useState(3);
   const [plan, setPlan] = useState<EventPlan | null>(null);
 
-  // weekly class TRIMP = classes × minutes × RPE
-  const classLoad = classesPerWeek * classMins * classRpe;
+  // weekly class schedule: each day can hold one or more classes
+  const [sched, setSched] = useState<Schedule>(() =>
+    Object.fromEntries(DAYS.map((d) => [d, [] as ClassEntry[]]))
+  );
+
+  function addClass(day: string) {
+    setSched((s) => ({ ...s, [day]: [...s[day], { id: CLASS_ID++, mins: 90, rpe: 6 }] }));
+  }
+  function removeClass(day: string, id: number) {
+    setSched((s) => ({ ...s, [day]: s[day].filter((c) => c.id !== id) }));
+  }
+  function updateClass(day: string, id: number, patch: Partial<ClassEntry>) {
+    setSched((s) => ({ ...s, [day]: s[day].map((c) => (c.id === id ? { ...c, ...patch } : c)) }));
+  }
+
+  // weekly class TRIMP = sum over every class of (minutes × RPE)
+  const allClasses = DAYS.flatMap((d) => sched[d]);
+  const classLoad = allClasses.reduce((sum, c) => sum + c.mins * c.rpe, 0);
+  const classCount = allClasses.length;
   // a sensible week-1 gym starting load: ~25 min × RPE6 per chosen gym day
   const gymStart = gymDays * 25 * 6;
 
@@ -63,27 +82,46 @@ export default function PlanClient() {
           </div>
         </div>
 
-        {/* class load */}
+        {/* class schedule — Mon–Sun */}
         <div>
-          <p className="eyebrow mb-2">Your weekly class load</p>
-          <p className="text-grey text-sm mb-3">Classes and rehearsals you already do each week — this stays constant; we plan your gym training around it.</p>
-          <div className="grid sm:grid-cols-3 gap-3">
-            <label className="block">
-              <span className="text-sm text-navy">Classes / week</span>
-              <input className="input mt-1" inputMode="numeric" value={classesPerWeek}
-                onChange={(e) => setClassesPerWeek(Math.max(0, Math.min(20, Number(e.target.value.replace(/[^0-9]/g, "")) || 0)))} />
-            </label>
-            <label className="block">
-              <span className="text-sm text-navy">Minutes each</span>
-              <input className="input mt-1" inputMode="numeric" value={classMins}
-                onChange={(e) => setClassMins(Math.max(15, Math.min(300, Number(e.target.value.replace(/[^0-9]/g, "")) || 0)))} />
-            </label>
-            <div>
-              <span className="text-sm text-navy">Typical difficulty · RPE {classRpe} <span className="text-grey">({RPE_LABEL[classRpe] ?? ""})</span></span>
-              <input type="range" min={4} max={8} value={classRpe} onChange={(e) => setClassRpe(Number(e.target.value))} className="w-full accent-teal mt-2" />
-            </div>
+          <p className="eyebrow mb-2">Your weekly class schedule</p>
+          <p className="text-grey text-sm mb-3">Add each class and rehearsal on the day you do it, with its length and how hard it usually is. This stays constant — we plan your gym training around it.</p>
+          <div className="space-y-2">
+            {DAYS.map((day) => (
+              <div key={day} className="rounded-xl border border-line p-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-navy text-sm w-12">{day}</span>
+                  <button type="button" onClick={() => addClass(day)} className="text-teal text-sm font-semibold inline-flex items-center gap-1">
+                    <Icon name="sparkle" className="w-3.5 h-3.5" /> Add class
+                  </button>
+                </div>
+                {sched[day].length === 0 ? (
+                  <p className="text-grey text-xs mt-1">Rest day</p>
+                ) : (
+                  <div className="mt-2 space-y-2">
+                    {sched[day].map((c) => (
+                      <div key={c.id} className="flex items-center gap-2 flex-wrap bg-light rounded-lg px-2.5 py-2">
+                        <input className="input w-16 py-1" inputMode="numeric" value={c.mins}
+                          onChange={(e) => updateClass(day, c.id, { mins: Math.max(15, Math.min(300, Number(e.target.value.replace(/[^0-9]/g, "")) || 0)) })} />
+                        <span className="text-grey text-xs">min</span>
+                        <span className="text-grey text-xs ml-1">RPE</span>
+                        <input type="range" min={4} max={8} value={c.rpe}
+                          onChange={(e) => updateClass(day, c.id, { rpe: Number(e.target.value) })} className="accent-teal w-24" />
+                        <span className="text-navy text-sm font-semibold w-20">{c.rpe} · {RPE_LABEL[c.rpe] ?? ""}</span>
+                        <span className="text-grey text-xs ml-auto">{(c.mins * c.rpe).toLocaleString()} TRIMP</span>
+                        <button type="button" onClick={() => removeClass(day, c.id)} className="text-grey hover:text-red-600 text-sm">✕</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-          <p className="text-grey text-xs mt-2">That&apos;s about <b className="text-navy">{classLoad.toLocaleString()} TRIMP</b> of class load a week ({classesPerWeek} × {classMins}min × RPE{classRpe}).</p>
+          <p className="text-grey text-xs mt-2">
+            {classCount > 0
+              ? <>That&apos;s <b className="text-navy">{classCount} {classCount === 1 ? "class" : "classes"}</b> a week · about <b className="text-navy">{classLoad.toLocaleString()} TRIMP</b> of class load.</>
+              : "Add at least one class to build your plan."}
+          </p>
         </div>
 
         {/* gym days */}
