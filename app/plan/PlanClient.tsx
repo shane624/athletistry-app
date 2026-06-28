@@ -234,20 +234,26 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                 ) : (
                   <div className="mt-2 space-y-2">
                     {sched[day].map((c) => (
-                      <div key={c.id} className="bg-light rounded-lg px-2.5 py-2">
+                      <div key={c.id} className="bg-light rounded-lg p-3">
+                        {/* row 1: class name + remove */}
                         <div className="flex items-center gap-2">
-                          <input className="input flex-1 min-w-0 py-1" placeholder="Class name"
+                          <input className="input flex-1 min-w-0 py-1.5" placeholder="Class name"
                             value={c.name} onChange={(e) => updateClass(day, c.id, { name: e.target.value })} />
-                          <input className="input w-14 py-1 shrink-0 text-center" inputMode="numeric" value={c.mins}
-                            onChange={(e) => updateClass(day, c.id, { mins: Math.max(15, Math.min(300, Number(e.target.value.replace(/[^0-9]/g, "")) || 0)) })} />
-                          <span className="text-grey text-xs shrink-0">min</span>
-                          <button type="button" onClick={() => removeClass(day, c.id)} className="text-grey hover:text-red-600 text-sm shrink-0" aria-label="Remove class">✕</button>
+                          <button type="button" onClick={() => removeClass(day, c.id)} className="text-grey hover:text-red-600 shrink-0 px-1" aria-label="Remove class">✕</button>
                         </div>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <span className="text-grey text-xs">RPE</span>
-                          <input type="range" min={4} max={8} value={c.rpe}
-                            onChange={(e) => updateClass(day, c.id, { rpe: Number(e.target.value) })} className="accent-teal flex-1 max-w-[140px]" />
-                          <span className="text-navy text-xs font-semibold w-20">{c.rpe} · {RPE_LABEL[c.rpe] ?? ""}</span>
+                        {/* row 2: minutes + RPE */}
+                        <div className="flex items-center gap-3 mt-2 flex-wrap">
+                          <label className="flex items-center gap-1.5 text-xs text-grey">
+                            <input className="input w-16 py-1 text-center" inputMode="numeric" value={c.mins}
+                              onChange={(e) => updateClass(day, c.id, { mins: Math.max(15, Math.min(300, Number(e.target.value.replace(/[^0-9]/g, "")) || 0)) })} />
+                            min
+                          </label>
+                          <label className="flex items-center gap-1.5 text-xs text-grey">
+                            RPE
+                            <input type="range" min={4} max={8} value={c.rpe}
+                              onChange={(e) => updateClass(day, c.id, { rpe: Number(e.target.value) })} className="accent-teal w-24" />
+                            <span className="text-navy font-semibold">{c.rpe} · {RPE_LABEL[c.rpe] ?? ""}</span>
+                          </label>
                           <span className="text-grey text-xs ml-auto">{(c.mins * c.rpe).toLocaleString()} TRIMP</span>
                         </div>
                       </div>
