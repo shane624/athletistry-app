@@ -110,16 +110,19 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
           <p className="eyebrow">This week, day by day</p>
           <span className="text-grey text-xs">{weekDayTotal} TRIMP total</span>
         </div>
-        <div className="flex items-end gap-2 mt-4 h-28">
+        <div className="flex items-end gap-2 mt-4">
           {weekDays.map((d) => (
-            <div key={d.key} className="flex-1 flex flex-col items-center justify-end">
-              <span className="text-[10px] text-grey">{d.trimp > 0 ? d.trimp : ""}</span>
-              <div
-                className={`w-full rounded-t ${d.trimp > 0 ? "grad-brand" : "bg-line"} ${d.isToday ? "ring-2 ring-teal" : ""}`}
-                style={{ height: d.trimp > 0 ? `${Math.max((d.trimp / maxDay) * 100, 6)}%` : "4px" }}
-                title={`${d.label}: ${d.trimp} TRIMP`}
-              />
-              <span className={`text-[10px] mt-1 ${d.isToday ? "text-teal font-bold" : "text-grey"}`}>{d.label}</span>
+            <div key={d.key} className="flex-1 flex flex-col items-center">
+              <span className="text-[10px] text-grey h-3.5">{d.trimp > 0 ? d.trimp : ""}</span>
+              {/* fixed-height bar track; the fill grows from the bottom */}
+              <div className="w-full h-24 flex items-end mt-1">
+                <div
+                  className={`w-full rounded-t ${d.trimp > 0 ? "bg-teal" : "bg-line"} ${d.isToday ? "ring-2 ring-teal ring-offset-1 ring-offset-transparent" : ""}`}
+                  style={{ height: d.trimp > 0 ? `${Math.max((d.trimp / maxDay) * 100, 8)}%` : "4px" }}
+                  title={`${d.label}: ${d.trimp} TRIMP`}
+                />
+              </div>
+              <span className={`text-[10px] mt-1.5 ${d.isToday ? "text-teal font-bold" : "text-grey"}`}>{d.label}</span>
             </div>
           ))}
         </div>
@@ -134,12 +137,14 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
       {recentWeeks.length > 0 && (
         <div className="card p-5 animate-in">
           <p className="eyebrow">Weekly load (last {recentWeeks.length} weeks)</p>
-          <div className="flex items-end gap-2 mt-4 h-32">
+          <div className="flex items-end gap-2 mt-4">
             {recentWeeks.map((w) => (
-              <div key={w.week} className="flex-1 flex flex-col items-center justify-end">
-                <span className="text-[10px] text-grey">{w.trimp}</span>
-                <div className="w-full grad-brand rounded-t" style={{ height: `${Math.max((w.trimp / maxTrimp) * 100, 3)}%` }} title={`${w.week}: ${w.trimp} TRIMP`} />
-                <span className="text-[9px] text-grey mt-1">{w.week.slice(5)}</span>
+              <div key={w.week} className="flex-1 flex flex-col items-center">
+                <span className="text-[10px] text-grey h-3.5">{w.trimp}</span>
+                <div className="w-full h-28 flex items-end mt-1">
+                  <div className="w-full bg-teal rounded-t" style={{ height: `${Math.max((w.trimp / maxTrimp) * 100, 4)}%` }} title={`${w.week}: ${w.trimp} TRIMP`} />
+                </div>
+                <span className="text-[9px] text-grey mt-1.5">{w.week.slice(5)}</span>
               </div>
             ))}
           </div>
