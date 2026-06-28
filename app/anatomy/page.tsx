@@ -88,7 +88,7 @@ function Lesson({ n, title, html, chips }: { n: string; title: string; html: str
       <p className="text-[11px] font-semibold tracking-wide text-grey uppercase">
         <span className="text-teal">{n}</span> · {title}
       </p>
-      <p className="text-ink text-sm leading-relaxed mt-2 [&_b]:text-navy [&_b]:font-semibold"
+      <p className="text-ink text-sm leading-relaxed mt-2 [&_b]:text-tealdark [&_b]:font-semibold"
          dangerouslySetInnerHTML={{ __html: html }} />
       {chips && (
         <div className="flex flex-wrap gap-1.5 mt-3">
@@ -111,7 +111,7 @@ function FnLesson({ title, g8, lead, ex }: { title: string; g8: string; lead: st
       <p className="text-ink text-sm leading-relaxed mt-2">{lead}</p>
       <ul className="mt-2 space-y-1.5">
         {ex.map((e, i) => (
-          <li key={i} className="text-ink text-sm leading-snug flex gap-2 [&_b]:text-navy [&_b]:font-semibold">
+          <li key={i} className="text-ink text-sm leading-snug flex gap-2 [&_b]:text-tealdark [&_b]:font-semibold">
             <span className="text-teal shrink-0">▸</span>
             <span dangerouslySetInnerHTML={{ __html: e }} />
           </li>

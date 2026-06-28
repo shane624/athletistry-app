@@ -172,7 +172,7 @@ function Section({ id, n, title, children }: { id: string; n: string; title: str
         <span className="w-8 h-8 rounded-full grad-brand text-white text-sm font-extrabold flex items-center justify-center shrink-0">{n}</span>
         <h2 className="text-xl font-extrabold text-navy">{title}</h2>
       </div>
-      <div className="mt-3 space-y-3 text-sm text-ink leading-relaxed [&_b]:text-navy">{children}</div>
+      <div className="mt-3 space-y-3 text-sm text-ink leading-relaxed [&_b]:text-tealdark [&_b]:font-semibold">{children}</div>
     </section>
   );
 }
