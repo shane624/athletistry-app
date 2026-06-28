@@ -57,6 +57,31 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
     }
   }
 
+  // ONE-TAP: log every set at once. Uses each set's own value if entered,
+  // otherwise fills from set 1 (the common "same weight across sets" case).
+  const [allBusy, setAllBusy] = useState(false);
+  async function logAll() {
+    const w1 = vals[1]?.weight ?? "";
+    const r1 = vals[1]?.reps ?? "";
+    setAllBusy(true);
+    const next = { ...vals };
+    for (const s of sets) {
+      const weight = (next[s].weight || w1);
+      const reps = (next[s].reps || r1);
+      next[s] = { weight, reps };
+      setSaved((st) => ({ ...st, [s]: "saving" }));
+      await logSet({
+        programId, exerciseId: exercise.id, week, dayIndex, setNumber: s,
+        weight: parseFloat(weight || "0"), reps: parseInt(reps || "0"),
+      });
+      setSaved((st) => ({ ...st, [s]: "ok" }));
+    }
+    setVals(next);          // reflect the filled-in values in the inputs
+    setAllBusy(false);
+    setRestKey((k) => k + 1);
+  }
+  const canLogAll = (vals[1]?.reps || "").trim() !== ""; // need at least set-1 reps
+
   const topReps = sets.filter((s) => parseInt(vals[s].reps || "0") >= rx.repHigh).length;
   const hint =
     rx.block === "hypertrophy" && topReps >= 2 ? `You hit ${rx.repHigh}+ reps on ${topReps} sets — bump the weight next time.`
@@ -69,27 +94,87 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
       <CardHeader exercise={exercise} rx={rx} />
       <div className="mt-3"><VideoEmbed exercise={exercise} /></div>
 
-      <div className="mt-3 space-y-2">
-        {sets.map((s) => (
-          <div key={s} className="flex items-center gap-2">
-            <span className="w-11 shrink-0 text-sm text-grey">Set {s}</span>
-            <input className="input py-1.5 flex-1 min-w-0" inputMode="decimal" placeholder="kg"
-              value={vals[s].weight}
-              onChange={(e) => setVals((v) => ({ ...v, [s]: { ...v[s], weight: e.target.value } }))} />
-            <span className="text-grey shrink-0">×</span>
-            <input className="input py-1.5 flex-1 min-w-0" inputMode="numeric" placeholder="reps"
-              value={vals[s].reps}
-              onChange={(e) => setVals((v) => ({ ...v, [s]: { ...v[s], reps: e.target.value } }))} />
-            <button className="btn-primary py-1.5 text-sm shrink-0" onClick={() => save(s)}>
-              {saved[s] === "saving" ? <Dots /> : saved[s] === "ok" ? "✓" : "Save"}
-            </button>
-          </div>
-        ))}
-      </div>
+      <OneTapLog
+        sets={sets}
+        vals={vals}
+        setVals={setVals}
+        saved={saved}
+        save={save}
+        logAll={logAll}
+        allBusy={allBusy}
+        canLogAll={canLogAll}
+      />
 
       <RestTimer defaultSec={rx.restSec ?? 60} autoStartKey={restKey} />
 
       {hint && <p className="mt-3 text-sm text-tealdark bg-light rounded-md px-3 py-2">{hint}</p>}
+    </div>
+  );
+}
+
+// One-tap logging: enter set 1, tap "Log all sets". Individual sets are tucked
+// behind a toggle for the rare case where they differ.
+function OneTapLog({ sets, vals, setVals, saved, save, logAll, allBusy, canLogAll }: {
+  sets: number[];
+  vals: Record<number, { weight: string; reps: string }>;
+  setVals: React.Dispatch<React.SetStateAction<Record<number, { weight: string; reps: string }>>>;
+  saved: Record<number, "idle" | "saving" | "ok">;
+  save: (n: number) => void;
+  logAll: () => void;
+  allBusy: boolean;
+  canLogAll: boolean;
+}) {
+  const [showEach, setShowEach] = useState(false);
+  const allDone = sets.every((s) => saved[s] === "ok");
+
+  return (
+    <div className="mt-3">
+      {/* primary: set 1 + one-tap "log all" */}
+      <div className="flex items-center gap-2">
+        <span className="w-16 shrink-0 text-sm text-grey">{sets.length} sets ×</span>
+        <input className="input py-1.5 flex-1 min-w-0" inputMode="decimal" placeholder="kg"
+          value={vals[1].weight}
+          onChange={(e) => setVals((v) => ({ ...v, 1: { ...v[1], weight: e.target.value } }))} />
+        <span className="text-grey shrink-0">×</span>
+        <input className="input py-1.5 flex-1 min-w-0" inputMode="numeric" placeholder="reps"
+          value={vals[1].reps}
+          onChange={(e) => setVals((v) => ({ ...v, 1: { ...v[1], reps: e.target.value } }))} />
+      </div>
+
+      <button
+        className="btn-primary w-full mt-2 py-2 disabled:opacity-50"
+        onClick={logAll}
+        disabled={!canLogAll || allBusy}
+      >
+        {allBusy ? <Dots /> : allDone ? "✓ All sets logged" : `Log all ${sets.length} sets`}
+      </button>
+
+      {/* secondary: per-set entry, only when they differ */}
+      {sets.length > 1 && (
+        <button onClick={() => setShowEach((v) => !v)} className="text-teal text-xs font-semibold mt-2">
+          {showEach ? "Hide individual sets" : "Sets weren’t the same? Log each →"}
+        </button>
+      )}
+
+      {showEach && (
+        <div className="mt-2 space-y-2">
+          {sets.map((s) => (
+            <div key={s} className="flex items-center gap-2">
+              <span className="w-11 shrink-0 text-sm text-grey">Set {s}</span>
+              <input className="input py-1.5 flex-1 min-w-0" inputMode="decimal" placeholder="kg"
+                value={vals[s].weight}
+                onChange={(e) => setVals((v) => ({ ...v, [s]: { ...v[s], weight: e.target.value } }))} />
+              <span className="text-grey shrink-0">×</span>
+              <input className="input py-1.5 flex-1 min-w-0" inputMode="numeric" placeholder="reps"
+                value={vals[s].reps}
+                onChange={(e) => setVals((v) => ({ ...v, [s]: { ...v[s], reps: e.target.value } }))} />
+              <button className="btn-primary py-1.5 text-sm shrink-0" onClick={() => save(s)}>
+                {saved[s] === "saving" ? <Dots /> : saved[s] === "ok" ? "✓" : "Save"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
