@@ -10,7 +10,7 @@ const GROUPS: { title: string; items: { href: string; label: string }[] }[] = [
     items: [
       { href: "/dashboard", label: "Today" },
       { href: "/programs", label: "Programs" },
-      { href: "/generate", label: "Random Workout" },
+      { href: "/generate", label: "Practice Generator" },
       { href: "/circuit", label: "Circuit Training" },
       { href: "/ballet", label: "Train for Ballet" },
       { href: "/warmups", label: "Warm-Ups" },

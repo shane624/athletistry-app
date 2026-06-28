@@ -11,7 +11,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/dashboard", label: "Today", icon: "home" },
       { href: "/programs", label: "Programs", icon: "grid" },
-      { href: "/generate", label: "Random", icon: "bolt" },
+      { href: "/generate", label: "Practice Generator", icon: "bolt" },
       { href: "/circuit", label: "Circuit Training", icon: "circuit" },
       { href: "/ballet", label: "Train for Ballet", icon: "ballet" },
       { href: "/warmups", label: "Warm-Ups", icon: "warmup" },

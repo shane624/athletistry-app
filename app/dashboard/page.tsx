@@ -23,7 +23,7 @@ export default async function Dashboard() {
   const ob = await getOnboarding();
   if (!ob.disclaimerAccepted) redirect("/welcome");
   if (!ob.learningCompleted) redirect("/start-here");
-  if (!ob.onboarded) redirect("/programs?first=1");
+  if (!ob.onboarded) redirect("/onboarding");
 
   const today = await getToday();
   const displayName = await getDisplayName();

@@ -49,7 +49,7 @@ export default function Home() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Feature title="Guided Programs" desc="Ready-made plans from gentle to serious — including The Practice, a 90-day anatomy-first journey." />
           <Feature title="Circuit Training" desc="Timed conditioning: intervals, Tabata, EMOM & AMRAP — built-in timer, looping videos and rest preview." />
-          <Feature title="Random Workout" desc="A balanced legs / push / pull / core session generated on demand at your level." />
+          <Feature title="Practice Generator" desc="A balanced legs / push / pull / core session generated on demand at your level." />
           <Feature title="Train for Ballet" desc="Pick a move — plié, fondu, arabesque — and get the exercises that strengthen it." />
           <Feature title="Warm-Ups" desc="Gentle and Winning warm-ups for before class, rehearsal or a performance." />
           <Feature title="Build & Save Your Own" desc="Make custom routines, filter by equipment and level, and reuse them any time." />

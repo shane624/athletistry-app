@@ -61,7 +61,7 @@ export default function GuidePage() {
           <div className="grid sm:grid-cols-2 gap-3 mt-3">
             <Feature t="Today" d="Your workout for today. Start here." />
             <Feature t="Programs" d="Ready-made plans to follow, from gentle to serious. Pick one and the app guides you day by day." />
-            <Feature t="Random" d="In a hurry? Get a quick, balanced workout instantly." />
+            <Feature t="Practice Generator" d="In a hurry? Get a quick, balanced workout instantly." />
             <Feature t="Circuit Training" d="Short, timed conditioning. Pick a style — the app runs the clock and you just follow along." />
             <Feature t="Train for Ballet" d="Want a better plié or fondu? Pick the move and get exercises that help it." />
             <Feature t="Warm-Ups" d="Short videos to loosen up before training, class, or a performance." />

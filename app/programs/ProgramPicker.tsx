@@ -63,7 +63,7 @@ export default function ProgramPicker({ programs, active, first, customActive }:
 
       <ActionCard href="/build" icon="stack" title="Build Your Own" active={customActive}
         desc="Pick exercises from the library and build your own routine. Full reps & weight tracking." cta="Open builder" />
-      <ActionCard href="/generate" icon="bolt" title="Random Workout"
+      <ActionCard href="/generate" icon="bolt" title="Practice Generator"
         desc="A balanced session on the spot — legs, push, pull and core — at the difficulty you choose." cta="Generate" />
       <ActionCard href="/circuit" icon="circuit" title="Circuit Training"
         desc="Timed conditioning — 1:1 intervals, Tabata, EMOM or AMRAP, with a built-in timer." cta="Choose a format" />

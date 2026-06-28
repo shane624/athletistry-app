@@ -33,7 +33,8 @@ export default function BalletClient() {
   // which equipment the dancer HAS (empty = no filter, show everything)
   const [equip, setEquip] = useState<Set<Equipment>>(new Set());
   const [result, setResult] = useState<{ move: string; focus: string; exercises: ExerciseRow[] } | null>(null);
-  const [busy, setBusy] = useState(false);
+  // start busy=true so the first auto-build shows a loader, not a flash of "0 exercises"
+  const [busy, setBusy] = useState(true);
   const [openVid, setOpenVid] = useState<number | null>(null);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
 
@@ -170,10 +171,15 @@ export default function BalletClient() {
               </div>
             ))}
           </div>
-        ) : (
+        ) : result ? (
           <p className="text-grey text-sm mt-3">
             No exercises match those filters. Try a higher level or fewer equipment limits.
           </p>
+        ) : (
+          <div className="mt-3">
+            <p className="text-grey text-sm">Couldn&apos;t load that just now.</p>
+            <button className="btn-ghost text-sm mt-2" onClick={() => build()}>Try again</button>
+          </div>
         )}
       </div>
     </div>
