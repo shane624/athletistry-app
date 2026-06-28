@@ -9,17 +9,20 @@ const SESSION_ICON: Record<string, IconName> = {
   cardio: "heart", tabata: "bolt", rest: "warmup",
 };
 
-// where a session sends the dancer to actually do it
-function sessionLink(type: string): string {
-  if (type === "tabata") return "/circuit?format=tabata";
-  if (type === "cardio") return "/load";
-  return "/generate";
-}
-
 export default function EventPlanDay({ plan, upcoming = [] }: { plan: EventPlanToday; upcoming?: PlanUpcomingDay[] }) {
   const isRest = plan.sessionType === "rest" || plan.sessionType === "cardio";
   const icon = SESSION_ICON[plan.sessionType] ?? "warmup";
   const nextWorkout = upcoming.find((d) => d.isWorkout);
+
+  // strength/hypertrophy/endurance days have their own prescribed exercises on
+  // this page — the button anchors to them. tabata/cardio link out. As a
+  // fallback, a strength-type day with no resolved exercises sends to /generate.
+  const hasOwnExercises = plan.exercises.length > 0;
+  const startHref =
+    plan.sessionType === "tabata" ? "/circuit?format=tabata"
+    : plan.sessionType === "cardio" ? "/load"
+    : hasOwnExercises ? "#plan-exercises"
+    : "/generate";
 
   return (
     <div>
@@ -51,17 +54,17 @@ export default function EventPlanDay({ plan, upcoming = [] }: { plan: EventPlanT
         <p className="text-white/90 text-sm mt-3">{plan.detail}</p>
 
         {plan.sessionType !== "rest" && (
-          <Link href={sessionLink(plan.sessionType)}
+          <a href={startHref}
             className="mt-4 inline-flex items-center justify-center gap-2 bg-white text-navy font-bold rounded-2xl px-5 py-2.5 text-sm active:scale-[.98] transition">
             <Icon name="play" className="w-4 h-4" /> {plan.sessionType === "cardio" ? "Log your cardio" : "Start session"}
-          </Link>
+          </a>
         )}
       </div>
 
       {/* the day's exercises (strength / hypertrophy / endurance) */}
       {plan.exercises.length > 0 && (
         <>
-          <p className="eyebrow mt-6 mb-3">Today&apos;s exercises</p>
+          <p id="plan-exercises" className="eyebrow mt-6 mb-3 scroll-mt-20">Today&apos;s exercises</p>
           <div className="grid sm:grid-cols-2 gap-3">
             {plan.exercises.map((ex) => (
               <div key={ex.id} className="card p-4">
