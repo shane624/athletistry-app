@@ -65,6 +65,28 @@ export async function deleteSession(id: number): Promise<{ ok: boolean }> {
   return { ok: true };
 }
 
+/** Edit an already-logged session (duration, effort, type). */
+export async function updateSession(input: {
+  id: number; durationMin: number; rpe: number; kind?: string;
+}): Promise<{ ok: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const duration = Math.round(Number(input.durationMin));
+  const rpe = Math.round(Number(input.rpe));
+  if (!(duration >= 1 && duration <= 600)) return { ok: false, error: "Duration must be 1–600 minutes" };
+  if (!(rpe >= 1 && rpe <= 10)) return { ok: false, error: "RPE must be 1–10" };
+  const patch: Record<string, unknown> = { duration_min: duration, rpe };
+  if (input.kind) patch.kind = input.kind;
+  const { error } = await supabase
+    .from("training_sessions")
+    .update(patch)
+    .eq("id", input.id)
+    .eq("user_id", user.id);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
 export async function addEvent(input: { date: string; kind?: string; name?: string }): Promise<{ ok: boolean; error?: string }> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();

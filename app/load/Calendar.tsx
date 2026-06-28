@@ -24,11 +24,12 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
   // add-form state
   const [kind, setKind] = useState("ballet");
   const [time, setTime] = useState("");
-  const [dur, setDur] = useState(90);
+  // kept as strings so the fields can be cleared/retyped; clamped when used
+  const [dur, setDur] = useState("90");
   const [rpe, setRpe] = useState(6);
   const [search, setSearch] = useState("");
   const [recurring, setRecurring] = useState(false);
-  const [weeks, setWeeks] = useState(8);
+  const [weeks, setWeeks] = useState("8");
 
   // group sessions/events by date
   const byDay = new Map<string, SessionRow[]>();
@@ -49,23 +50,25 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
   function openAdd(dateISO: string) {
     setAddDay(dateISO);
     const p = classPreset(kind);
-    if (p) { setDur(p.defaultMin); setRpe(p.defaultRpe); }
+    if (p) { setDur(String(p.defaultMin)); setRpe(p.defaultRpe); }
   }
   function pickKind(k: string) {
     setKind(k);
     const p = classPreset(k);
-    if (p) { setDur(p.defaultMin); setRpe(p.defaultRpe); }
+    if (p) { setDur(String(p.defaultMin)); setRpe(p.defaultRpe); }
   }
 
   function closeModal() { setAddDay(null); setTime(""); setSearch(""); setRecurring(false); }
 
   async function saveClass() {
     if (!addDay) return;
+    const durMin = Math.max(1, Math.min(600, Number(dur) || 0));
+    const wk = Math.max(1, Math.min(52, Number(weeks) || 1));
     setBusy(true);
     if (recurring) {
-      await logRecurring({ kind, durationMin: dur, rpe, date: addDay, startTime: time || undefined, weeks });
+      await logRecurring({ kind, durationMin: durMin, rpe, date: addDay, startTime: time || undefined, weeks: wk });
     } else {
-      await logSession({ kind, durationMin: dur, rpe, date: addDay, startTime: time || undefined });
+      await logSession({ kind, durationMin: durMin, rpe, date: addDay, startTime: time || undefined });
     }
     setBusy(false); closeModal();
     router.refresh();
@@ -172,7 +175,9 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
               </div>
               <div>
                 <label className="text-xs text-grey">Minutes</label>
-                <input className="input mt-1 w-24" inputMode="numeric" value={dur} onChange={(e) => setDur(Number(e.target.value) || 0)} />
+                <input className="input mt-1 w-24" inputMode="numeric" value={dur}
+                  onChange={(e) => setDur(e.target.value.replace(/[^0-9]/g, ""))}
+                  onBlur={() => setDur(String(Math.max(1, Math.min(600, Number(dur) || 0))))} />
               </div>
             </div>
 
@@ -182,7 +187,7 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
               <div className="flex justify-between text-[10px] text-grey"><span>1 easy</span><span>10 max</span></div>
             </div>
 
-            <p className="text-grey text-sm mt-2">This class = <b className="text-navy">{sessionTrimp(dur, rpe)} TRIMP</b></p>
+            <p className="text-grey text-sm mt-2">This class = <b className="text-navy">{sessionTrimp(Number(dur) || 0, rpe)} TRIMP</b></p>
 
             {/* existing items on that day */}
             {(byDay.get(addDay) ?? []).length > 0 && (
@@ -208,7 +213,9 @@ export default function Calendar({ sessions, events }: { sessions: SessionRow[];
               {recurring && (
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-sm text-grey">for</span>
-                  <input className="input w-16" inputMode="numeric" value={weeks} onChange={(e) => setWeeks(Math.max(1, Math.min(52, Number(e.target.value) || 1)))} />
+                  <input className="input w-16" inputMode="numeric" value={weeks}
+                    onChange={(e) => setWeeks(e.target.value.replace(/[^0-9]/g, ""))}
+                    onBlur={() => setWeeks(String(Math.max(1, Math.min(52, Number(weeks) || 1))))} />
                   <span className="text-sm text-grey">weeks</span>
                 </div>
               )}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { logSession, deleteSession, addEvent, deleteEvent } from "@/lib/load-actions";
+import { logSession, deleteSession, updateSession, addEvent, deleteEvent } from "@/lib/load-actions";
 import { sessionTrimp, type LoadAssessment, type WeekLoad } from "@/lib/load";
 import Dots from "@/components/Dots";
 
@@ -47,6 +47,19 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
     router.refresh();
   }
   async function removeSession(id: number) { setBusy(true); await deleteSession(id); setBusy(false); router.refresh(); }
+
+  // inline edit of a logged session
+  const [editId, setEditId] = useState<number | null>(null);
+  const [eDur, setEDur] = useState("");
+  const [eRpe, setERpe] = useState(6);
+  function startEdit(s: SessionRow) { setEditId(s.id); setEDur(String(s.duration_min)); setERpe(s.rpe); }
+  function cancelEdit() { setEditId(null); }
+  async function saveEdit(id: number) {
+    setBusy(true);
+    await updateSession({ id, durationMin: Number(eDur) || 0, rpe: eRpe });
+    setEditId(null); setBusy(false);
+    router.refresh();
+  }
 
   async function submitEvent(e: React.FormEvent) {
     e.preventDefault();
@@ -190,10 +203,29 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
           <p className="eyebrow">Recent sessions</p>
           <div className="mt-3 space-y-1.5">
             {sessions.slice(0, 12).map((s) => (
-              <div key={s.id} className="flex items-center justify-between text-sm py-1.5 border-b border-line last:border-0">
-                <span className="text-navy">{s.session_date.slice(5)} · <span className="capitalize">{s.kind}</span></span>
-                <span className="text-grey">{s.duration_min}min · RPE {s.rpe} · {sessionTrimp(s.duration_min, s.rpe)} TRIMP</span>
-                <button className="text-grey hover:text-red-600 text-xs" onClick={() => removeSession(s.id)}>✕</button>
+              <div key={s.id} className="text-sm py-1.5 border-b border-line last:border-0">
+                {editId === s.id ? (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-navy w-20">{s.session_date.slice(5)} · <span className="capitalize">{s.kind}</span></span>
+                    <input className="input w-16 py-1" inputMode="numeric" value={eDur}
+                      onChange={(e) => setEDur(e.target.value.replace(/[^0-9]/g, ""))} />
+                    <span className="text-grey text-xs">min</span>
+                    <label className="text-grey text-xs">RPE</label>
+                    <input type="range" min={1} max={10} value={eRpe} onChange={(e) => setERpe(Number(e.target.value))} className="accent-teal w-24" />
+                    <span className="text-navy font-semibold w-4">{eRpe}</span>
+                    <button className="text-teal font-semibold text-xs ml-auto" onClick={() => saveEdit(s.id)} disabled={busy}>Save</button>
+                    <button className="text-grey text-xs" onClick={cancelEdit}>Cancel</button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-navy">{s.session_date.slice(5)} · <span className="capitalize">{s.kind}</span></span>
+                    <span className="text-grey">{s.duration_min}min · RPE {s.rpe} · {sessionTrimp(s.duration_min, s.rpe)} TRIMP</span>
+                    <span className="flex items-center gap-2 shrink-0">
+                      <button className="text-teal hover:text-tealdark text-xs" onClick={() => startEdit(s)}>Edit</button>
+                      <button className="text-grey hover:text-red-600 text-xs" onClick={() => removeSession(s.id)}>✕</button>
+                    </span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
