@@ -98,6 +98,66 @@ export interface PlanGlance {
 
 export interface PlanCalendarDay { date: string; sessionType: string; title: string; }
 
+export interface PlanUpcomingDay {
+  date: string;
+  weekday: string;
+  sessionType: string;
+  title: string;
+  detail: string;
+  exerciseNames: string[];
+  isWorkout: boolean;
+}
+
+const DOW3 = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+/** The next few plan days AFTER today, with exercise names — for a "coming up"
+ *  preview. Returns the first working day expanded + a short look-ahead. */
+export async function getEventPlanUpcoming(count = 5): Promise<{ active: boolean; days: PlanUpcomingDay[] }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { active: false, days: [] };
+
+  const { data: state } = await supabase
+    .from("user_program_state")
+    .select("event_plan_active")
+    .eq("user_id", user.id)
+    .single();
+  if (!state?.event_plan_active) return { active: false, days: [] };
+
+  const iso = todayISO();
+  const { data: rows } = await supabase
+    .from("event_plan_days")
+    .select("plan_date, session_type, title, detail, exercise_ids")
+    .eq("user_id", user.id)
+    .gt("plan_date", iso)
+    .order("plan_date", { ascending: true })
+    .limit(count);
+
+  const all = rows ?? [];
+  // resolve all referenced exercise names in one query
+  const allIds = [...new Set(all.flatMap((r) => (r.exercise_ids ?? []) as number[]))];
+  const nameById = new Map<number, string>();
+  if (allIds.length) {
+    const { data: exRows } = await supabase.from("exercises").select("id,name").in("id", allIds);
+    for (const e of exRows ?? []) nameById.set(e.id, e.name as string);
+  }
+
+  const days: PlanUpcomingDay[] = all.map((r) => {
+    const ids: number[] = r.exercise_ids ?? [];
+    return {
+      date: r.plan_date,
+      weekday: DOW3[new Date(r.plan_date + "T00:00:00").getDay()],
+      sessionType: r.session_type,
+      title: r.title,
+      detail: r.detail,
+      exerciseNames: ids.map((id) => nameById.get(id)).filter((n): n is string => !!n),
+      isWorkout: r.session_type !== "rest",
+    };
+  });
+
+  return { active: true, days };
+}
+
 /** Flat list of the active plan's days, for overlaying on the calendar. */
 export async function getEventPlanDays(): Promise<{ active: boolean; label: string | null; days: PlanCalendarDay[] }> {
   const supabase = createClient();

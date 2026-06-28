@@ -10,7 +10,7 @@ import Greeting from "@/components/Greeting";
 import CompleteWorkout from "@/components/CompleteWorkout";
 import EventPlanDay from "@/components/EventPlanDay";
 import { getToday, getOnboarding } from "@/lib/data";
-import { getEventPlanToday } from "@/lib/event-plan-data";
+import { getEventPlanToday, getEventPlanUpcoming } from "@/lib/event-plan-data";
 import { getDisplayName } from "@/lib/profile-data";
 import { getAchievements } from "@/lib/achievements-data";
 import { getAssessment } from "@/lib/load-data";
@@ -31,6 +31,7 @@ export default async function Dashboard() {
   const eventPlan = await getEventPlanToday();
   const displayName = await getDisplayName();
   if (eventPlan.active) {
+    const upcoming = await getEventPlanUpcoming(5);
     return (
       <div className="min-h-screen">
         <NavBar />
@@ -39,7 +40,7 @@ export default async function Dashboard() {
             <Greeting name={displayName} programName={eventPlan.label ?? "Event plan"} />
           </div>
           <AchievementStrip />
-          <EventPlanDay plan={eventPlan} />
+          <EventPlanDay plan={eventPlan} upcoming={upcoming.days} />
         </main>
       </div>
     );

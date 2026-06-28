@@ -2,7 +2,7 @@ import Link from "next/link";
 import Icon, { type IconName } from "@/components/Icon";
 import ExerciseVideo from "@/components/ExerciseVideo";
 import ClearEventPlan from "@/components/ClearEventPlan";
-import type { EventPlanToday } from "@/lib/event-plan-data";
+import type { EventPlanToday, PlanUpcomingDay } from "@/lib/event-plan-data";
 
 const SESSION_ICON: Record<string, IconName> = {
   strength: "dumbbell", hypertrophy: "dumbbell", endurance: "circuit",
@@ -16,9 +16,10 @@ function sessionLink(type: string): string {
   return "/generate";
 }
 
-export default function EventPlanDay({ plan }: { plan: EventPlanToday }) {
+export default function EventPlanDay({ plan, upcoming = [] }: { plan: EventPlanToday; upcoming?: PlanUpcomingDay[] }) {
   const isRest = plan.sessionType === "rest" || plan.sessionType === "cardio";
   const icon = SESSION_ICON[plan.sessionType] ?? "warmup";
+  const nextWorkout = upcoming.find((d) => d.isWorkout);
 
   return (
     <div>
@@ -80,6 +81,55 @@ export default function EventPlanDay({ plan }: { plan: EventPlanToday }) {
 
       {isRest && (
         <p className="text-grey text-sm mt-4">Take it easy today — recovery is part of the plan. Your next session is around the corner.</p>
+      )}
+
+      {/* what's coming up */}
+      {upcoming.length > 0 && (
+        <div className="mt-8">
+          <p className="eyebrow mb-3">Coming up</p>
+
+          {/* next actual workout, with its exercises */}
+          {nextWorkout && (
+            <div className="card p-4 mb-3">
+              <div className="flex items-center gap-2">
+                <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${nextWorkout.sessionType === "rest" ? "bg-rowalt text-grey" : "bg-light text-tealdark"}`}>
+                  <Icon name={SESSION_ICON[nextWorkout.sessionType] ?? "dumbbell"} className="w-4 h-4" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[11px] text-grey uppercase tracking-wide">Next workout · {nextWorkout.weekday}</p>
+                  <p className="font-bold text-navy text-sm">{nextWorkout.title}</p>
+                </div>
+              </div>
+              {nextWorkout.exerciseNames.length > 0 ? (
+                <ul className="mt-3 grid sm:grid-cols-2 gap-x-4 gap-y-1">
+                  {nextWorkout.exerciseNames.map((n, i) => (
+                    <li key={i} className="text-sm text-navy flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-teal shrink-0" />{n}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-grey text-sm mt-2">{nextWorkout.detail}</p>
+              )}
+            </div>
+          )}
+
+          {/* short look-ahead */}
+          <div className="card divide-y divide-line overflow-hidden">
+            {upcoming.map((d) => (
+              <div key={d.date} className="flex items-center gap-3 px-4 py-2.5">
+                <span className="text-xs text-grey w-10 shrink-0">{d.weekday} {d.date.slice(8)}</span>
+                <span className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${d.isWorkout ? "bg-light text-tealdark" : "bg-rowalt text-grey"}`}>
+                  <Icon name={SESSION_ICON[d.sessionType] ?? "warmup"} className="w-3.5 h-3.5" />
+                </span>
+                <span className="text-sm text-navy truncate">{d.title}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-grey text-xs mt-3">
+            See your whole plan on the <Link href="/load" className="text-teal font-medium">Training Calendar</Link>.
+          </p>
+        </div>
       )}
     </div>
   );
