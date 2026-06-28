@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase-server";
 import { cookies } from "next/headers";
-import type { ExerciseRow } from "@/lib/types";
+import type { ExerciseRow, WorkoutStyle } from "@/lib/types";
 import { styleRx } from "@/lib/program";
-import type { ResolvedRx, WorkoutStyle } from "@/lib/program";
+import type { ResolvedRx } from "@/lib/program";
 
 // Plan-day logs are stored in set_logs under this synthetic program id, with
 // week = plan week index and day_index = days-since-epoch (so each dated day is
