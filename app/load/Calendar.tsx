@@ -6,10 +6,12 @@ import { logSession, logRecurring, deleteSession } from "@/lib/load-actions";
 import { CLASS_GROUPS, CLASS_PRESETS, classColor, classLabel, classPreset } from "@/lib/classes";
 import { sessionTrimp } from "@/lib/load";
 import Dots from "@/components/Dots";
+import ExerciseVideo from "@/components/ExerciseVideo";
 
 interface SessionRow { id: number; session_date: string; kind: string; duration_min: number; rpe: number; note: string | null; start_time: string | null; }
 interface EventRow { id: number; event_date: string; kind: string; name: string; }
-interface PlanDay { date: string; sessionType: string; title: string; }
+interface PlanExercise { id: number; name: string; youtube_id: string; cloudinary_id?: string | null; level: number; category: string; }
+interface PlanDay { date: string; sessionType: string; title: string; detail: string; exercises: PlanExercise[]; }
 
 function ymd(d: Date) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -30,6 +32,8 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
   const today = new Date();
   const [cursor, setCursor] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [addDay, setAddDay] = useState<string | null>(null); // YYYY-MM-DD being added to
+  const [viewPlan, setViewPlan] = useState<PlanDay | null>(null); // plan day being viewed
+  const [openVid, setOpenVid] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
 
   // add-form state
@@ -122,7 +126,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
           return (
             <button
               key={i}
-              onClick={() => openAdd(iso)}
+              onClick={() => { if (planDay && planDay.sessionType !== "rest") { setOpenVid(null); setViewPlan(planDay); } else { openAdd(iso); } }}
               className={`min-h-[58px] rounded-lg border p-1 text-left align-top transition hover:border-teal ${
                 isToday ? "border-teal bg-light" : "border-line bg-white"
               }`}
@@ -153,7 +157,47 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
         })}
       </div>
 
-      <p className="text-grey text-xs mt-3">Tap any day to add a class. ★ = event (taper plans around it).{planDays.length ? " ◆ = your plan's session for that day." : ""}</p>
+      <p className="text-grey text-xs mt-3">Tap any day to add a class{planDays.length ? ", or a ◆ plan day to see its workout" : ""}. ★ = event (taper plans around it).</p>
+
+      {/* plan-day view modal — shows the prescribed session + exercises + videos */}
+      {viewPlan && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: "rgba(31,42,68,.6)" }} onClick={() => setViewPlan(null)}>
+          <div className="card w-full max-w-md p-5 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="eyebrow">{viewPlan.date}</p>
+                <p className="font-extrabold text-navy mt-0.5">{viewPlan.title}</p>
+              </div>
+              <button className="text-grey" onClick={() => setViewPlan(null)}>✕</button>
+            </div>
+            {viewPlan.detail && <p className="text-grey text-sm mt-2">{viewPlan.detail}</p>}
+
+            {viewPlan.exercises.length > 0 ? (
+              <div className="mt-4 space-y-3">
+                {viewPlan.exercises.map((ex) => (
+                  <div key={ex.id} className="card p-3">
+                    <h3 className="font-semibold text-navy text-sm">{ex.name}</h3>
+                    <p className="text-xs text-grey mt-0.5">Level {ex.level} · {ex.category}</p>
+                    <div className="mt-2">
+                      {openVid === ex.id ? (
+                        <ExerciseVideo cloudinaryId={ex.cloudinary_id} youtubeId={ex.youtube_id} title={ex.name} />
+                      ) : (
+                        <button className="btn-ghost text-sm" onClick={() => setOpenVid(ex.id)}>Watch ▸</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-grey text-sm mt-4">
+                {viewPlan.sessionType === "cardio" ? "Steady-state cardio — log it once you're done."
+                  : viewPlan.sessionType === "tabata" ? "A Tabata circuit — open Circuit Training to run it."
+                  : "No specific exercises for this session."}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* add modal */}
       {addDay && (

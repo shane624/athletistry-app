@@ -96,7 +96,13 @@ export interface PlanGlance {
   weeks: PlanGlanceWeek[];
 }
 
-export interface PlanCalendarDay { date: string; sessionType: string; title: string; }
+export interface PlanCalendarDay {
+  date: string;
+  sessionType: string;
+  title: string;
+  detail: string;
+  exercises: ExerciseRow[];
+}
 
 export interface PlanUpcomingDay {
   date: string;
@@ -173,14 +179,32 @@ export async function getEventPlanDays(): Promise<{ active: boolean; label: stri
 
   const { data: rows } = await supabase
     .from("event_plan_days")
-    .select("plan_date, session_type, title")
+    .select("plan_date, session_type, title, detail, exercise_ids")
     .eq("user_id", user.id)
     .order("plan_date", { ascending: true });
+
+  const all = rows ?? [];
+  // resolve every referenced exercise once, then map back per day (in order)
+  const allIds = [...new Set(all.flatMap((r) => (r.exercise_ids ?? []) as number[]))];
+  const byId = new Map<number, ExerciseRow>();
+  if (allIds.length) {
+    const { data: exRows } = await supabase
+      .from("exercises")
+      .select("id,name,youtube_id,cloudinary_id,level,category")
+      .in("id", allIds);
+    for (const e of exRows ?? []) byId.set(e.id, e as ExerciseRow);
+  }
 
   return {
     active: true,
     label: state.event_plan_label ?? null,
-    days: (rows ?? []).map((r) => ({ date: r.plan_date, sessionType: r.session_type, title: r.title })),
+    days: all.map((r) => ({
+      date: r.plan_date,
+      sessionType: r.session_type,
+      title: r.title,
+      detail: r.detail ?? "",
+      exercises: ((r.exercise_ids ?? []) as number[]).map((id) => byId.get(id)).filter((e): e is ExerciseRow => !!e),
+    })),
   };
 }
 
