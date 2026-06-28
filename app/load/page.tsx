@@ -27,12 +27,12 @@ export default async function LoadPage() {
         />
 
         <div className="mt-8">
-          <p className="eyebrow mb-3">Your schedule</p>
-          {eventPlan.active && (
-            <p className="text-grey text-sm mb-3">
-              Your <b className="text-navy">{eventPlan.label ?? "event plan"}</b> is laid out below — each day&apos;s prescribed session shows on the calendar.
-            </p>
-          )}
+          <p className="eyebrow mb-1">Your schedule</p>
+          <p className="text-grey text-sm mb-3">
+            {eventPlan.active
+              ? <>Your <b className="text-navy">{eventPlan.label ?? "event plan"}</b> is laid out below — tap a ◆ day to see its workout, or any other day to plan a class.</>
+              : <>Your week at a glance. Tap a day to <b className="text-navy">plan ahead</b> — add an upcoming class or event. (To record something you&apos;ve done, use “Log a session” above.)</>}
+          </p>
           <Calendar sessions={sessions} events={events} planDays={eventPlan.days} />
         </div>
       </main>

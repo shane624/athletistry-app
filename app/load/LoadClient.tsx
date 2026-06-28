@@ -168,6 +168,7 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
       {/* LOG A SESSION */}
       <div className="card p-5 animate-in">
         <p className="eyebrow">Log a session</p>
+        <p className="text-grey text-sm mt-1">Record something you&apos;ve <b className="text-navy">already done</b> — a class, rehearsal or gym session — so it counts toward your load. To plan ahead instead, tap a day on the calendar below.</p>
         <form onSubmit={submitSession} className="mt-3 space-y-3">
           <div className="flex flex-wrap gap-1.5">
             {KINDS.map((k) => (
