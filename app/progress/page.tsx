@@ -23,9 +23,9 @@ export default async function ProgressPage() {
         <PageHeader icon="chart" eyebrow="Your trends" title="Progress"
           subtitle="See which muscle groups you've trained, and watch lifts climb week to week." />
 
-        <div className="mt-5"><MuscleBalance /></div>
+        <div data-tour="muscle" className="mt-5"><MuscleBalance /></div>
 
-        <h2 className="text-lg font-bold text-navy mt-8">Lift progress</h2>
+        <h2 data-tour="lift" className="text-lg font-bold text-navy mt-8 scroll-mt-20">Lift progress</h2>
         <p className="text-grey text-sm mt-1">Pick an exercise to see your top set weight and total volume climb week to week (current program).</p>
         <ProgressClient exercises={exercises} programId={programId} />
       </main>

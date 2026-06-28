@@ -33,7 +33,7 @@ export default async function LoadPage() {
               ? <>Your <b className="text-navy">{eventPlan.label ?? "event plan"}</b> is laid out below — tap a ◆ day to see its workout, or any other day to plan a class.</>
               : <>Your week at a glance. Tap a day to <b className="text-navy">plan ahead</b> — add an upcoming class or event. (To record something you&apos;ve done, use “Log a session” above.)</>}
           </p>
-          <Calendar sessions={sessions} events={events} planDays={eventPlan.days} />
+          <div data-tour="calendar"><Calendar sessions={sessions} events={events} planDays={eventPlan.days} /></div>
         </div>
       </main>
     </div>

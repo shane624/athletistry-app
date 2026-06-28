@@ -38,7 +38,7 @@ export default function LibraryClient({ exercises }: { exercises: ExerciseRow[] 
   return (
     <div className="mt-4">
       <div className="flex gap-2 flex-wrap">
-        <input className="input max-w-xs" placeholder="Search exercises…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <input data-tour="ex-search" className="input max-w-xs" placeholder="Search exercises…" value={q} onChange={(e) => setQ(e.target.value)} />
         <select className="input max-w-[10rem]" value={level} onChange={(e) => setLevel(e.target.value === "" ? "" : Number(e.target.value))}>
           <option value="">All levels</option>
           {[1, 2, 3, 4].map((l) => <option key={l} value={l}>Level {l}</option>)}

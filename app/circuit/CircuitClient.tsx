@@ -72,7 +72,7 @@ export default function CircuitClient() {
     <div className="mt-5 space-y-5">
       {/* format */}
       <div>
-        <p className="eyebrow mb-2">Format</p>
+        <p data-tour="format" className="eyebrow mb-2">Format</p>
         <div className="grid grid-cols-2 gap-2">
           {CIRCUIT_FORMATS.map((f) => (
             <button key={f.id} onClick={() => pickFormat(f.id)}
@@ -89,7 +89,7 @@ export default function CircuitClient() {
 
       {/* composition */}
       <div>
-        <p className="eyebrow mb-2">Focus</p>
+        <p data-tour="focus" className="eyebrow mb-2">Focus</p>
         <div className="flex flex-wrap gap-1.5">
           {COMPOSITIONS.map((c) => (
             <button key={c.id} onClick={() => { setComp(c.id); setExercises(null); }}
@@ -136,7 +136,7 @@ export default function CircuitClient() {
 
       <div className="card p-4 bg-light">
         <p className="text-navy font-semibold text-sm">{circuitSummary(cfg)}</p>
-        <button className="btn-primary mt-3" onClick={build} disabled={busy}>
+        <button data-tour="build-circuit" className="btn-primary mt-3" onClick={build} disabled={busy}>
           {busy ? <Dots /> : exercises ? "Rebuild circuit" : "Build my circuit"}
         </button>
       </div>

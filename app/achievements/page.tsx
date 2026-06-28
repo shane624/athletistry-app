@@ -24,7 +24,7 @@ export default async function AchievementsPage() {
         {/* top: level + streak + ring */}
         <div className="grid md:grid-cols-3 gap-4 mt-5">
           {/* LEVEL */}
-          <div className="card p-5 md:col-span-2 animate-in">
+          <div data-tour="rank" className="card p-5 md:col-span-2 animate-in">
             <p className="eyebrow">Current rank</p>
             <div className="flex items-baseline gap-2 mt-1">
               <h2 className="text-2xl font-extrabold text-navy">{a.level.name}</h2>
@@ -83,7 +83,7 @@ export default async function AchievementsPage() {
         </div>
 
         {/* badges */}
-        <p className="eyebrow mt-8">Earned · {earned.length} of {a.badges.length}</p>
+        <p data-tour="badges" className="eyebrow mt-8 scroll-mt-20">Earned · {earned.length} of {a.badges.length}</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
           {earned.map((b) => <BadgeCard key={b.id} b={b} />)}
           {earned.length === 0 && (

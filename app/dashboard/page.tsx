@@ -9,7 +9,6 @@ import WarmUp from "@/components/WarmUp";
 import Greeting from "@/components/Greeting";
 import CompleteWorkout from "@/components/CompleteWorkout";
 import EventPlanDay from "@/components/EventPlanDay";
-import DashboardTour from "@/components/DashboardTour";
 import TourButton from "@/components/TourButton";
 import WeekdaySync from "@/components/WeekdaySync";
 import LocalDateCookie from "@/components/LocalDateCookie";
@@ -41,7 +40,6 @@ export default async function Dashboard() {
         <NavBar />
         <main className="max-w-4xl mx-auto px-4 py-6">
           <LocalDateCookie />
-          <DashboardTour />
           <div className="flex items-center justify-between flex-wrap gap-2 mb-4 animate-in">
             <Greeting name={displayName} programName={eventPlan.label ?? "Event plan"} />
             <TourButton />
@@ -73,7 +71,6 @@ export default async function Dashboard() {
       <NavBar />
       <main className="max-w-4xl mx-auto px-4 py-6">
         <LocalDateCookie />
-        <DashboardTour />
         {today.scheduling === "weekday" && (
           <WeekdaySync currentDay={today.dayIndex} dayCount={today.dayCount} />
         )}

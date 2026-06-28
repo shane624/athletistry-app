@@ -99,7 +99,7 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
   return (
     <div className="mt-5 space-y-6">
       {/* STATUS */}
-      <div className={`${statusColor[a.status] ?? "bg-navy2"} text-white rounded-xl p-5 animate-in`}>
+      <div data-tour="load-status" className={`${statusColor[a.status] ?? "bg-navy2"} text-white rounded-xl p-5 animate-in`}>
         <div className="flex items-center justify-between flex-wrap gap-2">
           <p className="text-white/80 text-xs font-semibold uppercase tracking-wide">
             {a.taper ? "Taper" : a.status === "event-week" ? "Event week" : "This week's load"}
@@ -166,7 +166,7 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
       )}
 
       {/* LOG A SESSION */}
-      <div className="card p-5 animate-in">
+      <div data-tour="log-session" className="card p-5 animate-in">
         <p className="eyebrow">Log a session</p>
         <p className="text-grey text-sm mt-1">Record something you&apos;ve <b className="text-navy">already done</b> — a class, rehearsal or gym session — so it counts toward your load. To plan ahead instead, tap a day on the calendar below.</p>
         <form onSubmit={submitSession} className="mt-3 space-y-3">

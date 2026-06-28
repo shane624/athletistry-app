@@ -86,7 +86,7 @@ export default function GeneratorClient() {
   return (
     <div className="mt-5">
       {/* style */}
-      <p className="text-sm font-medium text-navy">Training style</p>
+      <p data-tour="style" className="text-sm font-medium text-navy">Training style</p>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
         {STYLES.map((s) => {
           const selected = style === s.id;
@@ -182,7 +182,7 @@ export default function GeneratorClient() {
         </div>
       )}
 
-      <button className="btn-primary mt-5 w-full sm:w-auto" onClick={generate} disabled={busy}>
+      <button data-tour="gen-build" className="btn-primary mt-5 w-full sm:w-auto" onClick={generate} disabled={busy}>
         {busy ? "Rolling…" : workout ? "🎲 Regenerate" : "🎲 Generate workout"}
       </button>
       </>

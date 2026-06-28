@@ -30,7 +30,7 @@ export default function ProgramPicker({ programs, active, first, customActive }:
   }
 
   return (
-    <div className="grid md:grid-cols-2 gap-4 mt-5 stagger">
+    <div data-tour="programs" className="grid md:grid-cols-2 gap-4 mt-5 stagger">
       {programs.map((p) => {
         const look = programLook(p.id);
         const isActive = p.id === active;
@@ -61,7 +61,7 @@ export default function ProgramPicker({ programs, active, first, customActive }:
         );
       })}
 
-      <ActionCard href="/build" icon="stack" title="Build Your Own" active={customActive}
+      <ActionCard href="/build" icon="stack" title="Build Your Own" active={customActive} tour="tools"
         desc="Pick exercises from the library and build your own routine. Full reps & weight tracking." cta="Open builder" />
       <ActionCard href="/generate" icon="bolt" title="Practice Generator"
         desc="A balanced session on the spot — legs, push, pull and core — at the difficulty you choose." cta="Generate" />
@@ -71,11 +71,11 @@ export default function ProgramPicker({ programs, active, first, customActive }:
   );
 }
 
-function ActionCard({ href, icon, title, desc, cta, active }: {
-  href: string; icon: IconName; title: string; desc: string; cta: string; active?: boolean;
+function ActionCard({ href, icon, title, desc, cta, active, tour }: {
+  href: string; icon: IconName; title: string; desc: string; cta: string; active?: boolean; tour?: string;
 }) {
   return (
-    <Link href={href} className={`card card-hover block p-5 transition ${active ? "ring-2 ring-teal" : ""}`}>
+    <Link href={href} data-tour={tour} className={`card card-hover block p-5 transition ${active ? "ring-2 ring-teal" : ""}`}>
       <div className="flex items-center gap-3">
         <span className="w-10 h-10 rounded-2xl bg-light flex items-center justify-center text-teal shrink-0">
           <Icon name={icon} className="w-5 h-5" />

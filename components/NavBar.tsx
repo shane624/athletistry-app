@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase-browser";
 import GlobalSearch from "@/components/GlobalSearch";
 import BottomTabBar from "@/components/BottomTabBar";
 import SideNav from "@/components/SideNav";
+import PageTour from "@/components/PageTour";
+import TourButton from "@/components/TourButton";
 
 type Item = { href: string; label: string };
 type Group = { title: string; items: Item[] };
@@ -127,7 +129,11 @@ export default function NavBar() {
                   </div>
                 </div>
               ))}
-              <div className="border-t border-white/10 mt-2 pt-2">
+              <div className="border-t border-white/10 mt-2 pt-2 space-y-1">
+                <button onClick={() => { setOpen(false); setTimeout(() => window.dispatchEvent(new Event("athl:start-tour")), 250); }}
+                  className="px-3 py-2.5 rounded-md text-sm text-left text-teal hover:bg-white/10 w-full inline-flex items-center gap-2">
+                  ✨ Show me around this page
+                </button>
                 <button onClick={signOut}
                   className="px-3 py-2.5 rounded-md text-sm text-left text-white/70 hover:bg-white/10 w-full">
                   Sign out
@@ -138,6 +144,7 @@ export default function NavBar() {
         </>
       )}
     </header>
+    <PageTour />
     <BottomTabBar />
     </>
   );

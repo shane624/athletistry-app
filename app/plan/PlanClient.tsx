@@ -183,7 +183,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
     <div className="mt-5">
       <form onSubmit={go} className="card p-5 space-y-5">
         {/* event */}
-        <div className="flex flex-wrap gap-4 items-end">
+        <div data-tour="event" className="flex flex-wrap gap-4 items-end">
           <div>
             <p className="text-sm font-medium text-navy">Event type</p>
             <div className="flex gap-1.5 mt-1 flex-wrap">
@@ -202,7 +202,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
         </div>
 
         {/* class schedule — Mon–Sun */}
-        <div>
+        <div data-tour="schedule">
           <p className="eyebrow mb-2">Your weekly class schedule</p>
           <p className="text-grey text-sm mb-3">
             Add each class and rehearsal on the day you do it, with its length and how hard it usually is. This stays constant — we plan your gym training around it.
@@ -285,7 +285,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
         </div>
 
         {/* event demand */}
-        <div>
+        <div data-tour="demand">
           <p className="eyebrow mb-2">What does the event demand?</p>
           <p className="text-grey text-sm mb-3">This shapes the conditioning we schedule, and which areas the strength work biases toward.</p>
 
@@ -350,7 +350,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           )}
         </div>
 
-        <button className="btn-primary" disabled={!date || classLoad === 0}>Build my plan</button>
+        <button data-tour="build" className="btn-primary" disabled={!date || classLoad === 0}>Build my plan</button>
       </form>
 
       {plan && (

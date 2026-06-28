@@ -82,7 +82,7 @@ export default function BalletClient() {
   return (
     <div className="mt-5">
       {/* move picker */}
-      <p className="eyebrow mb-2">Pick a move</p>
+      <p data-tour="move" className="eyebrow mb-2">Pick a move</p>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {BALLET_MOVES.map((m) => (
           <button
@@ -98,7 +98,7 @@ export default function BalletClient() {
       </div>
 
       {/* filters */}
-      <div className="flex flex-wrap gap-4 mt-4 items-end">
+      <div data-tour="ballet-filters" className="flex flex-wrap gap-4 mt-4 items-end">
         <div>
           <p className="text-sm font-medium text-navy">Level</p>
           <div className="flex gap-1.5 mt-1 flex-wrap">

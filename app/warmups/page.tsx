@@ -16,7 +16,7 @@ export default function WarmupsPage() {
       <main className="max-w-3xl mx-auto px-4 py-6">
         <PageHeader icon="warmup" eyebrow="Prepare your body" title="Warm-Ups"
           subtitle="Before training, class, a performance or an exam. Pick the level that suits you." />
-        <div className="grid sm:grid-cols-2 gap-4 mt-5">
+        <div data-tour="warmup-pick" className="grid sm:grid-cols-2 gap-4 mt-5">
           {WARMUPS.map((w) => (
             <Link key={w.slug} href={`/warmups/${w.slug}`}
               className="card card-hover overflow-hidden block border-2 border-line hover:border-teal transition animate-in">
