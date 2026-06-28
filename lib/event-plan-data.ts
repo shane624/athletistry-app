@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase-server";
+import { cookies } from "next/headers";
 import type { ExerciseRow } from "@/lib/types";
 
 export interface EventPlanToday {
@@ -13,7 +14,14 @@ export interface EventPlanToday {
   weekIndex: number;
 }
 
+// The dancer's LOCAL date — read from a cookie the client sets (LocalDateCookie)
+// so we don't use the server's UTC clock. Falls back to UTC if the cookie isn't
+// there yet (first paint before the client runs).
 function todayISO(): string {
+  try {
+    const c = cookies().get("athl_local_date")?.value;
+    if (c && /^\d{4}-\d{2}-\d{2}$/.test(c)) return c;
+  } catch {}
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }

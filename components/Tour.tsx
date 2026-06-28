@@ -10,8 +10,9 @@ export type TourStep = { target: string; title: string; body: string };
 
 type Rect = { top: number; left: number; width: number; height: number };
 
-export default function Tour({ steps }: { steps: TourStep[] }) {
+export default function Tour({ steps: allSteps }: { steps: TourStep[] }) {
   const [active, setActive] = useState(false);
+  const [steps, setSteps] = useState<TourStep[]>(allSteps);
   const [i, setI] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
 
@@ -30,13 +31,20 @@ export default function Tour({ steps }: { steps: TourStep[] }) {
   }, [i, steps]);
 
   useEffect(() => {
-    function start() { setI(0); setActive(true); }
+    function start() {
+      // only include steps whose target actually exists on this screen
+      const present = allSteps.filter((s) => document.querySelector(`[data-tour="${s.target}"]`));
+      setSteps(present.length ? present : allSteps);
+      setI(0);
+      setActive(true);
+    }
     window.addEventListener("athl:start-tour", start);
     // auto-start if arrived with ?tour=1 (e.g. from the guide)
     if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tour") === "1") {
-      setTimeout(start, 500);
+      setTimeout(start, 600);
     }
     return () => window.removeEventListener("athl:start-tour", start);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

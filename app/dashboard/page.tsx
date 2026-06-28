@@ -12,6 +12,7 @@ import EventPlanDay from "@/components/EventPlanDay";
 import DashboardTour from "@/components/DashboardTour";
 import TourButton from "@/components/TourButton";
 import WeekdaySync from "@/components/WeekdaySync";
+import LocalDateCookie from "@/components/LocalDateCookie";
 import { getToday, getOnboarding } from "@/lib/data";
 import { getEventPlanToday, getEventPlanUpcoming } from "@/lib/event-plan-data";
 import { getDisplayName } from "@/lib/profile-data";
@@ -39,10 +40,13 @@ export default async function Dashboard() {
       <div className="min-h-screen">
         <NavBar />
         <main className="max-w-4xl mx-auto px-4 py-6">
-          <div className="mb-4 animate-in">
+          <LocalDateCookie />
+          <DashboardTour />
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-4 animate-in">
             <Greeting name={displayName} programName={eventPlan.label ?? "Event plan"} />
+            <TourButton />
           </div>
-          <AchievementStrip />
+          <div data-tour="ring"><AchievementStrip /></div>
           <EventPlanDay plan={eventPlan} upcoming={upcoming.days} />
         </main>
       </div>
@@ -68,6 +72,7 @@ export default async function Dashboard() {
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-4xl mx-auto px-4 py-6">
+        <LocalDateCookie />
         <DashboardTour />
         {today.scheduling === "weekday" && (
           <WeekdaySync currentDay={today.dayIndex} dayCount={today.dayCount} />
