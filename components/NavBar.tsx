@@ -18,6 +18,7 @@ const GROUPS: Group[] = [
     items: [
       { href: "/dashboard", label: "Today" },
       { href: "/programs", label: "Programs" },
+      { href: "/plan", label: "Training Plan Builder" },
       { href: "/generate", label: "Practice Generator" },
       { href: "/circuit", label: "Circuit Training" },
       { href: "/ballet", label: "Train for Ballet" },
@@ -31,7 +32,6 @@ const GROUPS: Group[] = [
     items: [
       { href: "/progress", label: "Progress" },
       { href: "/load", label: "Training Calendar" },
-      { href: "/plan", label: "Event Planner" },
       { href: "/achievements", label: "Achievements" },
     ],
   },

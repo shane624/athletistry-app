@@ -27,7 +27,7 @@ const PAGES: SearchItem[] = [
   { kind: "page", title: "Warm-Ups", subtitle: "Gentle & Winning warm-ups", href: "/warmups", keywords: "warm up pre class performance exam rehearsal" },
   { kind: "page", title: "Progress", subtitle: "Lifts & muscle-group balance", href: "/progress", keywords: "charts volume muscle group tracking" },
   { kind: "page", title: "Training Calendar", subtitle: "Log classes & training load", href: "/load", keywords: "calendar load trimp rpe schedule class jazz tap rehearsal taper" },
-  { kind: "page", title: "Event Planner", subtitle: "Plan around a performance", href: "/plan", keywords: "competition exam taper performance schedule" },
+  { kind: "page", title: "Training Plan Builder", subtitle: "A dated plan for your event", href: "/plan", keywords: "event planner competition exam taper performance schedule periodized build" },
   { kind: "page", title: "Achievements", subtitle: "Ranks, streaks & badges", href: "/achievements", keywords: "rank level streak ring badge etoile" },
   { kind: "page", title: "Library", subtitle: "Every exercise & video", href: "/exercises", keywords: "exercises catalogue demo video" },
   { kind: "page", title: "How to Use the App", subtitle: "Beginner guide", href: "/guide", keywords: "help guide getting started beginner how to" },

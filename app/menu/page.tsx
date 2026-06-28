@@ -10,6 +10,7 @@ const GROUPS: { title: string; items: { href: string; label: string }[] }[] = [
     items: [
       { href: "/dashboard", label: "Today" },
       { href: "/programs", label: "Programs" },
+      { href: "/plan", label: "Training Plan Builder" },
       { href: "/generate", label: "Practice Generator" },
       { href: "/circuit", label: "Circuit Training" },
       { href: "/ballet", label: "Train for Ballet" },
@@ -23,7 +24,6 @@ const GROUPS: { title: string; items: { href: string; label: string }[] }[] = [
     items: [
       { href: "/progress", label: "Progress" },
       { href: "/load", label: "Training Calendar" },
-      { href: "/plan", label: "Event Planner" },
       { href: "/achievements", label: "Achievements" },
     ],
   },

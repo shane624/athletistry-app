@@ -11,6 +11,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/dashboard", label: "Today", icon: "home" },
       { href: "/programs", label: "Programs", icon: "grid" },
+      { href: "/plan", label: "Training Plan Builder", icon: "target" },
       { href: "/generate", label: "Practice Generator", icon: "bolt" },
       { href: "/circuit", label: "Circuit Training", icon: "circuit" },
       { href: "/ballet", label: "Train for Ballet", icon: "ballet" },
@@ -24,7 +25,6 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/progress", label: "Progress", icon: "chart" },
       { href: "/load", label: "Training Calendar", icon: "calendar" },
-      { href: "/plan", label: "Event Planner", icon: "target" },
       { href: "/achievements", label: "Achievements", icon: "trophy" },
     ],
   },

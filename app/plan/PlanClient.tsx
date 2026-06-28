@@ -37,9 +37,12 @@ const RPE_LABEL: Record<number, string> = {
 };
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
-type ClassEntry = { id: number; mins: number; rpe: number };
+type ClassEntry = { id: number; name: string; mins: number; rpe: number };
 type Schedule = Record<string, ClassEntry[]>;
 let CLASS_ID = 1;
+
+// common class types for quick naming
+const CLASS_NAMES = ["Ballet", "Pointe", "Jazz", "Contemporary", "Tap", "Rehearsal", "Conditioning"];
 
 const FOCUS_OPTS: { id: DemandFocus; label: string }[] = [
   { id: "turnout", label: "Turnout & hips" },
@@ -104,7 +107,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
         const key = `${wd}-${c.mins}-${c.rpe}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        next[DAYS[wd]].push({ id: CLASS_ID++, mins: c.mins, rpe: c.rpe });
+        next[DAYS[wd]].push({ id: CLASS_ID++, name: "Class", mins: c.mins, rpe: c.rpe });
       }
       return DAYS.some((d) => next[d].length) ? next : prev;
     });
@@ -116,7 +119,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
   }
 
   function addClass(day: string) {
-    setSched((s) => ({ ...s, [day]: [...s[day], { id: CLASS_ID++, mins: 90, rpe: 6 }] }));
+    setSched((s) => ({ ...s, [day]: [...s[day], { id: CLASS_ID++, name: "Ballet", mins: 90, rpe: 6 }] }));
   }
   function removeClass(day: string, id: number) {
     setSched((s) => ({ ...s, [day]: s[day].filter((c) => c.id !== id) }));
@@ -132,8 +135,10 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
   // a sensible week-1 gym starting load: ~25 min × RPE6 per chosen gym day
   const gymStart = gymDays * 25 * 6;
 
-  // which weekdays (0=Mon) the dancer has class
+  // which weekdays (0=Mon) the dancer has class, and the class names per weekday
   const classWeekdays = DAYS.map((d, i) => (sched[d].length ? i : -1)).filter((i) => i >= 0);
+  const classNamesByWeekday: Record<number, string[]> = {};
+  DAYS.forEach((d, i) => { if (sched[d].length) classNamesByWeekday[i] = sched[d].map((c) => c.name.trim() || "Class"); });
 
   function go(e: React.FormEvent) {
     e.preventDefault();
@@ -142,7 +147,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
     setPlan(p);
     if (p) {
       const demand: PlanDemand = { stamina, explosive, focus: [...focus] };
-      setSchedule(buildDailySchedule(p, classWeekdays, gymDays, demand));
+      setSchedule(buildDailySchedule(p, classWeekdays, gymDays, demand, new Date(), classNamesByWeekday));
     } else {
       setSchedule(null);
     }
@@ -197,6 +202,9 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
             Add each class and rehearsal on the day you do it, with its length and how hard it usually is. This stays constant — we plan your gym training around it.
             {loggedClasses.length > 0 && classCount > 0 && <span className="text-tealdark"> Pre-filled from your logged classes — adjust as needed.</span>}
           </p>
+          <datalist id="class-names">
+            {CLASS_NAMES.map((n) => <option key={n} value={n} />)}
+          </datalist>
           <div className="space-y-2">
             {DAYS.map((day) => (
               <div key={day} className="rounded-xl border border-line p-3">
@@ -211,16 +219,22 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                 ) : (
                   <div className="mt-2 space-y-2">
                     {sched[day].map((c) => (
-                      <div key={c.id} className="flex items-center gap-2 flex-wrap bg-light rounded-lg px-2.5 py-2">
-                        <input className="input w-16 py-1" inputMode="numeric" value={c.mins}
-                          onChange={(e) => updateClass(day, c.id, { mins: Math.max(15, Math.min(300, Number(e.target.value.replace(/[^0-9]/g, "")) || 0)) })} />
-                        <span className="text-grey text-xs">min</span>
-                        <span className="text-grey text-xs ml-1">RPE</span>
-                        <input type="range" min={4} max={8} value={c.rpe}
-                          onChange={(e) => updateClass(day, c.id, { rpe: Number(e.target.value) })} className="accent-teal w-24" />
-                        <span className="text-navy text-sm font-semibold w-20">{c.rpe} · {RPE_LABEL[c.rpe] ?? ""}</span>
-                        <span className="text-grey text-xs ml-auto">{(c.mins * c.rpe).toLocaleString()} TRIMP</span>
-                        <button type="button" onClick={() => removeClass(day, c.id)} className="text-grey hover:text-red-600 text-sm">✕</button>
+                      <div key={c.id} className="bg-light rounded-lg px-2.5 py-2">
+                        <div className="flex items-center gap-2">
+                          <input className="input flex-1 py-1" list="class-names" placeholder="Class name (e.g. Ballet)"
+                            value={c.name} onChange={(e) => updateClass(day, c.id, { name: e.target.value })} />
+                          <input className="input w-16 py-1" inputMode="numeric" value={c.mins}
+                            onChange={(e) => updateClass(day, c.id, { mins: Math.max(15, Math.min(300, Number(e.target.value.replace(/[^0-9]/g, "")) || 0)) })} />
+                          <span className="text-grey text-xs">min</span>
+                          <button type="button" onClick={() => removeClass(day, c.id)} className="text-grey hover:text-red-600 text-sm">✕</button>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-grey text-xs">RPE</span>
+                          <input type="range" min={4} max={8} value={c.rpe}
+                            onChange={(e) => updateClass(day, c.id, { rpe: Number(e.target.value) })} className="accent-teal flex-1 max-w-[140px]" />
+                          <span className="text-navy text-xs font-semibold w-20">{c.rpe} · {RPE_LABEL[c.rpe] ?? ""}</span>
+                          <span className="text-grey text-xs ml-auto">{(c.mins * c.rpe).toLocaleString()} TRIMP</span>
+                        </div>
                       </div>
                     ))}
                   </div>

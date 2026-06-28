@@ -205,7 +205,8 @@ export function buildDailySchedule(
   classWeekdays: number[],
   gymDays: number,
   demand: PlanDemand,
-  today: Date = new Date()
+  today: Date = new Date(),
+  classNamesByWeekday?: Record<number, string[]>
 ): PlanDay[] {
   if (plan.weeksOut === 0) return [];
   const focusText = demand.focus.length
@@ -283,7 +284,8 @@ export function buildDailySchedule(
       }
     } else if (isClassDay && tone !== "event") {
       type = "rest";
-      title = "Class day — no extra gym";
+      const names = classNamesByWeekday?.[wd]?.filter(Boolean);
+      title = names && names.length ? `Class day — ${names.join(", ")}` : "Class day — no extra gym";
       detail = "Your class is the training today. Warm up first, and treat it as the session.";
     } else {
       // genuine rest day with active-recovery ideas
