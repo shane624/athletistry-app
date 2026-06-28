@@ -169,6 +169,7 @@ export default async function Dashboard() {
               dayIndex={today.dayIndex}
               timed={today.mode === "timed"}
               initialLogs={today.logs[ex.id] ?? {}}
+              lastLog={today.lastLogs?.[ex.id]}
             />
           ))}
         </div>

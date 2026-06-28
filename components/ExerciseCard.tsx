@@ -16,9 +16,11 @@ interface Props {
   dayIndex: number;
   timed?: boolean;
   initialLogs: Record<number, { weight: number; reps: number }>;
+  /** Most recent log of this exercise from an earlier session (for pre-fill). */
+  lastLog?: { weight: number; reps: number };
 }
 
-export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, timed, initialLogs }: Props) {
+export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, timed, initialLogs, lastLog }: Props) {
   // ---------- timed mode (kids): work timer + done check, no weights ----------
   if (timed) {
     return <TimedCard exercise={exercise} rx={rx} programId={programId} week={week} dayIndex={dayIndex} initialDone={!!initialLogs[1]} />;
@@ -30,12 +32,16 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
   }
 
   const sets = Array.from({ length: rx.sets }, (_, i) => i + 1);
+  // pre-fill: today's log if present, else last session's weight/reps (so the
+  // dancer just confirms instead of typing).
+  const preW = lastLog?.weight != null ? String(lastLog.weight) : "";
+  const preR = lastLog?.reps != null ? String(lastLog.reps) : "";
   const [vals, setVals] = useState<Record<number, { weight: string; reps: string }>>(() => {
     const init: Record<number, { weight: string; reps: string }> = {};
     for (const s of sets) {
       init[s] = {
-        weight: initialLogs[s]?.weight != null ? String(initialLogs[s].weight) : "",
-        reps: initialLogs[s]?.reps != null ? String(initialLogs[s].reps) : "",
+        weight: initialLogs[s]?.weight != null ? String(initialLogs[s].weight) : preW,
+        reps: initialLogs[s]?.reps != null ? String(initialLogs[s].reps) : preR,
       };
     }
     return init;
@@ -93,6 +99,12 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
     <div className="card card-hover p-4 animate-in">
       <CardHeader exercise={exercise} rx={rx} />
       <div className="mt-3"><VideoEmbed exercise={exercise} /></div>
+
+      {lastLog && !initialLogs[1] && (
+        <p className="text-grey text-xs mt-2">
+          Last time: <b className="text-navy">{lastLog.weight ? `${lastLog.weight}kg × ` : ""}{lastLog.reps} reps</b> — pre-filled, just confirm or adjust.
+        </p>
+      )}
 
       <OneTapLog
         sets={sets}

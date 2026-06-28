@@ -19,4 +19,6 @@ export interface TodayData {
   exercises: ExerciseRow[];
   // exercise id -> set_number -> {weight, reps}
   logs: Record<number, Record<number, { weight: number; reps: number }>>;
+  // exercise id -> last logged {weight, reps} from an earlier session (prefill)
+  lastLogs?: Record<number, { weight: number; reps: number }>;
 }

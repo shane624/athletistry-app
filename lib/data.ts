@@ -82,8 +82,12 @@ export async function getToday(): Promise<TodayData & { programId: string; progr
   const rx: ResolvedRx = resolveRx(program, week);
 
   const logs: TodayData["logs"] = {};
+  // last logged weight/reps per exercise (from an EARLIER session) so the
+  // inputs open pre-filled and the dancer just confirms.
+  const lastLogs: Record<number, { weight: number; reps: number }> = {};
   if (st.user && exercises.length) {
     const supabase = createClient();
+    const exIds = exercises.map((e) => e.id);
     const { data: setRows } = await supabase
       .from("set_logs")
       .select("exercise_id,set_number,weight,reps")
@@ -91,15 +95,30 @@ export async function getToday(): Promise<TodayData & { programId: string; progr
       .eq("program_id", program.id)
       .eq("week", week)
       .eq("day_index", dayIndex)
-      .in("exercise_id", exercises.map((e) => e.id));
+      .in("exercise_id", exIds);
     for (const r of setRows ?? []) {
       logs[r.exercise_id] ??= {};
       logs[r.exercise_id][r.set_number] = { weight: Number(r.weight), reps: r.reps };
     }
+
+    // most-recent prior log per exercise (newest first; keep the first seen)
+    const { data: priorRows } = await supabase
+      .from("set_logs")
+      .select("exercise_id,weight,reps,logged_at")
+      .eq("user_id", st.user.id)
+      .eq("program_id", program.id)
+      .in("exercise_id", exIds)
+      .order("logged_at", { ascending: false })
+      .limit(400);
+    for (const r of priorRows ?? []) {
+      if (lastLogs[r.exercise_id]) continue;          // already have the newest
+      if (logs[r.exercise_id]) continue;              // already logged today — no need to prefill
+      lastLogs[r.exercise_id] = { weight: Number(r.weight), reps: r.reps };
+    }
   }
 
   return {
-    week, dayIndex, dayTitle, phase, principle, rx: rx as any, exercises, logs,
+    week, dayIndex, dayTitle, phase, principle, rx: rx as any, exercises, logs, lastLogs,
     programId: program.id, programName: program.name, programType: program.type,
     mode: program.mode, dayCount, scheduling: program.scheduling, isCustom,
   };
