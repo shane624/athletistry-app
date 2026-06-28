@@ -20,6 +20,9 @@ export default function GuidePage() {
             keeps track of everything for you. Go at your own pace — there&apos;s no rush, and nothing
             here is a test.
           </p>
+          <a href="/dashboard?tour=1" className="btn-primary mt-4 inline-flex items-center gap-2 text-sm py-2">
+            ✨ Take the interactive walkthrough
+          </a>
         </div>
 
         {/* contents */}

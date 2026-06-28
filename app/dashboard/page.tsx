@@ -9,6 +9,9 @@ import WarmUp from "@/components/WarmUp";
 import Greeting from "@/components/Greeting";
 import CompleteWorkout from "@/components/CompleteWorkout";
 import EventPlanDay from "@/components/EventPlanDay";
+import DashboardTour from "@/components/DashboardTour";
+import TourButton from "@/components/TourButton";
+import WeekdaySync from "@/components/WeekdaySync";
 import { getToday, getOnboarding } from "@/lib/data";
 import { getEventPlanToday, getEventPlanUpcoming } from "@/lib/event-plan-data";
 import { getDisplayName } from "@/lib/profile-data";
@@ -65,15 +68,25 @@ export default async function Dashboard() {
     <div className="min-h-screen">
       <NavBar />
       <main className="max-w-4xl mx-auto px-4 py-6">
+        <DashboardTour />
+        {today.scheduling === "weekday" && (
+          <WeekdaySync currentDay={today.dayIndex} dayCount={today.dayCount} />
+        )}
+
         {/* greeting + program row */}
         <div className="flex items-end justify-between flex-wrap gap-2 mb-4 animate-in">
           <Greeting name={displayName} programName={today.programName} />
-          <Link href="/programs" className="text-teal text-sm font-semibold whitespace-nowrap hover:text-tealdark">
-            Switch program →
-          </Link>
+          <div className="flex items-center gap-4 whitespace-nowrap">
+            <TourButton />
+            <Link href="/programs" className="text-teal text-sm font-semibold hover:text-tealdark">
+              Switch program →
+            </Link>
+          </div>
         </div>
 
-        <AchievementStrip />
+        <div data-tour="ring">
+          <AchievementStrip />
+        </div>
 
         {assessment.status !== "no-data" && (
           <Link href="/load" className="card card-hover block p-4 mb-5 animate-in">
@@ -90,7 +103,7 @@ export default async function Dashboard() {
         <DailyQuote />
 
         {/* today's session header */}
-        <div className={`${blockColor} text-white p-5 animate-in`} style={{ borderRadius: "18px", boxShadow: "0 12px 34px rgba(31,42,68,.2)" }}>
+        <div data-tour="today-session" className={`${blockColor} text-white p-5 animate-in`} style={{ borderRadius: "18px", boxShadow: "0 12px 34px rgba(31,42,68,.2)" }}>
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <p className="text-white/75 text-xs font-semibold tracking-wide uppercase">
@@ -152,13 +165,13 @@ export default async function Dashboard() {
         {totalEx > 0 && (
           <>
             <p id="today-exercises" className="eyebrow mt-6 mb-3 scroll-mt-16">Warm-up first</p>
-            <WarmUp />
+            <div data-tour="warmup"><WarmUp /></div>
             <EquipmentNeeded names={today.exercises.map((ex) => ex.name)} className="mb-4" />
             <p className="eyebrow mb-3">Today&apos;s exercises</p>
           </>
         )}
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <div data-tour="log" className="grid md:grid-cols-2 gap-4">
           {today.exercises.map((ex) => (
             <ExerciseCard
               key={ex.id}

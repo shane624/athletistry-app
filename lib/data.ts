@@ -68,8 +68,12 @@ export async function getToday(): Promise<TodayData & { programId: string; progr
     exercises = sel?.exercises ?? [];
     dayTitle = `My Routine — Day ${dayIndex + 1}`;
   } else {
+    // Weekday programs default to the server's weekday, but a client-side
+    // WeekdaySync corrects this to the dancer's LOCAL day via selected_day.
+    // Prefer selected_day when it's been set (>0 or explicitly synced); fall
+    // back to the server weekday for the very first load.
     dayIndex = program.scheduling === "weekday"
-      ? weekdayDayIndex()
+      ? Math.min(st.selectedDay ?? weekdayDayIndex(), program.days.length - 1)
       : Math.min(st.selectedDay, program.days.length - 1);
     const day = program.days[dayIndex];
     dayTitle = day.title;

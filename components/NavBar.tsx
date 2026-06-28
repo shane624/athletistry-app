@@ -91,7 +91,7 @@ export default function NavBar() {
         <div className="h-12 flex items-center gap-2">
           <Link href="/dashboard" className="font-bold tracking-widest text-teal text-sm shrink-0 lg:hidden">ATHLETISTRY</Link>
 
-          <GlobalSearch />
+          <span data-tour="menu" className="flex-1 min-w-0 flex"><GlobalSearch /></span>
 
           <button
             onClick={() => setOpen((v) => !v)}
