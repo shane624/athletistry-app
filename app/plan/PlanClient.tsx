@@ -202,12 +202,14 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
         </div>
 
         {/* class schedule — Mon–Sun */}
-        <div data-tour="schedule">
-          <p className="eyebrow mb-2">Your weekly class schedule</p>
-          <p className="text-grey text-sm mb-3">
-            Add each class and rehearsal on the day you do it, with its length and how hard it usually is. This stays constant — we plan your gym training around it.
-            {loggedClasses.length > 0 && classCount > 0 && <span className="text-tealdark"> Pre-filled from your logged classes — adjust as needed.</span>}
-          </p>
+        <div>
+          <div data-tour="schedule">
+            <p className="eyebrow mb-2">Your weekly class schedule</p>
+            <p className="text-grey text-sm mb-3">
+              Add each class and rehearsal on the day you do it, with its length and how hard it usually is. This stays constant — we plan your gym training around it.
+              {loggedClasses.length > 0 && classCount > 0 && <span className="text-tealdark"> Pre-filled from your logged classes — adjust as needed.</span>}
+            </p>
+          </div>
           <div className="space-y-2">
             {DAYS.map((day) => (
               <div key={day} className="rounded-xl border border-line p-3">
