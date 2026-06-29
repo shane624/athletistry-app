@@ -13,7 +13,8 @@ import TourButton from "@/components/TourButton";
 import WeekdaySync from "@/components/WeekdaySync";
 import LocalDateCookie from "@/components/LocalDateCookie";
 import { getToday, getOnboarding } from "@/lib/data";
-import { getEventPlanToday, getEventPlanUpcoming } from "@/lib/event-plan-data";
+import { getEventPlanToday, getEventPlanUpcoming, getPausedEventPlan } from "@/lib/event-plan-data";
+import RejoinEventPlan from "@/components/RejoinEventPlan";
 import { getDisplayName } from "@/lib/profile-data";
 import { getAchievements } from "@/lib/achievements-data";
 import { getAssessment } from "@/lib/load-data";
@@ -54,6 +55,7 @@ export default async function Dashboard() {
   const today = await getToday();
   const ach = await getAchievements();
   const { assessment } = await getAssessment();
+  const paused = await getPausedEventPlan();
   const blockColor =
     today.rx.block === "hypertrophy" ? "grad-navy"
     : today.rx.block === "strength" ? "grad-brand"
@@ -89,6 +91,8 @@ export default async function Dashboard() {
         <div data-tour="ring">
           <AchievementStrip />
         </div>
+
+        {paused.paused && <RejoinEventPlan label={paused.label} daysLeft={paused.daysLeft} />}
 
         {assessment.status !== "no-data" && (
           <Link href="/load" className="card card-hover block p-4 mb-5 animate-in">

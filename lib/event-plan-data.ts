@@ -55,6 +55,29 @@ function todayISO(): string {
  * (session or rest). Returns { active: false } otherwise so the dashboard
  * falls back to the normal program.
  */
+/**
+ * Is there a plan the dancer has paused (event_plan_active = false) that still
+ * has days left to run? Used to offer a "Rejoin your plan" prompt.
+ */
+export async function getPausedEventPlan(): Promise<{ paused: boolean; label: string | null; daysLeft: number }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { paused: false, label: null, daysLeft: 0 };
+  const { data: state } = await supabase
+    .from("user_program_state")
+    .select("event_plan_active, event_plan_label")
+    .eq("user_id", user.id)
+    .single();
+  if (state?.event_plan_active) return { paused: false, label: null, daysLeft: 0 };
+  const { count } = await supabase
+    .from("event_plan_days")
+    .select("plan_date", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("plan_date", todayISO());
+  if (!count) return { paused: false, label: null, daysLeft: 0 };
+  return { paused: true, label: state?.event_plan_label ?? null, daysLeft: count };
+}
+
 export async function getEventPlanToday(): Promise<EventPlanToday | { active: false }> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();

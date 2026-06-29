@@ -9,7 +9,7 @@ export default function ClearEventPlan() {
   const [busy, setBusy] = useState(false);
 
   async function exit() {
-    if (!confirm("Stop following the event plan and go back to your regular program?")) return;
+    if (!confirm("Pause this plan and go back to your regular program? You can rejoin it any time from Today or the Training Plan Builder.")) return;
     setBusy(true);
     await clearEventPlan();
     router.refresh();

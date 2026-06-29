@@ -2,6 +2,7 @@ import Link from "next/link";
 import Icon, { type IconName } from "@/components/Icon";
 import ClearEventPlan from "@/components/ClearEventPlan";
 import ExerciseCard from "@/components/ExerciseCard";
+import PlanDayEdit from "@/components/PlanDayEdit";
 import { EVENT_PLAN_PROGRAM_ID } from "@/lib/event-plan-data";
 import type { EventPlanToday, PlanUpcomingDay } from "@/lib/event-plan-data";
 
@@ -85,6 +86,7 @@ export default function EventPlanDay({ plan, upcoming = [] }: { plan: EventPlanT
               />
             ))}
           </div>
+          <PlanDayEdit date={plan.date} />
         </>
       )}
 

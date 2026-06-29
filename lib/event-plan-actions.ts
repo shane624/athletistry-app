@@ -81,12 +81,85 @@ export async function saveEventPlan(input: {
   return { ok: true };
 }
 
-/** Turn the event plan off (back to the regular program). */
+function localTodayISO(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/**
+ * Pause the event plan (back to the regular program) WITHOUT deleting it, so the
+ * dancer can rejoin later. We keep the label so the rejoin prompt can name it.
+ */
 export async function clearEventPlan(): Promise<{ ok: boolean }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false };
+  await supabase.from("user_program_state").update({ event_plan_active: false }).eq("user_id", user.id);
+  return { ok: true };
+}
+
+/** Rejoin a previously paused plan, if it still has days left to run. */
+export async function reactivateEventPlan(): Promise<{ ok: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const { count } = await supabase
+    .from("event_plan_days")
+    .select("plan_date", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("plan_date", localTodayISO());
+  if (!count) return { ok: false, error: "No upcoming plan days to rejoin." };
+  await supabase.from("user_program_state").update({ event_plan_active: true }).eq("user_id", user.id);
+  return { ok: true };
+}
+
+/** Permanently delete the saved plan (used when building a fresh one, or on request). */
+export async function deleteEventPlan(): Promise<{ ok: boolean }> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false };
   await supabase.from("event_plan_days").delete().eq("user_id", user.id);
   await supabase.from("user_program_state").update({ event_plan_active: false, event_plan_label: null }).eq("user_id", user.id);
   return { ok: true };
+}
+
+/** Reroll the exercises for one plan day (same style/level as originally built). */
+export async function regeneratePlanDay(date: string, maxLevel = 4, equipment?: string[]): Promise<{ ok: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const { data: row } = await supabase
+    .from("event_plan_days")
+    .select("block, session_type")
+    .eq("user_id", user.id).eq("plan_date", date).single();
+  if (!row) return { ok: false, error: "No plan day on that date." };
+  const style = (row.block as WorkoutStyle | null) ?? STYLE_FOR[row.session_type];
+  if (!style) return { ok: false, error: "This day has no exercise workout to swap." };
+  const slots = await generateWorkout(style, 1, maxLevel, equipment);
+  const ids = slots.flatMap((s) => s.exercises.map((e) => e.id));
+  const { error } = await supabase.from("event_plan_days")
+    .update({ exercise_ids: ids }).eq("user_id", user.id).eq("plan_date", date);
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+/** Append one or more extra exercises to a plan day's workout. */
+export async function addExercisesToPlanDay(date: string, count = 1, maxLevel = 4, equipment?: string[]): Promise<{ ok: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const { data: row } = await supabase
+    .from("event_plan_days")
+    .select("block, session_type, exercise_ids")
+    .eq("user_id", user.id).eq("plan_date", date).single();
+  if (!row) return { ok: false, error: "No plan day on that date." };
+  const style = (row.block as WorkoutStyle | null) ?? STYLE_FOR[row.session_type];
+  if (!style) return { ok: false, error: "This day has no exercise workout to add to." };
+  const existing: number[] = row.exercise_ids ?? [];
+  const slots = await generateWorkout(style, 1, maxLevel, equipment);
+  const candidates = slots.flatMap((s) => s.exercises.map((e) => e.id)).filter((id) => !existing.includes(id));
+  const additions = candidates.slice(0, Math.max(1, count));
+  if (!additions.length) return { ok: false, error: "No new exercises available to add." };
+  const { error } = await supabase.from("event_plan_days")
+    .update({ exercise_ids: [...existing, ...additions] }).eq("user_id", user.id).eq("plan_date", date);
+  return error ? { ok: false, error: error.message } : { ok: true };
 }
