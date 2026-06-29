@@ -10,6 +10,17 @@ export type TourStep = { target: string; title: string; body: string };
 
 type Rect = { top: number; left: number; width: number; height: number };
 
+// Clamp a target's bounding box to the visible viewport so a target taller than
+// the screen still produces a sensible spotlight (rather than boxing everything).
+function clampToViewport(r: DOMRect): Rect {
+  const m = 8; // keep a small margin from the very edges
+  const top = Math.max(m, r.top);
+  const bottom = Math.min(window.innerHeight - m, r.bottom);
+  const left = Math.max(m, r.left);
+  const right = Math.min(window.innerWidth - m, r.right);
+  return { top, left, width: Math.max(0, right - left), height: Math.max(0, bottom - top) };
+}
+
 export default function Tour({ steps: allSteps }: { steps: TourStep[] }) {
   const [active, setActive] = useState(false);
   const [steps, setSteps] = useState<TourStep[]>(allSteps);
@@ -23,8 +34,7 @@ export default function Tour({ steps: allSteps }: { steps: TourStep[] }) {
     if (!step) return;
     const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
     if (!el) { setRect(null); return; }
-    const r = el.getBoundingClientRect();
-    setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+    setRect(clampToViewport(el.getBoundingClientRect()));
   }, [i, steps]);
 
   useEffect(() => {
@@ -52,12 +62,15 @@ export default function Tour({ steps: allSteps }: { steps: TourStep[] }) {
     if (!step) return;
     const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
     if (!el) { setRect(null); return; }
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    // tall targets: scroll so their TOP is near the top of the screen; otherwise
+    // centre them. Either way we clamp the spotlight to the viewport.
+    const tall = el.getBoundingClientRect().height > window.innerHeight * 0.8;
+    el.scrollIntoView({ behavior: "smooth", block: tall ? "start" : "center" });
 
     let last = -1, stable = 0, frames = 0;
     const id = window.setInterval(() => {
       const r = el.getBoundingClientRect();
-      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+      setRect(clampToViewport(r));
       if (Math.abs(r.top - last) < 1) stable++; else stable = 0;
       last = r.top;
       // stop once the position is steady for a few ticks, or after ~1.5s
