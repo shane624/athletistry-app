@@ -16,18 +16,15 @@ export default function Tour({ steps: allSteps }: { steps: TourStep[] }) {
   const [i, setI] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
 
-  // measure the current target (and scroll it into view)
-  const measure = useCallback(() => {
+  // read the target's current position (no scrolling) — used by the live
+  // scroll/resize listeners so the spotlight tracks the element as the page moves
+  const remeasure = useCallback(() => {
     const step = steps[i];
     if (!step) return;
     const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
     if (!el) { setRect(null); return; }
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-    // measure after the scroll settles
-    setTimeout(() => {
-      const r = el.getBoundingClientRect();
-      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
-    }, 320);
+    const r = el.getBoundingClientRect();
+    setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
   }, [i, steps]);
 
   useEffect(() => {
@@ -47,14 +44,36 @@ export default function Tour({ steps: allSteps }: { steps: TourStep[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // when the step changes: scroll the target into view, then lock onto it once
+  // the smooth-scroll has actually settled (poll until the rect stops moving).
   useEffect(() => {
     if (!active) return;
-    measure();
-    const onResize = () => measure();
-    window.addEventListener("resize", onResize);
-    window.addEventListener("scroll", onResize, true);
-    return () => { window.removeEventListener("resize", onResize); window.removeEventListener("scroll", onResize, true); };
-  }, [active, i, measure]);
+    const step = steps[i];
+    if (!step) return;
+    const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
+    if (!el) { setRect(null); return; }
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    let last = -1, stable = 0, frames = 0;
+    const id = window.setInterval(() => {
+      const r = el.getBoundingClientRect();
+      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+      if (Math.abs(r.top - last) < 1) stable++; else stable = 0;
+      last = r.top;
+      // stop once the position is steady for a few ticks, or after ~1.5s
+      if (stable >= 3 || ++frames > 30) window.clearInterval(id);
+    }, 50);
+    return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, i, steps]);
+
+  // keep the spotlight glued to the element if the user scrolls or resizes
+  useEffect(() => {
+    if (!active) return;
+    window.addEventListener("resize", remeasure);
+    window.addEventListener("scroll", remeasure, true);
+    return () => { window.removeEventListener("resize", remeasure); window.removeEventListener("scroll", remeasure, true); };
+  }, [active, remeasure]);
 
   if (!active) return null;
   const step = steps[i];

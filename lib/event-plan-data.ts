@@ -55,27 +55,48 @@ function todayISO(): string {
  * (session or rest). Returns { active: false } otherwise so the dashboard
  * falls back to the normal program.
  */
+export interface EventPlanStatus {
+  status: "none" | "active" | "paused";
+  label: string | null;
+  daysLeft: number;     // upcoming dated days (today onward)
+  totalDays: number;    // all saved days (incl. past) — so an all-past plan still shows
+}
+
 /**
- * Is there a plan the dancer has paused (event_plan_active = false) that still
- * has days left to run? Used to offer a "Rejoin your plan" prompt.
+ * Overall status of the dancer's saved plan, for the Training Plan Builder page
+ * and the dashboard. "paused" = saved plan with days left but not driving Today.
+ * Backwards-compatible alias getPausedEventPlan kept below.
  */
-export async function getPausedEventPlan(): Promise<{ paused: boolean; label: string | null; daysLeft: number }> {
+export async function getEventPlanStatus(): Promise<EventPlanStatus> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { paused: false, label: null, daysLeft: 0 };
+  if (!user) return { status: "none", label: null, daysLeft: 0, totalDays: 0 };
   const { data: state } = await supabase
     .from("user_program_state")
     .select("event_plan_active, event_plan_label")
     .eq("user_id", user.id)
     .single();
-  if (state?.event_plan_active) return { paused: false, label: null, daysLeft: 0 };
-  const { count } = await supabase
+  const { count: total } = await supabase
+    .from("event_plan_days")
+    .select("plan_date", { count: "exact", head: true })
+    .eq("user_id", user.id);
+  const { count: upcoming } = await supabase
     .from("event_plan_days")
     .select("plan_date", { count: "exact", head: true })
     .eq("user_id", user.id)
     .gte("plan_date", todayISO());
-  if (!count) return { paused: false, label: null, daysLeft: 0 };
-  return { paused: true, label: state?.event_plan_label ?? null, daysLeft: count };
+  const totalDays = total ?? 0;
+  const daysLeft = upcoming ?? 0;
+  const label = state?.event_plan_label ?? null;
+  if (!totalDays) return { status: "none", label: null, daysLeft: 0, totalDays: 0 };
+  if (state?.event_plan_active) return { status: "active", label, daysLeft, totalDays };
+  return { status: "paused", label, daysLeft, totalDays };
+}
+
+/** Back-compat: paused plan with days left (used by existing callers). */
+export async function getPausedEventPlan(): Promise<{ paused: boolean; label: string | null; daysLeft: number }> {
+  const s = await getEventPlanStatus();
+  return { paused: s.status === "paused" && s.daysLeft > 0, label: s.label, daysLeft: s.daysLeft };
 }
 
 export async function getEventPlanToday(): Promise<EventPlanToday | { active: false }> {
