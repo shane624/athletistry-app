@@ -30,13 +30,14 @@ export default function ProgramPicker({ programs, active, first, customActive }:
   }
 
   return (
-    <div data-tour="programs" className="grid md:grid-cols-2 gap-4 mt-5 stagger">
-      {programs.map((p) => {
+    <div className="grid md:grid-cols-2 gap-4 mt-5 stagger">
+      {programs.map((p, idx) => {
         const look = programLook(p.id);
         const isActive = p.id === active;
         return (
         <button
           key={p.id}
+          {...(idx === 0 ? { "data-tour": "programs" } : {})}
           onClick={() => choose(p.id)}
           disabled={!!busy}
           className={`text-left card card-hover overflow-hidden p-0 transition ${isActive ? "ring-2 ring-teal" : ""}`}
