@@ -25,12 +25,34 @@ const STYLE_FOR: Record<string, WorkoutStyle | null> = {
  * driven by it. Strength/hypertrophy/endurance days get a real exercise list
  * (filtered by the dancer's level + equipment); cardio/tabata/rest store none.
  */
+// Preview exercises per training style, for showing real thumbnails in the plan
+// reveal before it's activated. Returns a handful per style.
+export async function previewPlanExercises(
+  maxLevel = 4, equipment?: string[],
+): Promise<Record<string, { id: number; name: string; cloudinary_id: string | null; youtube_id: string | null }[]>> {
+  const out: Record<string, { id: number; name: string; cloudinary_id: string | null; youtube_id: string | null }[]> = {};
+  for (const style of ["strength", "hypertrophy", "endurance"] as WorkoutStyle[]) {
+    const slots = await generateWorkout(style, 1, maxLevel, equipment);
+    const seen = new Set<number>();
+    const rows: { id: number; name: string; cloudinary_id: string | null; youtube_id: string | null }[] = [];
+    for (const s of slots) for (const e of s.exercises) {
+      if (seen.has(e.id)) continue;
+      seen.add(e.id);
+      rows.push({ id: e.id, name: e.name, cloudinary_id: e.cloudinary_id ?? null, youtube_id: e.youtube_id ?? null });
+    }
+    out[style] = rows;
+  }
+  return out;
+}
+
 export async function saveEventPlan(input: {
   label: string;
   days: SavedDay[];
   maxLevel: number;
   equipment?: string[];
   focus?: string[];
+  /** Reuse the exercises already shown in the preview so the saved plan matches. */
+  exercisesByStyle?: Record<string, number[]>;
 }): Promise<{ ok: boolean; error?: string }> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -38,12 +60,14 @@ export async function saveEventPlan(input: {
   if (!input.days.length) return { ok: false, error: "Nothing to save" };
 
   // pre-generate one exercise list per distinct style so we don't hit the DB
-  // for every single day. (Variety still comes from the day's own slot order.)
+  // for every single day. Reuse the preview's set when provided.
   const styles = new Set(
     input.days.map((d) => STYLE_FOR[d.type]).filter((s): s is WorkoutStyle => !!s)
   );
   const byStyle: Record<string, number[]> = {};
   for (const style of styles) {
+    const provided = input.exercisesByStyle?.[style];
+    if (provided && provided.length) { byStyle[style] = provided; continue; }
     const slots = await generateWorkout(style, 1, input.maxLevel, input.equipment);
     byStyle[style] = slots.flatMap((s) => s.exercises.map((e) => e.id));
   }

@@ -7,7 +7,7 @@ import {
   type EventPlan, type PlanDay, type PlanDemand, type DemandFocus, type SessionType,
 } from "@/lib/event-plan";
 import { useRouter } from "next/navigation";
-import { saveEventPlan } from "@/lib/event-plan-actions";
+import { saveEventPlan, previewPlanExercises } from "@/lib/event-plan-actions";
 import { EQUIPMENT_LABEL, type Equipment } from "@/lib/equipment";
 import { CLASS_GROUPS } from "@/lib/classes";
 import Icon, { type IconName } from "@/components/Icon";
@@ -55,6 +55,20 @@ const SESSION_TONE: Record<SessionType, string> = {
   tabata: "bg-light text-navy", rest: "bg-rowalt text-grey",
 };
 
+const STEPS = [
+  { title: "Your event", subtitle: "What are you training for, and when?" },
+  { title: "Your classes", subtitle: "Add the classes you already do each week." },
+  { title: "What it needs", subtitle: "Tell us what the day will demand of you." },
+  { title: "Your preferences", subtitle: "Difficulty and kit — then we build it." },
+];
+
+const PLAN_CLOUD = "dsbtk5hpq";
+function exThumb(e: { cloudinary_id: string | null; youtube_id: string | null }): string | null {
+  if (e.cloudinary_id) return `https://res.cloudinary.com/${PLAN_CLOUD}/video/upload/so_1,w_80,h_80,c_fill,g_auto/${e.cloudinary_id}.jpg`;
+  if (e.youtube_id) return `https://i.ytimg.com/vi/${e.youtube_id}/default.jpg`;
+  return null;
+}
+
 export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: LoggedClass[] }) {
   const [date, setDate] = useState("");
   const [type, setType] = useState("Performance");
@@ -75,6 +89,11 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
   const [equipOpen, setEquipOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
+
+  // wizard step + built-plan exercise thumbnails
+  const [step, setStep] = useState(0);
+  const [building, setBuilding] = useState(false);
+  const [styleExercises, setStyleExercises] = useState<Record<string, { id: number; name: string; cloudinary_id: string | null; youtube_id: string | null }[]>>({});
 
   function toggleEquip(e: Equipment) {
     setEquip((prev) => { const n = new Set(prev); n.has(e) ? n.delete(e) : n.add(e); return n; });
@@ -151,28 +170,35 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
     maxWeekLoad: Math.max(1, ...plan.weeks.map((w) => w.totalLoad)),
   } : null;
 
-  function go(e: React.FormEvent) {
+  async function go(e: React.FormEvent) {
     e.preventDefault();
     setSavedMsg(null);
     const p = buildEventPlan({ eventISO: date, classLoad, gymDays, gymStart });
     setPlan(p);
-    if (p) {
-      const demand: PlanDemand = { stamina, explosive, focus: [...focus] };
-      setSchedule(buildDailySchedule(p, classWeekdays, gymDays, demand, new Date(), classNamesByWeekday));
-    } else {
-      setSchedule(null);
-    }
+    if (!p) { setSchedule(null); return; }
+    const demand: PlanDemand = { stamina, explosive, focus: [...focus] };
+    setSchedule(buildDailySchedule(p, classWeekdays, gymDays, demand, new Date(), classNamesByWeekday));
+    // fetch real exercise thumbnails to show in the reveal (and reuse on activate)
+    setBuilding(true);
+    try {
+      const ex = await previewPlanExercises(maxLevel, equip.size ? [...equip] : undefined);
+      setStyleExercises(ex);
+    } catch { /* reveal still works without images */ }
+    setBuilding(false);
   }
 
   async function activate() {
     if (!schedule || !schedule.length) return;
     setSaving(true); setSavedMsg(null);
+    const exercisesByStyle: Record<string, number[]> = {};
+    for (const k of Object.keys(styleExercises)) exercisesByStyle[k] = styleExercises[k].map((x) => x.id);
     const res = await saveEventPlan({
       label: `${type} plan`,
       days: schedule.map((d) => ({ iso: d.iso, type: d.type, title: d.title, detail: d.detail, weekIndex: d.weekIndex })),
       maxLevel,
       equipment: equip.size ? [...equip] : undefined,
       focus: [...focus],
+      exercisesByStyle: Object.keys(exercisesByStyle).length ? exercisesByStyle : undefined,
     });
     setSaving(false);
     if (res.ok) {
@@ -187,6 +213,19 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
   return (
     <div className="mt-5">
       <form onSubmit={go} className="card p-5 space-y-5">
+        {/* wizard header + progress */}
+        <div>
+          <p className="eyebrow">Step {step + 1} of {STEPS.length}</p>
+          <div className="flex items-center gap-1.5 mt-1">
+            {STEPS.map((_, i) => (
+              <span key={i} className={`h-1.5 rounded-full flex-1 transition-colors ${i <= step ? "bg-teal" : "bg-line"}`} />
+            ))}
+          </div>
+          <h2 className="text-lg font-bold text-navy mt-3">{STEPS[step].title}</h2>
+          <p className="text-grey text-sm">{STEPS[step].subtitle}</p>
+        </div>
+
+        {step === 0 && (<>
         {/* event */}
         <div data-tour="event" className="flex flex-wrap gap-4 items-end">
           <div>
@@ -206,6 +245,9 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           </div>
         </div>
 
+        </>)}
+
+        {step === 1 && (<>
         {/* class schedule — Mon–Sun */}
         <div>
           <div data-tour="schedule">
@@ -277,6 +319,9 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           </p>
         </div>
 
+        </>)}
+
+        {step === 2 && (<>
         {/* gym days */}
         <div>
           <p className="eyebrow mb-2">Gym days a week</p>
@@ -326,6 +371,9 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           </div>
         </div>
 
+        </>)}
+
+        {step === 3 && (<>
         {/* exercise preferences */}
         <div>
           <p className="eyebrow mb-2">Exercise options</p>
@@ -367,10 +415,28 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
             <span className="text-grey"><b className="text-navy">{gymDays}</b> gym day{gymDays === 1 ? "" : "s"}</span>
           </div>
         )}
+        </>)}
 
-        <button data-tour="build" className="btn-primary w-full sm:w-auto py-3" disabled={!date || classLoad === 0}>
-          {plan ? "Rebuild my plan" : "Build my plan ✨"}
-        </button>
+        {/* wizard nav */}
+        <div className="flex items-center gap-3 pt-1">
+          {step > 0 && (
+            <button type="button" onClick={() => setStep((s) => s - 1)} className="btn-ghost px-5">Back</button>
+          )}
+          {step < STEPS.length - 1 ? (
+            <button
+              type="button"
+              onClick={() => setStep((s) => s + 1)}
+              disabled={(step === 0 && !date) || (step === 1 && classLoad === 0)}
+              className="btn-primary flex-1 py-3 disabled:opacity-50"
+            >
+              {step === 0 && !date ? "Add an event date to continue" : step === 1 && classLoad === 0 ? "Add at least one class" : "Next →"}
+            </button>
+          ) : (
+            <button data-tour="build" type="submit" className="btn-primary flex-1 py-3" disabled={!date || classLoad === 0 || building}>
+              {building ? <Dots /> : plan ? "Rebuild my plan" : "Build my plan ✨"}
+            </button>
+          )}
+        </div>
       </form>
 
       {plan && (
@@ -454,9 +520,27 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                           <span className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${SESSION_TONE[d.type]}`}>
                             <Icon name={SESSION_ICON[d.type]} className="w-4 h-4" />
                           </span>
-                          <span className="min-w-0">
+                          <span className="min-w-0 flex-1">
                             <span className="block text-sm font-semibold text-navy">{d.title}</span>
                             <span className="block text-grey text-xs leading-snug">{d.detail}</span>
+                            {/* real exercise thumbnails for workout days */}
+                            {(styleExercises[d.type]?.length ?? 0) > 0 && (
+                              <span className="flex -space-x-2 mt-2">
+                                {styleExercises[d.type].slice(0, 4).map((ex) => {
+                                  const t = exThumb(ex);
+                                  return (
+                                    <span key={ex.id} className="w-8 h-8 rounded-lg overflow-hidden ring-2 ring-white bg-black/5 shrink-0" title={ex.name}>
+                                      {t && <img src={t} alt="" className="w-full h-full object-cover" loading="lazy" />}
+                                    </span>
+                                  );
+                                })}
+                                {styleExercises[d.type].length > 4 && (
+                                  <span className="w-8 h-8 rounded-lg ring-2 ring-white bg-light flex items-center justify-center text-[11px] font-bold text-tealdark shrink-0">
+                                    +{styleExercises[d.type].length - 4}
+                                  </span>
+                                )}
+                              </span>
+                            )}
                           </span>
                         </div>
                         );
