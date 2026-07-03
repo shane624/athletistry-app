@@ -19,6 +19,7 @@ const GROUPS: Group[] = [
     title: "Train",
     items: [
       { href: "/dashboard", label: "Today" },
+      { href: "/explore", label: "Explore" },
       { href: "/programs", label: "Programs" },
       { href: "/plan", label: "Training Plan Builder" },
       { href: "/generate", label: "Practice Generator" },

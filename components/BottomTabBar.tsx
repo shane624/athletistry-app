@@ -11,7 +11,7 @@ type Tab = { href: string; label: string; icon: IconName };
 
 const TABS: Tab[] = [
   { href: "/dashboard", label: "Today", icon: "home" },
-  { href: "/programs", label: "Programs", icon: "grid" },
+  { href: "/explore", label: "Explore", icon: "grid" },
   { href: "/circuit", label: "Circuit", icon: "circuit" },
   { href: "/progress", label: "Progress", icon: "chart" },
   { href: "/menu", label: "More", icon: "dots" },
