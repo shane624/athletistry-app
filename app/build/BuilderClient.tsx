@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveCustomDay, setActiveProgram, markOnboarded, saveWorkout } from "@/lib/data";
 import type { ExerciseRow } from "@/lib/types";
+import ExercisePicker from "@/components/ExercisePicker";
 
 interface DayState { dayIndex: number; exerciseIds: number[]; }
 
@@ -14,19 +15,18 @@ export default function BuilderClient({ allExercises, initial }: { allExercises:
     initial.length ? initial : [{ dayIndex: 0, exerciseIds: [] }]
   );
   const [activeDay, setActiveDay] = useState(0);
-  const [q, setQ] = useState("");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
   const day = days.find((d) => d.dayIndex === activeDay) ?? days[0];
   const chosen = new Set(day.exerciseIds);
-  const filtered = allExercises.filter((e) => e.name.toLowerCase().includes(q.toLowerCase()));
 
   function update(fn: (d: DayState) => DayState) {
     setDays((ds) => ds.map((d) => (d.dayIndex === activeDay ? fn(d) : d)));
   }
   function add(id: number) { if (!chosen.has(id)) update((d) => ({ ...d, exerciseIds: [...d.exerciseIds, id] })); }
   function remove(id: number) { update((d) => ({ ...d, exerciseIds: d.exerciseIds.filter((x) => x !== id) })); }
+  function toggle(id: number) { chosen.has(id) ? remove(id) : add(id); }
   function move(id: number, dir: -1 | 1) {
     update((d) => {
       const arr = [...d.exerciseIds];
@@ -109,19 +109,8 @@ export default function BuilderClient({ allExercises, initial }: { allExercises:
 
         {/* library to add from */}
         <div className="card p-4">
-          <h3 className="font-semibold text-navy">Add from library</h3>
-          <input className="input mt-2" placeholder="Search exercises…" value={q} onChange={(e) => setQ(e.target.value)} />
-          <ul className="mt-2 space-y-1 max-h-80 overflow-y-auto">
-            {filtered.map((e) => (
-              <li key={e.id} className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md hover:bg-rowalt">
-                <span className="text-sm">{e.name} <span className="text-grey text-xs">· L{e.level} · {e.category}</span></span>
-                <button onClick={() => add(e.id)} disabled={chosen.has(e.id)}
-                  className={`text-sm px-2 py-1 rounded-md ${chosen.has(e.id) ? "text-grey" : "text-teal hover:bg-light"}`}>
-                  {chosen.has(e.id) ? "Added" : "+ Add"}
-                </button>
-              </li>
-            ))}
-          </ul>
+          <h3 className="font-semibold text-navy mb-3">Add from library</h3>
+          <ExercisePicker allExercises={allExercises} chosen={chosen} onToggle={toggle} />
         </div>
       </div>
 
