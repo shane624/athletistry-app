@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  buildEventPlan, buildDailySchedule, planSummary,
-  type EventPlan, type PlanTone, type PlanDay, type PlanDemand, type DemandFocus, type SessionType,
+  buildEventPlan, buildDailySchedule,
+  type EventPlan, type PlanDay, type PlanDemand, type DemandFocus, type SessionType,
 } from "@/lib/event-plan";
 import { useRouter } from "next/navigation";
 import { saveEventPlan } from "@/lib/event-plan-actions";
@@ -28,14 +28,6 @@ const LEVELS = [
 // how many gym days they want. We generate a week-by-week periodized plan:
 // total load climbs ~10%/week through the build, then tapers ~30% over the
 // final two weeks. Classes stay constant; the gym load is what rises and falls.
-
-const toneClass: Record<PlanTone, string> = {
-  base: "bg-navy2",
-  build: "grad-navy",
-  taper: "grad-brand",
-  event: "bg-teal",
-  past: "bg-navy2",
-};
 
 const RPE_LABEL: Record<number, string> = {
   4: "easy", 5: "steady", 6: "moderate", 7: "hard", 8: "very hard",
@@ -145,6 +137,19 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
   const classWeekdays = DAYS.map((d, i) => (sched[d].length ? i : -1)).filter((i) => i >= 0);
   const classNamesByWeekday: Record<number, string[]> = {};
   DAYS.forEach((d, i) => { if (sched[d].length) classNamesByWeekday[i] = sched[d].map((c) => c.name.trim() || "Class"); });
+
+  // live preview: weeks until the event (for the form summary)
+  const weeksToEvent = date
+    ? Math.max(0, Math.ceil((new Date(date + "T00:00:00").getTime() - Date.now()) / (7 * 864e5)))
+    : null;
+
+  // headline stats for the built plan
+  const planStats = plan && schedule ? {
+    weeks: plan.weeks.length,
+    sessions: schedule.filter((d) => d.type !== "rest").length,
+    restDays: schedule.filter((d) => d.type === "rest").length,
+    maxWeekLoad: Math.max(1, ...plan.weeks.map((w) => w.totalLoad)),
+  } : null;
 
   function go(e: React.FormEvent) {
     e.preventDefault();
@@ -352,73 +357,101 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           )}
         </div>
 
-        <button data-tour="build" className="btn-primary" disabled={!date || classLoad === 0}>Build my plan</button>
+        {/* live preview — shows the plan taking shape as you fill it in */}
+        {(date || classCount > 0) && (
+          <div className="card p-3 bg-light flex flex-wrap gap-x-5 gap-y-1 text-sm">
+            {weeksToEvent != null && (
+              <span className="text-navy"><b>{weeksToEvent}</b> week{weeksToEvent === 1 ? "" : "s"} until your {type.toLowerCase()}</span>
+            )}
+            <span className="text-grey"><b className="text-navy">{classCount}</b> class{classCount === 1 ? "" : "es"} a week</span>
+            <span className="text-grey"><b className="text-navy">{gymDays}</b> gym day{gymDays === 1 ? "" : "s"}</span>
+          </div>
+        )}
+
+        <button data-tour="build" className="btn-primary w-full sm:w-auto py-3" disabled={!date || classLoad === 0}>
+          {plan ? "Rebuild my plan" : "Build my plan ✨"}
+        </button>
       </form>
 
       {plan && (
-        <div className="mt-6">
-          {/* PRIMARY: activate the plan, with a brief periodisation overview */}
-          <div className="card p-5 grad-navy text-white">
-            <p className="text-white/75 text-xs font-semibold uppercase tracking-wide">Your plan is ready</p>
-            <p className="font-extrabold text-lg mt-1">{planSummary(plan)}</p>
+        <div className="mt-6 stagger">
+          {/* celebratory header — warm, plain language */}
+          <div className="card p-5 grad-navy text-white animate-in">
+            <p className="text-white/75 text-xs font-semibold uppercase tracking-wide">Your plan is ready 🎉</p>
+            <p className="font-extrabold text-xl mt-1">Here&apos;s your roadmap to your {type.toLowerCase()}.</p>
             <p className="text-white/85 text-sm mt-2 leading-relaxed">
-              We&apos;ve periodised the weeks to your event: a steady build (~10% more load each week), then a taper that cuts volume ~30% in the final stretch while keeping intensity, so you peak fresh. Activate it and your Today screen runs the plan day-by-day — strength, conditioning or rest — automatically until the event.
+              {planStats?.weeks} weeks that build you up gently, then ease off just before the day so you arrive fresh and strong. Press activate and I&apos;ll guide you through it one day at a time — no guesswork, nothing scary.
             </p>
             <button onClick={activate} disabled={saving}
-              className="mt-4 bg-white text-navy font-bold rounded-xl px-5 py-2.5 text-sm inline-flex items-center gap-2 active:scale-[.98] transition">
+              className="mt-4 bg-white text-navy font-bold rounded-xl px-5 py-3 text-sm inline-flex items-center gap-2 active:scale-[.98] transition">
               {saving ? <Dots /> : <><Icon name="check" className="w-4 h-4" /> Activate this plan</>}
             </button>
             {savedMsg && <p className="text-white/90 text-sm mt-2">{savedMsg}</p>}
           </div>
 
-          <p className="eyebrow mt-8 mb-1">Week by week</p>
-          <p className="text-grey text-xs mb-3">Each week shows your target total load (class + gym). Keep your classes the same; your gym sessions flex to hit the gym target shown.</p>
-          <div className="space-y-3">
-            {plan.weeks.map((w) => (
-              <div key={w.index} className={`${toneClass[w.tone]} text-white rounded-2xl p-4`}>
-                <div className="flex items-center justify-between flex-wrap gap-1">
-                  <span className="font-extrabold">{w.label}</span>
-                  <span className="text-white/80 text-xs">
-                    {w.weeksOut > 0 ? `${w.weeksOut} ${w.weeksOut === 1 ? "week" : "weeks"} out` : "event week"}
-                  </span>
-                </div>
+          {/* headline stats */}
+          {planStats && (
+            <div className="grid grid-cols-3 gap-3 mt-4 animate-in">
+              <Stat label="weeks" value={planStats.weeks} />
+              <Stat label="workouts" value={planStats.sessions} />
+              <Stat label="rest days" value={planStats.restDays} />
+            </div>
+          )}
 
-                {w.tone !== "event" && (
-                  <div className="flex flex-wrap gap-x-5 gap-y-1 mt-2 text-sm">
-                    <span className="text-white/90">Target total <b>{w.totalLoad.toLocaleString()}</b> TRIMP
-                      {w.changePct != null && <span className="text-white/70"> ({w.changePct > 0 ? "+" : ""}{w.changePct}%)</span>}
-                    </span>
-                    <span className="text-white/80">Classes <b>{w.classLoad.toLocaleString()}</b></span>
-                    <span className="text-white/80">Gym <b>{w.gymLoad.toLocaleString()}</b> · {plan.gymDays} sessions (~{w.perSession.toLocaleString()} each)</span>
-                  </div>
-                )}
-
-                <p className="text-white/90 text-sm mt-2">{w.focus}</p>
+          {/* visual week timeline — the build-then-ease-off shape at a glance */}
+          {planStats && (
+            <div className="card p-5 mt-4 animate-in">
+              <p className="eyebrow">Build up, then ease off</p>
+              <p className="text-grey text-xs mt-1 mb-3">Each bar is a week. You climb steadily, then wind down before the event so you peak fresh — that&apos;s the whole idea.</p>
+              <div className="flex items-end gap-1.5">
+                {plan.weeks.map((w) => {
+                  const h = Math.max((w.totalLoad / planStats.maxWeekLoad) * 100, 10);
+                  const isTaper = w.tone === "taper";
+                  const isEvent = w.tone === "event";
+                  return (
+                    <div key={w.index} className="flex-1 flex flex-col items-center">
+                      <div className="w-full h-24 flex items-end">
+                        <div
+                          className={`w-full rounded-t transition-all duration-700 ${isEvent ? "bg-navy" : isTaper ? "bg-teal/50" : "bg-teal"}`}
+                          style={{ height: `${h}%` }}
+                          title={`${w.label}: ${w.focus}`}
+                        />
+                      </div>
+                      <span className="text-[10px] text-grey mt-1">{w.index}</span>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
+              <div className="flex justify-between text-[11px] text-grey mt-2">
+                <span>Build ↗</span>
+                <span>Ease off ↘ · arrive fresh</span>
+              </div>
+            </div>
+          )}
 
-          {/* DATED DAY-BY-DAY SCHEDULE */}
+          {/* day-by-day, friendlier */}
           {schedule && schedule.length > 0 && (
-            <div className="mt-8">
-              <p className="eyebrow">Your day-by-day plan</p>
-              <p className="text-grey text-sm mt-1 mb-3">A preview of each day from now to the event — strength, conditioning, or rest with recovery ideas. Activate the plan above and these appear on your Today screen, one day at a time.</p>
-              <div className="space-y-5">
+            <div className="mt-6">
+              <p className="eyebrow">Day by day</p>
+              <p className="text-grey text-sm mt-1 mb-3">A peek at each day from now to your {type.toLowerCase()}. Once you activate, these appear on your Today screen with demo videos — one day at a time, so it never feels like a lot.</p>
+              <div className="space-y-5 stagger">
                 {groupByWeek(schedule).map((wk) => {
                   const weeksOut = (plan?.weeksOut ?? 0) - (wk.weekIndex - 1);
                   return (
-                  <div key={wk.weekIndex}>
+                  <div key={wk.weekIndex} className="animate-in">
                     <p className="text-[11px] font-bold tracking-widest uppercase text-grey mb-2">
-                      Week {wk.weekIndex} · {weeksOut} {weeksOut === 1 ? "week" : "weeks"} out
+                      Week {wk.weekIndex} · {weeksOut === 0 ? "event week 🩰" : `${weeksOut} ${weeksOut === 1 ? "week" : "weeks"} to go`}
                     </p>
                     <div className="space-y-1.5">
-                      {wk.days.map((d) => (
-                        <div key={d.iso} className="flex items-start gap-3 rounded-xl border border-line p-2.5">
+                      {wk.days.map((d) => {
+                        const rest = d.type === "rest";
+                        return (
+                        <div key={d.iso} className={`flex items-start gap-3 rounded-xl border border-line p-2.5 ${rest ? "bg-light/40" : ""}`}>
                           <span className="w-12 text-center shrink-0">
                             <span className="block text-[11px] text-grey uppercase">{DAYS[d.weekday]}</span>
                             <span className="block text-sm font-bold text-navy">{d.iso.slice(8)}</span>
                           </span>
-                          <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${SESSION_TONE[d.type]}`}>
+                          <span className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${SESSION_TONE[d.type]}`}>
                             <Icon name={SESSION_ICON[d.type]} className="w-4 h-4" />
                           </span>
                           <span className="min-w-0">
@@ -426,7 +459,8 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                             <span className="block text-grey text-xs leading-snug">{d.detail}</span>
                           </span>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                   );
@@ -436,11 +470,20 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           )}
 
           <p className="text-grey text-xs mt-6">
-            This plan follows the Build Your Workout method — a steady ~10% weekly climb, then a ~30% volume cut in the taper while keeping intensity.
-            Log your sessions in the <Link href="/load" className="text-teal font-medium">Training Calendar</Link> so your actual load tracks against these targets. Add the event there too and the app will track the taper for you.
+            Once it&apos;s active, log your sessions in the <Link href="/load" className="text-teal font-medium">Training Calendar</Link> and the app keeps you on track. You can swap or add exercises on any day, and rejoin the plan any time if life gets in the way.
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+// headline stat tile for the built plan
+function Stat({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className="card p-3 text-center">
+      <div className="text-2xl font-extrabold text-navy">{value}</div>
+      <div className="text-grey text-xs mt-0.5">{label}</div>
     </div>
   );
 }
