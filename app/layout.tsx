@@ -42,22 +42,6 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en" style={{ background: "#1f2a44" }}>
-      <head>
-        {SPLASH.map((s) => (
-          <link key={s.href} rel="apple-touch-startup-image" media={s.media} href={s.href} />
-        ))}
-      </head>
-      <body>
-        <InitialSplash />
-        {children}
-      </body>
-    </html>
-  );
-}
-
 // iOS PWA launch screens (branded navy) so an installed app never launches white.
 const SPLASH: { media: string; href: string }[] = [
   { media: "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)", href: "/splash/splash-640x1136.png" },
@@ -71,3 +55,17 @@ const SPLASH: { media: string; href: string }[] = [
   { media: "(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)", href: "/splash/splash-1179x2556.png" },
   { media: "(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)", href: "/splash/splash-1290x2796.png" },
 ];
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" style={{ background: "#1f2a44" }}>
+      <body>
+        {SPLASH.map((s) => (
+          <link key={s.href} rel="apple-touch-startup-image" media={s.media} href={s.href} />
+        ))}
+        <InitialSplash />
+        {children}
+      </body>
+    </html>
+  );
+}

@@ -7,15 +7,12 @@ export default function InitialSplash() {
   const js = `(function(){try{
     var s=document.getElementById('app-splash');if(!s)return;
     var gone=false;
-    var hide=function(){if(gone||!s)return;gone=true;s.style.opacity='0';setTimeout(function(){if(s&&s.parentNode)s.parentNode.removeChild(s);s=null;},400);};
-    if(sessionStorage.getItem('athl_splash_seen')==='1'){if(s.parentNode)s.parentNode.removeChild(s);return;}
+    var hide=function(){if(gone)return;gone=true;var el=document.getElementById('app-splash');if(!el)return;el.style.opacity='0';setTimeout(function(){if(el&&el.parentNode)el.parentNode.removeChild(el);},400);};
+    // Purely cosmetic cover for the first paint — dismiss on a short, unconditional
+    // timer so it can never stick, whatever else the page is doing.
+    if(sessionStorage.getItem('athl_splash_seen')==='1'){hide();return;}
     sessionStorage.setItem('athl_splash_seen','1');
-    var start=Date.now(),MIN=350;
-    var ready=function(){setTimeout(hide,Math.max(0,MIN-(Date.now()-start)));};
-    // dismiss as soon as the DOM is parsed — do NOT wait for every image/video
-    if(document.readyState==='interactive'||document.readyState==='complete')ready();
-    else document.addEventListener('DOMContentLoaded',ready,{once:true});
-    setTimeout(hide,2500);
+    setTimeout(hide,900);
   }catch(e){var x=document.getElementById('app-splash');if(x&&x.parentNode)x.parentNode.removeChild(x);}})();`;
 
   return (
