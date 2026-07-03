@@ -158,7 +158,7 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
                 <div className="w-full h-28 flex items-end mt-1">
                   <div className="w-full bg-teal rounded-t" style={{ height: `${Math.max((w.trimp / maxTrimp) * 100, 4)}%` }} title={`${w.week}: ${w.trimp} TRIMP`} />
                 </div>
-                <span className="text-[9px] text-grey mt-1.5">{w.week.slice(5)}</span>
+                <span className="text-[10px] text-grey mt-1.5">{w.week.slice(5)}</span>
               </div>
             ))}
           </div>

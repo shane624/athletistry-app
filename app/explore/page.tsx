@@ -36,6 +36,14 @@ export default async function ExplorePage() {
         <PageHeader icon="grid" eyebrow="Discover" title="Explore"
           subtitle="Browse everything Athletistry can do — and save anything to come back to." />
 
+        {/* where do I start — a clear default path for anyone unsure */}
+        <Link href="/programs" className="card card-hover block p-4 mt-5 border-l-2 border-teal">
+          <p className="eyebrow">New here?</p>
+          <p className="text-navy text-sm font-semibold mt-0.5">Not sure where to start? Begin with a program.</p>
+          <p className="text-grey text-xs mt-1">Pick a ready-made plan and the app guides you day by day. You can switch any time.</p>
+          <span className="text-teal text-sm mt-2 font-semibold inline-flex items-center gap-1">Choose a program<Icon name="chevron" className="w-4 h-4" /></span>
+        </Link>
+
         {/* goal tiles */}
         <div className="grid grid-cols-2 gap-3 mt-5">
           {TILES.map((t) => (
@@ -51,6 +59,12 @@ export default async function ExplorePage() {
         </div>
 
         {/* saved */}
+        {saved.length === 0 && (
+          <div className="card p-4 mt-8 bg-light">
+            <p className="eyebrow">Saved</p>
+            <p className="text-grey text-sm mt-1">Tap the bookmark on any program to save it here for quick access later.</p>
+          </div>
+        )}
         {saved.length > 0 && (
           <>
             <p className="eyebrow mt-8 mb-3">Saved</p>

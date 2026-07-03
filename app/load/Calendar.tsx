@@ -134,23 +134,23 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
               <div className={`text-[11px] font-semibold ${isToday ? "text-teal" : "text-grey"}`}>{date.getDate()}</div>
               <div className="mt-0.5 space-y-0.5">
                 {planDay && planDay.sessionType !== "rest" && (
-                  <div className="text-[8px] font-bold text-white rounded px-1 py-0.5 truncate"
+                  <div className="text-[10px] font-bold text-white rounded px-1 py-0.5 truncate"
                     style={{ background: PLAN_COLOR[planDay.sessionType] ?? "#27ae9f" }}
                     title={`Plan: ${planDay.title}`}>
                     ◆ {PLAN_LABEL[planDay.sessionType] ?? "Session"}
                   </div>
                 )}
                 {dayEvents.map((e) => (
-                  <div key={"e" + e.id} className="text-[8px] font-bold text-white rounded px-1 py-0.5 truncate" style={{ background: "#1f2a44" }} title={e.name || e.kind}>
+                  <div key={"e" + e.id} className="text-[10px] font-bold text-white rounded px-1 py-0.5 truncate" style={{ background: "#1f2a44" }} title={e.name || e.kind}>
                     ★ {e.name || e.kind}
                   </div>
                 ))}
                 {daySessions.slice(0, 3).map((s) => (
-                  <div key={s.id} className="text-[8px] text-white rounded px-1 py-0.5 truncate" style={{ background: classColor(s.kind) }} title={`${classLabel(s.kind)} · ${s.duration_min}min · RPE ${s.rpe}`}>
+                  <div key={s.id} className="text-[10px] text-white rounded px-1 py-0.5 truncate" style={{ background: classColor(s.kind) }} title={`${classLabel(s.kind)} · ${s.duration_min}min · RPE ${s.rpe}`}>
                     {classLabel(s.kind)}
                   </div>
                 ))}
-                {daySessions.length > 3 && <div className="text-[8px] text-grey">+{daySessions.length - 3}</div>}
+                {daySessions.length > 3 && <div className="text-[10px] text-grey">+{daySessions.length - 3}</div>}
               </div>
             </button>
           );

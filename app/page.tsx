@@ -109,7 +109,7 @@ function PhoneMockup() {
         <div className="p-3.5 space-y-3">
           {/* daily inspiration */}
           <div className="bg-white border border-line rounded-xl p-3.5">
-            <div className="eyebrow !text-[9px]">Daily Inspiration</div>
+            <div className="eyebrow !text-[10px]">Daily Inspiration</div>
             <p className="text-navy font-bold text-[14px] leading-snug mt-2">
               &ldquo;No one can arrive from being talented alone. Work transforms talent into genius.&rdquo;
             </p>
