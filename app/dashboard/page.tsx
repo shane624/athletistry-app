@@ -31,12 +31,10 @@ export default async function Dashboard() {
   if (!ob.learningCompleted) redirect("/start-here");
   if (!ob.onboarded) redirect("/onboarding");
 
-  // If an event plan is active, it drives the Today screen.
-  const eventPlan = await getEventPlanToday();
-  const displayName = await getDisplayName();
+  // Fetch in parallel — these are independent, so one round of latency not six.
+  const [eventPlan, displayName] = await Promise.all([getEventPlanToday(), getDisplayName()]);
   if (eventPlan.active) {
-    const upcoming = await getEventPlanUpcoming(5);
-    const planAch = await getAchievements();
+    const [upcoming, planAch] = await Promise.all([getEventPlanUpcoming(5), getAchievements()]);
     return (
       <div className="min-h-screen">
         <NavBar />
@@ -59,10 +57,10 @@ export default async function Dashboard() {
     );
   }
 
-  const today = await getToday();
-  const ach = await getAchievements();
-  const { assessment } = await getAssessment();
-  const paused = await getPausedEventPlan();
+  const [today, ach, assessmentRes, paused] = await Promise.all([
+    getToday(), getAchievements(), getAssessment(), getPausedEventPlan(),
+  ]);
+  const { assessment } = assessmentRes;
   const blockColor =
     today.rx.block === "hypertrophy" ? "grad-navy"
     : today.rx.block === "strength" ? "grad-brand"
