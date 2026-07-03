@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import SplashGate from "@/components/SplashGate";
+import InitialSplash from "@/components/InitialSplash";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://athletistry.app"),
@@ -44,9 +44,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" style={{ background: "#1f2a44" }}>
       <body>
-        <SplashGate>{children}</SplashGate>
+        <InitialSplash />
+        {children}
       </body>
     </html>
   );
