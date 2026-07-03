@@ -13,6 +13,10 @@ export interface AchievementsInput {
   totalVolume: number;
   /** Weekly goal — workouts per week the member aims for. */
   weeklyGoal?: number;
+  /** Anatomy quizzes passed (0..10). */
+  quizzesPassed?: number;
+  /** Total anatomy modules available. */
+  quizzesTotal?: number;
 }
 
 export interface Level {
@@ -158,6 +162,14 @@ export function computeAchievements(input: AchievementsInput): AchievementsResul
     badge("comeback", "Welcome Back", "Return to training after two weeks away.", comeback, comeback ? 1 : 0),
     badge("principal", "Principal", `Reach the Principal rank (${LEVELS[5].minWorkouts} workouts).`, totalWorkouts >= LEVELS[5].minWorkouts, totalWorkouts / LEVELS[5].minWorkouts),
   ];
+
+  // ---- anatomy course badges ----
+  const quizzesPassed = input.quizzesPassed ?? 0;
+  const quizzesTotal = input.quizzesTotal ?? 10;
+  badges.push(
+    badge("anatomy_student", "Anatomy Student", "Pass your first anatomy quiz.", quizzesPassed >= 1, quizzesPassed / 1),
+    badge("anatomy_scholar", "Anatomy Scholar", "Pass every anatomy module quiz.", quizzesTotal > 0 && quizzesPassed >= quizzesTotal, quizzesPassed / quizzesTotal),
+  );
 
   return {
     totalWorkouts, currentStreak, bestStreak,
