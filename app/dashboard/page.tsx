@@ -155,9 +155,9 @@ export default async function Dashboard() {
             </div>
           )}
 
-          <a href="#today-exercises" className="mt-4 w-full bg-white text-navy font-bold rounded-2xl py-3 flex items-center justify-center gap-2 active:scale-[.98] transition-transform">
+          <Link href="/session" className="mt-4 w-full bg-white text-navy font-bold rounded-2xl py-3 flex items-center justify-center gap-2 active:scale-[.98] transition-transform">
             <Icon name="play" className="w-5 h-5" />{startedEx > 0 ? "Continue workout" : "Start workout"}
-          </a>
+          </Link>
         </div>
 
         {today.principle && (
