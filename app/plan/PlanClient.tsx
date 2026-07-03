@@ -415,7 +415,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                       {wk.days.map((d) => (
                         <div key={d.iso} className="flex items-start gap-3 rounded-xl border border-line p-2.5">
                           <span className="w-12 text-center shrink-0">
-                            <span className="block text-[10px] text-grey uppercase">{DAYS[d.weekday]}</span>
+                            <span className="block text-[11px] text-grey uppercase">{DAYS[d.weekday]}</span>
                             <span className="block text-sm font-bold text-navy">{d.iso.slice(8)}</span>
                           </span>
                           <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${SESSION_TONE[d.type]}`}>

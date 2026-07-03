@@ -60,8 +60,8 @@ export default function AdminRoster({ initial }: { initial: MemberRow[] }) {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-bold text-navy">{m.name || "—"}</span>
                   {m.disabled
-                    ? <span className="badge bg-grey text-white text-[10px]">Disabled</span>
-                    : <span className="badge bg-teal text-white text-[10px]">{m.rank}</span>}
+                    ? <span className="badge bg-grey text-white text-[11px]">Disabled</span>
+                    : <span className="badge bg-teal text-white text-[11px]">{m.rank}</span>}
                 </div>
                 <div className="text-grey text-xs mt-0.5 break-all">{m.email}</div>
               </div>

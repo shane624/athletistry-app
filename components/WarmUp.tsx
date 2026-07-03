@@ -50,7 +50,7 @@ export default function WarmUp() {
             <div className="flex items-center justify-between">
               <span className="font-semibold text-navy text-sm">{w.label}</span>
               {w.advanced && (
-                <span className="badge bg-navy text-white text-[10px]">Advanced</span>
+                <span className="badge bg-navy text-white text-[11px]">Advanced</span>
               )}
             </div>
             <span className="text-grey text-xs">{w.tag}</span>

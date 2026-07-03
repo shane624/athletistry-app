@@ -66,9 +66,9 @@ export default function CompleteWorkout({
               <input className="input mt-1 w-32" inputMode="numeric" placeholder="e.g. 45" value={dur} onChange={(e) => setDur(e.target.value)} />
             </div>
             <div className="mt-3">
-              <label className="text-xs text-grey">Effort (RPE): <b className="text-navy">{rpe}</b> / 10</label>
+              <label className="text-xs text-grey">Effort — how hard it felt <span className="opacity-70">(RPE)</span>: <b className="text-navy">{rpe}</b> / 10</label>
               <input type="range" min={1} max={10} value={rpe} onChange={(e) => setRpe(Number(e.target.value))} className="w-full accent-teal mt-1" />
-              <div className="flex justify-between text-[10px] text-grey"><span>1 easy</span><span>10 max</span></div>
+              <div className="flex justify-between text-[11px] text-grey"><span>1 easy</span><span>10 max</span></div>
             </div>
             {dur && <p className="text-grey text-sm mt-1">= <b className="text-navy">{sessionTrimp(Number(dur) || 0, rpe)} TRIMP</b></p>}
             <div className="flex gap-2 mt-4">

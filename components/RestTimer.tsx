@@ -65,12 +65,13 @@ export default function RestTimer({
   return (
     <div className={`mt-2 rounded-lg px-3 py-2 flex items-center gap-2 text-sm border ${active ? "bg-navy text-white border-navy" : "bg-light border-line text-grey"}`}>
       <span className="font-semibold tabular-nums w-14">{active ? `${left}s` : `${target}s`}</span>
-      <button onClick={toggle} className={`rounded-md px-2 py-1 text-xs font-bold ${active ? "bg-white/20 text-white" : "bg-teal text-white"}`}>
+      <button onClick={toggle} aria-label={running ? "Pause rest timer" : active ? "Resume rest timer" : "Start rest timer"}
+        className={`rounded-md min-h-[40px] px-3 text-sm font-bold ${active ? "bg-white/20 text-white" : "bg-teal text-white"}`}>
         {running ? "Pause" : active ? "Resume" : "Start rest"}
       </button>
-      <button onClick={() => adjust(-15)} className="rounded-md px-2 py-1 text-xs bg-white/15 text-current border border-current/20">−15</button>
-      <button onClick={() => adjust(15)} className="rounded-md px-2 py-1 text-xs bg-white/15 text-current border border-current/20">+15</button>
-      {active && <button onClick={skip} className="ml-auto rounded-md px-2 py-1 text-xs underline opacity-80">Skip</button>}
+      <button onClick={() => adjust(-15)} aria-label="Subtract 15 seconds" className="rounded-md min-h-[40px] min-w-[44px] text-sm bg-white/15 text-current border border-current/20">−15</button>
+      <button onClick={() => adjust(15)} aria-label="Add 15 seconds" className="rounded-md min-h-[40px] min-w-[44px] text-sm bg-white/15 text-current border border-current/20">+15</button>
+      {active && <button onClick={skip} aria-label="Skip rest" className="ml-auto rounded-md min-h-[40px] px-3 text-sm underline opacity-80">Skip</button>}
     </div>
   );
 }

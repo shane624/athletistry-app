@@ -96,11 +96,11 @@ export default function BuilderClient({ allExercises, initial }: { allExercises:
               const e = byId.get(id);
               if (!e) return null;
               return (
-                <li key={id} className="flex items-center gap-2 border border-line rounded-lg px-3 py-2">
+                <li key={id} className="flex items-center gap-1 border border-line rounded-lg pl-3 pr-1 py-1">
                   <span className="flex-1 text-sm">{e.name} <span className="text-grey text-xs">· L{e.level}</span></span>
-                  <button onClick={() => move(id, -1)} className="text-grey px-1" aria-label="Up">↑</button>
-                  <button onClick={() => move(id, 1)} className="text-grey px-1" aria-label="Down">↓</button>
-                  <button onClick={() => remove(id)} className="text-red-600 px-1" aria-label="Remove">✕</button>
+                  <button onClick={() => move(id, -1)} className="text-grey w-11 h-11 inline-flex items-center justify-center" aria-label={`Move ${e.name} up`}>↑</button>
+                  <button onClick={() => move(id, 1)} className="text-grey w-11 h-11 inline-flex items-center justify-center" aria-label={`Move ${e.name} down`}>↓</button>
+                  <button onClick={() => remove(id)} className="text-red-600 w-11 h-11 inline-flex items-center justify-center" aria-label={`Remove ${e.name}`}>✕</button>
                 </li>
               );
             })}

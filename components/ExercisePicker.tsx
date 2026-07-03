@@ -129,7 +129,7 @@ export default function ExercisePicker({
           <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-center gap-0.5 py-1">
             {letters.map((l) => (
               <button key={l} onClick={() => jumpTo(l)}
-                className="text-[10px] leading-none text-grey hover:text-teal font-semibold w-4 text-center">
+                className="text-[11px] leading-none text-grey hover:text-teal font-semibold w-4 text-center">
                 {l}
               </button>
             ))}

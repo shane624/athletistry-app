@@ -107,7 +107,7 @@ function FnLesson({ title, g8, lead, ex }: { title: string; g8: string; lead: st
       <p className="text-[11px] font-semibold tracking-wide text-grey uppercase">
         <span className="text-teal">04</span> · {title}
       </p>
-      <span className="inline-block mt-2 badge bg-teal text-white text-[10px]">Great 8 · {g8}</span>
+      <span className="inline-block mt-2 badge bg-teal text-white text-[11px]">Great 8 · {g8}</span>
       <p className="text-ink text-sm leading-relaxed mt-2">{lead}</p>
       <ul className="mt-2 space-y-1.5">
         {ex.map((e, i) => (

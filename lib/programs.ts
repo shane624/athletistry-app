@@ -182,7 +182,7 @@ export function getProgram(id: string | null | undefined): Program {
 export const ALL_PICKER_PROGRAMS: Program[] = [...PROGRAMS, CUSTOM_PROGRAM];
 
 export const BLOCK_LABEL: Record<string, string> = {
-  hypertrophy: "Hypertrophy", strength: "Strength", endurance: "Endurance", ballet: "Ballet Return", kids: "Kids",
+  hypertrophy: "Muscle building", strength: "Strength", endurance: "Endurance", ballet: "Ballet Return", kids: "Kids",
 };
 export const BLOCK_WEEKS: Record<string, string> = {
   hypertrophy: "Weeks 1–8", strength: "Weeks 9–16", endurance: "Weeks 17–24", ballet: "Full body", kids: "Full body",

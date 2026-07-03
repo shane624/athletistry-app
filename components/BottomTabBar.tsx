@@ -45,7 +45,7 @@ export default function BottomTabBar() {
                 <span className={`transition-transform duration-200 ${active ? "scale-110 -translate-y-0.5" : ""}`}>
                   <Icon name={t.icon} className="w-6 h-6" strokeWidth={active ? 2.1 : 1.8} />
                 </span>
-                <span className={`text-[10px] ${active ? "font-bold" : "font-semibold"}`}>{t.label}</span>
+                <span className={`text-[11px] ${active ? "font-bold" : "font-semibold"}`}>{t.label}</span>
               </Link>
             </li>
           );

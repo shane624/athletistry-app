@@ -118,10 +118,10 @@ function PhoneMockup() {
 
           {/* block header */}
           <div className="grad-navy text-white rounded-xl p-4">
-            <p className="text-white/75 text-[10px]">Weeks 1–8 · Hypertrophy</p>
+            <p className="text-white/75 text-[11px]">Weeks 1–8 · Hypertrophy</p>
             <p className="font-extrabold text-[17px] mt-0.5">Week 3 — Lower Body</p>
-            <span className="inline-block bg-white/20 rounded-md px-2 py-0.5 text-[10px] mt-2">4 × 8–12</span>
-            <span className="inline-block bg-white/20 rounded-md px-2 py-0.5 text-[10px] mt-2 ml-1.5">tempo 3-1-1</span>
+            <span className="inline-block bg-white/20 rounded-md px-2 py-0.5 text-[11px] mt-2">4 × 8–12</span>
+            <span className="inline-block bg-white/20 rounded-md px-2 py-0.5 text-[11px] mt-2 ml-1.5">tempo 3-1-1</span>
           </div>
 
           {/* exercise rows with real video frames */}

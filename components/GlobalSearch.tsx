@@ -86,7 +86,7 @@ export default function GlobalSearch() {
           ) : (
             grouped.map((g) => (
               <div key={g.kind} className="py-1">
-                <p className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wide text-grey">{KIND_LABEL[g.kind]}</p>
+                <p className="px-3 pt-2 pb-1 text-[11px] font-bold uppercase tracking-wide text-grey">{KIND_LABEL[g.kind]}</p>
                 {g.items.map((it, i) => (
                   <button key={g.kind + i} onClick={() => go(it)}
                     className="w-full text-left px-3 py-2 hover:bg-light flex items-center justify-between gap-2">

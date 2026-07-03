@@ -47,7 +47,7 @@ export default function SideNav() {
       <nav className="px-3 pb-4 flex-1">
         {groups.map((g) => (
           <div key={g.title} className="mb-4">
-            <p className="px-3 mb-1 text-[10px] font-bold tracking-widest uppercase text-grey">{g.title}</p>
+            <p className="px-3 mb-1 text-[11px] font-bold tracking-widest uppercase text-grey">{g.title}</p>
             <div className="space-y-0.5">
               {g.items.map((it) => {
                 const active = it.href === "/dashboard"

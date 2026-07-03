@@ -111,7 +111,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
 
       {/* dow header */}
       <div className="grid grid-cols-7 gap-1 mt-3 text-center">
-        {DOW.map((d) => <div key={d} className="text-[10px] text-grey font-semibold">{d}</div>)}
+        {DOW.map((d) => <div key={d} className="text-[11px] text-grey font-semibold">{d}</div>)}
       </div>
 
       {/* grid */}
@@ -249,7 +249,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
             <div className="mt-3">
               <label className="text-xs text-grey">Effort (RPE): <b className="text-navy">{rpe}</b> / 10</label>
               <input type="range" min={1} max={10} value={rpe} onChange={(e) => setRpe(Number(e.target.value))} className="w-full accent-teal mt-1" />
-              <div className="flex justify-between text-[10px] text-grey"><span>1 easy</span><span>10 max</span></div>
+              <div className="flex justify-between text-[11px] text-grey"><span>1 easy</span><span>10 max</span></div>
             </div>
 
             <p className="text-grey text-sm mt-2">This class = <b className="text-navy">{sessionTrimp(Number(dur) || 0, rpe)} TRIMP</b></p>
