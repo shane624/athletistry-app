@@ -3,6 +3,7 @@ import Icon, { type IconName } from "@/components/Icon";
 import ClearEventPlan from "@/components/ClearEventPlan";
 import ExerciseCard from "@/components/ExerciseCard";
 import PlanDayEdit from "@/components/PlanDayEdit";
+import CompleteWorkout from "@/components/CompleteWorkout";
 import { EVENT_PLAN_PROGRAM_ID } from "@/lib/event-plan-data";
 import type { EventPlanToday, PlanUpcomingDay } from "@/lib/event-plan-data";
 
@@ -11,7 +12,10 @@ const SESSION_ICON: Record<string, IconName> = {
   cardio: "heart", tabata: "bolt", rest: "warmup",
 };
 
-export default function EventPlanDay({ plan, upcoming = [] }: { plan: EventPlanToday; upcoming?: PlanUpcomingDay[] }) {
+export default function EventPlanDay({ plan, upcoming = [], levelIndex = 0, levelName = "", nextLevelName }: {
+  plan: EventPlanToday; upcoming?: PlanUpcomingDay[];
+  levelIndex?: number; levelName?: string; nextLevelName?: string;
+}) {
   const isRest = plan.sessionType === "rest" || plan.sessionType === "cardio";
   const icon = SESSION_ICON[plan.sessionType] ?? "warmup";
   const nextWorkout = upcoming.find((d) => d.isWorkout);
@@ -87,6 +91,7 @@ export default function EventPlanDay({ plan, upcoming = [] }: { plan: EventPlanT
             ))}
           </div>
           <PlanDayEdit date={plan.date} />
+          <CompleteWorkout levelIndex={levelIndex} levelName={levelName} nextLevelName={nextLevelName} />
         </>
       )}
 

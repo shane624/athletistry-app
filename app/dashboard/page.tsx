@@ -36,6 +36,7 @@ export default async function Dashboard() {
   const displayName = await getDisplayName();
   if (eventPlan.active) {
     const upcoming = await getEventPlanUpcoming(5);
+    const planAch = await getAchievements();
     return (
       <div className="min-h-screen">
         <NavBar />
@@ -46,7 +47,13 @@ export default async function Dashboard() {
             <TourButton />
           </div>
           <div data-tour="ring"><AchievementStrip /></div>
-          <EventPlanDay plan={eventPlan} upcoming={upcoming.days} />
+          <EventPlanDay
+            plan={eventPlan}
+            upcoming={upcoming.days}
+            levelIndex={planAch.level.index}
+            levelName={planAch.level.name}
+            nextLevelName={planAch.nextLevel?.name}
+          />
         </main>
       </div>
     );
