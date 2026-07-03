@@ -298,12 +298,12 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                             min
                           </label>
                           <label className="flex items-center gap-1.5 text-xs text-grey">
-                            RPE
+                            Effort
                             <input type="range" min={4} max={8} value={c.rpe}
                               onChange={(e) => updateClass(day, c.id, { rpe: Number(e.target.value) })} className="accent-teal w-24" />
                             <span className="text-navy font-semibold">{c.rpe} · {RPE_LABEL[c.rpe] ?? ""}</span>
                           </label>
-                          <span className="text-grey text-xs ml-auto">{(c.mins * c.rpe).toLocaleString()} TRIMP</span>
+                          <span className="text-grey text-xs ml-auto">{(c.mins * c.rpe).toLocaleString()} load</span>
                         </div>
                       </div>
                     ))}
@@ -314,7 +314,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           </div>
           <p className="text-grey text-xs mt-2">
             {classCount > 0
-              ? <>That&apos;s <b className="text-navy">{classCount} {classCount === 1 ? "class" : "classes"}</b> a week · about <b className="text-navy">{classLoad.toLocaleString()} TRIMP</b> of class load.</>
+              ? <>That&apos;s <b className="text-navy">{classCount} {classCount === 1 ? "class" : "classes"}</b> a week · about <b className="text-navy">{classLoad.toLocaleString()} load</b> from class.</>
               : "Add at least one class to build your plan."}
           </p>
         </div>

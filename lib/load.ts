@@ -20,6 +20,23 @@ export function sessionTrimp(durationMin: number, rpe: number): number {
   return Math.max(0, Math.round(durationMin)) * Math.max(0, Math.min(10, rpe));
 }
 
+// Plain-language helpers so the UI never has to say "RPE" or "TRIMP".
+/** How hard a session felt, in words (from a 1–10 effort value). */
+export function effortWord(rpe: number): string {
+  if (rpe <= 3) return "easy";
+  if (rpe <= 5) return "steady";
+  if (rpe <= 6) return "moderate";
+  if (rpe <= 7) return "hard";
+  return "very hard";
+}
+/** A week's training load in words (from a load number). */
+export function weekLoadWord(load: number): string {
+  if (load <= 150) return "light";
+  if (load <= 400) return "steady";
+  if (load <= 700) return "hard";
+  return "very hard";
+}
+
 // ---- week keys (Monday-based, local) ----
 export function weekKey(d: Date): string {
   const x = new Date(d);

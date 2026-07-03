@@ -61,7 +61,7 @@ export default function Home() {
           <Feature title="Progress & Balance" desc="See your lifts improve over time and a muscle-group balance view." />
           <Feature title="Training Calendar" desc="Log classes and training; track weekly load so you build up safely and taper before a show." />
           <Feature title="Event Planner" desc="Set a performance or exam date and it plans your taper automatically." />
-          <Feature title="Complete & Rate" desc="Finish a workout, rate your effort (RPE) and it counts toward your training load." />
+          <Feature title="Complete & Rate" desc="Finish a workout, rate how hard it felt, and it counts toward your training load." />
           <Feature title="Rest Timers" desc="An auto rest timer on every set — with pause, ±15s and skip." />
         </div>
 

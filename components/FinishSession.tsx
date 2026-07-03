@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { logSession } from "@/lib/load-actions";
+import { effortWord } from "@/lib/load";
 
 /**
- * "Mark complete" + RPE picker that logs the session to the dancer's training
- * load (TRIMP = duration × RPE). Reusable across circuits and guided workouts.
+ * "Mark complete" + effort picker that logs the session to the dancer's training
+ * load (time × how hard it felt). Reusable across circuits and guided workouts.
  */
 export default function FinishSession({
   kind,
@@ -33,7 +34,7 @@ export default function FinishSession({
     return (
       <div className="card p-4 bg-light border-2 border-teal mt-4">
         <p className="text-tealdark font-semibold">Logged ✓ — added to your training load.</p>
-        <p className="text-grey text-sm mt-1">{duration} min · RPE {rpe} · TRIMP {duration * rpe}. See it in your Training Calendar.</p>
+        <p className="text-grey text-sm mt-1">{duration} min · {effortWord(rpe)} · {duration * rpe} load. See it in your Training Calendar.</p>
       </div>
     );
   }
@@ -49,10 +50,10 @@ export default function FinishSession({
   return (
     <div className="card p-4 mt-4">
       <p className="font-semibold text-navy">How hard was that?</p>
-      <p className="text-grey text-sm mt-0.5">Your effort (RPE) and time set the training load this session adds.</p>
+      <p className="text-grey text-sm mt-0.5">Your effort and time set the training load this session adds.</p>
 
       <div className="mt-3">
-        <p className="text-sm font-medium text-navy">Effort — RPE {rpe}/10</p>
+        <p className="text-sm font-medium text-navy">Effort — how hard it felt: {rpe} · {effortWord(rpe)}</p>
         <input type="range" min={1} max={10} value={rpe} onChange={(e) => setRpe(Number(e.target.value))} className="w-full mt-1 accent-teal" />
         <div className="flex justify-between text-xs text-grey"><span>Easy</span><span>All-out</span></div>
       </div>

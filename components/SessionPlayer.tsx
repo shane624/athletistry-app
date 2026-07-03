@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { logSet } from "@/lib/data";
 import { logSession } from "@/lib/load-actions";
-import { sessionTrimp } from "@/lib/load";
+import { sessionTrimp, effortWord } from "@/lib/load";
 import type { ResolvedRx } from "@/lib/program";
 import type { ExerciseRow } from "@/lib/types";
 import ExerciseVideo from "@/components/ExerciseVideo";
@@ -275,11 +275,11 @@ function FinishScreen({
               <input className="input mt-1 w-32" inputMode="numeric" value={dur} onChange={(e) => setDur(e.target.value)} />
             </div>
             <div className="mt-3 text-left">
-              <label className="text-xs text-grey">Effort — how hard it felt <span className="opacity-70">(RPE)</span>: <b className="text-navy">{rpe}</b> / 10</label>
+              <label className="text-xs text-grey">Effort — how hard it felt: <b className="text-navy">{rpe} · {effortWord(rpe)}</b></label>
               <input type="range" min={1} max={10} value={rpe} onChange={(e) => setRpe(Number(e.target.value))} className="w-full accent-teal mt-1" />
-              <div className="flex justify-between text-[11px] text-grey"><span>1 easy</span><span>10 max</span></div>
+              <div className="flex justify-between text-[11px] text-grey"><span>easy</span><span>all-out</span></div>
             </div>
-            {dur && <p className="text-grey text-sm mt-1">= <b className="text-navy">{sessionTrimp(Number(dur) || 0, rpe)} TRIMP</b></p>}
+            {dur && <p className="text-grey text-sm mt-1">Adds <b className="text-navy">{sessionTrimp(Number(dur) || 0, rpe)} load</b> to your week</p>}
             <div className="flex gap-2 mt-4">
               <button className="btn-primary flex-1" disabled={busy || !dur} onClick={() => save(false)}>
                 {busy ? <Dots /> : "Save & finish"}

@@ -17,7 +17,7 @@ export default async function LoadPage() {
       <NavBar />
       <main className="max-w-3xl mx-auto px-4 py-6">
         <PageHeader icon="calendar" eyebrow="Train like an athlete" title="Training Calendar"
-          subtitle="Log every session as time + effort (RPE). The app tracks your weekly load and tapers you before an event." />
+          subtitle="Log every session as time + how hard it felt. The app tracks your weekly load and eases you off before an event." />
         <LoadClient
           assessment={assessment}
           weeks={weeks}

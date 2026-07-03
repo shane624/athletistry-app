@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { logSession, deleteSession, updateSession, addEvent, deleteEvent } from "@/lib/load-actions";
-import { sessionTrimp, type LoadAssessment, type WeekLoad } from "@/lib/load";
+import { sessionTrimp, effortWord, weekLoadWord, type LoadAssessment, type WeekLoad } from "@/lib/load";
 import Dots from "@/components/Dots";
 
 interface SessionRow { id: number; session_date: string; kind: string; duration_min: number; rpe: number; note: string | null; start_time: string | null; }
@@ -105,7 +105,7 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
             {a.taper ? "Taper" : a.status === "event-week" ? "Event week" : "This week's load"}
             {nextEventName && a.weeksToEvent != null ? ` · ${nextEventName} in ${a.weeksToEvent} wk` : ""}
           </p>
-          {a.thisWeek && <span className="badge bg-white/20">{a.thisWeek.trimp} TRIMP</span>}
+          {a.thisWeek && <span className="badge bg-white/20 capitalize">{weekLoadWord(a.thisWeek.trimp)} · {a.thisWeek.trimp.toLocaleString()}</span>}
         </div>
         <p className="text-lg font-bold mt-2">{a.message}</p>
         <p className="text-white/70 text-xs mt-1">Load = time × effort. Higher means a harder training week.</p>
@@ -122,7 +122,7 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
       <div className="card p-5 animate-in">
         <div className="flex items-center justify-between">
           <p className="eyebrow">This week, day by day</p>
-          <span className="text-grey text-xs">{weekDayTotal} TRIMP total</span>
+          <span className="text-grey text-xs">{weekDayTotal.toLocaleString()} load this week</span>
         </div>
         <div className="flex items-end gap-2 mt-4">
           {weekDays.map((d) => (
@@ -142,7 +142,7 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
         </div>
         <p className="text-grey text-xs mt-3">
           {weekDayTotal > 0
-            ? "Each bar is that day's load (duration × RPE). Spread hard days out and keep an easy day or two."
+            ? "Each bar is that day's load (time × how hard it felt). Spread hard days out and keep an easy day or two."
             : "No sessions logged this week yet — add one below and it'll show here."}
         </p>
       </div>
@@ -190,11 +190,11 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
             </div>
           </div>
           <div>
-            <label className="text-xs text-grey">Effort — how hard it felt <span className="opacity-70">(RPE)</span>: <b className="text-navy">{rpe}</b> / 10</label>
+            <label className="text-xs text-grey">Effort — how hard it felt: <b className="text-navy">{rpe} · {effortWord(rpe)}</b></label>
             <input type="range" min={1} max={10} value={rpe} onChange={(e) => setRpe(Number(e.target.value))} className="w-full accent-teal mt-1" />
-            <div className="flex justify-between text-[11px] text-grey"><span>1 easy</span><span>10 max</span></div>
+            <div className="flex justify-between text-[11px] text-grey"><span>easy</span><span>all-out</span></div>
           </div>
-          {dur && <p className="text-grey text-sm">This session = <b className="text-navy">{sessionTrimp(Number(dur) || 0, rpe)} TRIMP</b></p>}
+          {dur && <p className="text-grey text-sm">Adds <b className="text-navy">{sessionTrimp(Number(dur) || 0, rpe)} load</b> to your week</p>}
           <button className="btn-primary" disabled={busy || !dur}>{busy ? <Dots /> : "Log session"}</button>
         </form>
       </div>
@@ -212,16 +212,16 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
                     <input className="input w-16 py-1" inputMode="numeric" value={eDur}
                       onChange={(e) => setEDur(e.target.value.replace(/[^0-9]/g, ""))} />
                     <span className="text-grey text-xs">min</span>
-                    <label className="text-grey text-xs">RPE</label>
+                    <label className="text-grey text-xs">Effort</label>
                     <input type="range" min={1} max={10} value={eRpe} onChange={(e) => setERpe(Number(e.target.value))} className="accent-teal w-24" />
-                    <span className="text-navy font-semibold w-4">{eRpe}</span>
+                    <span className="text-navy font-semibold">{eRpe} · {effortWord(eRpe)}</span>
                     <button className="text-teal font-semibold text-xs ml-auto" onClick={() => saveEdit(s.id)} disabled={busy}>Save</button>
                     <button className="text-grey text-xs" onClick={cancelEdit}>Cancel</button>
                   </div>
                 ) : (
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-navy">{s.session_date.slice(5)} · <span className="capitalize">{s.kind}</span></span>
-                    <span className="text-grey">{s.duration_min}min · RPE {s.rpe} · {sessionTrimp(s.duration_min, s.rpe)} TRIMP</span>
+                    <span className="text-grey">{s.duration_min}min · {effortWord(s.rpe)} · {sessionTrimp(s.duration_min, s.rpe)} load</span>
                     <span className="flex items-center gap-2 shrink-0">
                       <button className="text-teal hover:text-tealdark text-xs" onClick={() => startEdit(s)}>Edit</button>
                       <button className="text-grey hover:text-red-600 text-xs" onClick={() => removeSession(s.id)}>✕</button>
