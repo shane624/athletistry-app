@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import InitialSplash from "@/components/InitialSplash";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://athletistry.app"),
@@ -58,12 +57,11 @@ const SPLASH: { media: string; href: string }[] = [
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" style={{ background: "#1f2a44" }}>
+    <html lang="en">
       <body>
         {SPLASH.map((s) => (
           <link key={s.href} rel="apple-touch-startup-image" media={s.media} href={s.href} />
         ))}
-        <InitialSplash />
         {children}
       </body>
     </html>
