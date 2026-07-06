@@ -176,14 +176,18 @@ export async function addExercisesToPlanDay(date: string, count = 1, maxLevel = 
     .select("block, session_type, exercise_ids")
     .eq("user_id", user.id).eq("plan_date", date).single();
   if (!row) return { ok: false, error: "No plan day on that date." };
-  const style = (row.block as WorkoutStyle | null) ?? STYLE_FOR[row.session_type];
-  if (!style) return { ok: false, error: "This day has no exercise workout to add to." };
+  // Workout days keep their own style; class / cardio / rest days default to a
+  // short accessory session (hypertrophy) so a dancer can add e.g. core work.
+  const style = (row.block as WorkoutStyle | null) ?? STYLE_FOR[row.session_type] ?? "hypertrophy";
   const existing: number[] = row.exercise_ids ?? [];
   const slots = await generateWorkout(style, 1, maxLevel, equipment);
   const candidates = slots.flatMap((s) => s.exercises.map((e) => e.id)).filter((id) => !existing.includes(id));
   const additions = candidates.slice(0, Math.max(1, count));
   if (!additions.length) return { ok: false, error: "No new exercises available to add." };
+  // set the block on days that had none, so it renders (and gets an rx) on Today
+  const patch: { exercise_ids: number[]; block?: string } = { exercise_ids: [...existing, ...additions] };
+  if (!row.block) patch.block = style;
   const { error } = await supabase.from("event_plan_days")
-    .update({ exercise_ids: [...existing, ...additions] }).eq("user_id", user.id).eq("plan_date", date);
+    .update(patch).eq("user_id", user.id).eq("plan_date", date);
   return error ? { ok: false, error: error.message } : { ok: true };
 }

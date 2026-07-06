@@ -72,6 +72,8 @@ function exThumb(e: { cloudinary_id: string | null; youtube_id: string | null })
 export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: LoggedClass[] }) {
   const [date, setDate] = useState("");
   const [type, setType] = useState("Performance");
+  const [noEvent, setNoEvent] = useState(false);
+  const [horizon, setHorizon] = useState(8);
   const [gymDays, setGymDays] = useState(3);
   const [plan, setPlan] = useState<EventPlan | null>(null);
   const [schedule, setSchedule] = useState<PlanDay[] | null>(null);
@@ -173,7 +175,9 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
   async function go(e: React.FormEvent) {
     e.preventDefault();
     setSavedMsg(null);
-    const p = buildEventPlan({ eventISO: date, classLoad, gymDays, gymStart });
+    const p = noEvent
+      ? buildEventPlan({ eventISO: "", classLoad, gymDays, gymStart, general: true, horizonWeeks: horizon })
+      : buildEventPlan({ eventISO: date, classLoad, gymDays, gymStart });
     setPlan(p);
     if (!p) { setSchedule(null); return; }
     const demand: PlanDemand = { stamina, explosive, focus: [...focus] };
@@ -193,7 +197,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
     const exercisesByStyle: Record<string, number[]> = {};
     for (const k of Object.keys(styleExercises)) exercisesByStyle[k] = styleExercises[k].map((x) => x.id);
     const res = await saveEventPlan({
-      label: `${type} plan`,
+      label: noEvent ? "Training block" : `${type} plan`,
       days: schedule.map((d) => ({ iso: d.iso, type: d.type, title: d.title, detail: d.detail, weekIndex: d.weekIndex })),
       maxLevel,
       equipment: equip.size ? [...equip] : undefined,
@@ -227,22 +231,49 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
 
         {step === 0 && (<>
         {/* event */}
-        <div data-tour="event" className="flex flex-wrap gap-4 items-end">
-          <div>
-            <p className="text-sm font-medium text-navy">Event type</p>
-            <div className="flex gap-1.5 mt-1 flex-wrap">
-              {["Performance", "Competition", "Exam"].map((t) => (
-                <button key={t} type="button" onClick={() => setType(t)}
-                  className={`rounded-full px-3 py-1.5 text-sm border ${type === t ? "bg-teal text-white border-teal" : "bg-white border-line text-grey"}`}>
-                  {t}
-                </button>
-              ))}
+        <div data-tour="event">
+          {!noEvent && (
+            <div className="flex flex-wrap gap-4 items-end">
+              <div>
+                <p className="text-sm font-medium text-navy">Event type</p>
+                <div className="flex gap-1.5 mt-1 flex-wrap">
+                  {["Performance", "Competition", "Exam"].map((t) => (
+                    <button key={t} type="button" onClick={() => setType(t)}
+                      className={`rounded-full px-3 py-1.5 text-sm border ${type === t ? "bg-teal text-white border-teal" : "bg-white border-line text-grey"}`}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-navy">Event date</p>
+                <input type="date" className="input mt-1" value={date} onChange={(e) => setDate(e.target.value)} />
+              </div>
             </div>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-navy">Event date</p>
-            <input type="date" className="input mt-1" value={date} onChange={(e) => setDate(e.target.value)} required />
-          </div>
+          )}
+
+          {/* no-event toggle */}
+          <label className="flex items-start gap-2.5 mt-4 cursor-pointer">
+            <input type="checkbox" className="mt-1 accent-teal w-4 h-4" checked={noEvent} onChange={(e) => setNoEvent(e.target.checked)} />
+            <span>
+              <span className="block text-sm font-medium text-navy">I don&apos;t have an event yet</span>
+              <span className="block text-grey text-xs">Build me a general training block instead — steady progress, no taper or countdown.</span>
+            </span>
+          </label>
+
+          {noEvent && (
+            <div className="mt-3">
+              <p className="text-sm font-medium text-navy">How many weeks?</p>
+              <div className="flex gap-1.5 mt-1 flex-wrap">
+                {[4, 6, 8, 12].map((w) => (
+                  <button key={w} type="button" onClick={() => setHorizon(w)}
+                    className={`rounded-full px-3 py-1.5 text-sm border ${horizon === w ? "bg-teal text-white border-teal" : "bg-white border-line text-grey"}`}>
+                    {w} weeks
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         </>)}
@@ -293,8 +324,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                         {/* row 2: minutes + RPE */}
                         <div className="flex items-center gap-3 mt-2 flex-wrap">
                           <label className="flex items-center gap-1.5 text-xs text-grey">
-                            <input className="input w-16 py-1 text-center" inputMode="numeric" value={c.mins}
-                              onChange={(e) => updateClass(day, c.id, { mins: Math.max(15, Math.min(300, Number(e.target.value.replace(/[^0-9]/g, "")) || 0)) })} />
+                            <MinsField value={c.mins} onCommit={(n) => updateClass(day, c.id, { mins: n })} />
                             min
                           </label>
                           <label className="flex items-center gap-1.5 text-xs text-grey">
@@ -406,11 +436,11 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
         </div>
 
         {/* live preview — shows the plan taking shape as you fill it in */}
-        {(date || classCount > 0) && (
+        {(date || noEvent || classCount > 0) && (
           <div className="card p-3 bg-light flex flex-wrap gap-x-5 gap-y-1 text-sm">
-            {weeksToEvent != null && (
-              <span className="text-navy"><b>{weeksToEvent}</b> week{weeksToEvent === 1 ? "" : "s"} until your {type.toLowerCase()}</span>
-            )}
+            {noEvent
+              ? <span className="text-navy"><b>{horizon}</b>-week general block</span>
+              : weeksToEvent != null && <span className="text-navy"><b>{weeksToEvent}</b> week{weeksToEvent === 1 ? "" : "s"} until your {type.toLowerCase()}</span>}
             <span className="text-grey"><b className="text-navy">{classCount}</b> class{classCount === 1 ? "" : "es"} a week</span>
             <span className="text-grey"><b className="text-navy">{gymDays}</b> gym day{gymDays === 1 ? "" : "s"}</span>
           </div>
@@ -426,13 +456,13 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
             <button
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              disabled={(step === 0 && !date) || (step === 1 && classLoad === 0)}
+              disabled={(step === 0 && !date && !noEvent) || (step === 1 && classLoad === 0)}
               className="btn-primary flex-1 py-3 disabled:opacity-50"
             >
-              {step === 0 && !date ? "Add an event date to continue" : step === 1 && classLoad === 0 ? "Add at least one class" : "Next →"}
+              {step === 0 && !date && !noEvent ? "Add a date, or pick 'no event yet'" : step === 1 && classLoad === 0 ? "Add at least one class" : "Next →"}
             </button>
           ) : (
-            <button data-tour="build" type="submit" className="btn-primary flex-1 py-3" disabled={!date || classLoad === 0 || building}>
+            <button data-tour="build" type="submit" className="btn-primary flex-1 py-3" disabled={(!date && !noEvent) || classLoad === 0 || building}>
               {building ? <Dots /> : plan ? "Rebuild my plan" : "Build my plan ✨"}
             </button>
           )}
@@ -444,9 +474,11 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           {/* celebratory header — warm, plain language */}
           <div className="card p-5 grad-navy text-white animate-in">
             <p className="text-white/75 text-xs font-semibold uppercase tracking-wide">Your plan is ready 🎉</p>
-            <p className="font-extrabold text-xl mt-1">Here&apos;s your roadmap to your {type.toLowerCase()}.</p>
+            <p className="font-extrabold text-xl mt-1">{noEvent ? "Here's your training block." : `Here's your roadmap to your ${type.toLowerCase()}.`}</p>
             <p className="text-white/85 text-sm mt-2 leading-relaxed">
-              {planStats?.weeks} weeks that build you up gently, then ease off just before the day so you arrive fresh and strong. Press activate and I&apos;ll guide you through it one day at a time — no guesswork, nothing scary.
+              {noEvent
+                ? `${planStats?.weeks} weeks that build you up steadily around your classes — no countdown, just steady progress. Press activate and I'll guide you through it one day at a time.`
+                : `${planStats?.weeks} weeks that build you up gently, then ease off just before the day so you arrive fresh and strong. Press activate and I'll guide you through it one day at a time — no guesswork, nothing scary.`}
             </p>
             <button onClick={activate} disabled={saving}
               className="mt-4 bg-white text-navy font-bold rounded-xl px-5 py-3 text-sm inline-flex items-center gap-2 active:scale-[.98] transition">
@@ -499,7 +531,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           {schedule && schedule.length > 0 && (
             <div className="mt-6">
               <p className="eyebrow">Day by day</p>
-              <p className="text-grey text-sm mt-1 mb-3">A peek at each day from now to your {type.toLowerCase()}. Once you activate, these appear on your Today screen with demo videos — one day at a time, so it never feels like a lot.</p>
+              <p className="text-grey text-sm mt-1 mb-3">A peek at each day{noEvent ? " in your block" : ` from now to your ${type.toLowerCase()}`}. Once you activate, these appear on your Today screen with demo videos — one day at a time, so it never feels like a lot.</p>
               <div className="space-y-5 stagger">
                 {groupByWeek(schedule).map((wk) => {
                   const weeksOut = (plan?.weeksOut ?? 0) - (wk.weekIndex - 1);
@@ -559,6 +591,22 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
         </div>
       )}
     </div>
+  );
+}
+
+// Minutes input that lets you clear and retype freely, then clamps to 15–300 on
+// blur (the old version clamped on every keystroke, so you couldn't edit it).
+function MinsField({ value, onCommit }: { value: number; onCommit: (n: number) => void }) {
+  const [str, setStr] = useState(String(value));
+  useEffect(() => { setStr(String(value)); }, [value]);
+  return (
+    <input
+      className="input w-16 py-1 text-center"
+      inputMode="numeric"
+      value={str}
+      onChange={(e) => setStr(e.target.value.replace(/[^0-9]/g, ""))}
+      onBlur={() => { const n = Math.max(15, Math.min(300, Number(str) || 60)); onCommit(n); setStr(String(n)); }}
+    />
   );
 }
 

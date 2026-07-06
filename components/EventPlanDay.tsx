@@ -3,6 +3,7 @@ import Icon, { type IconName } from "@/components/Icon";
 import ClearEventPlan from "@/components/ClearEventPlan";
 import ExerciseCard from "@/components/ExerciseCard";
 import PlanDayEdit from "@/components/PlanDayEdit";
+import AddDayWorkout from "@/components/AddDayWorkout";
 import CompleteWorkout from "@/components/CompleteWorkout";
 import { EVENT_PLAN_PROGRAM_ID } from "@/lib/event-plan-data";
 import type { EventPlanToday, PlanUpcomingDay } from "@/lib/event-plan-data";
@@ -96,7 +97,12 @@ export default function EventPlanDay({ plan, upcoming = [], levelIndex = 0, leve
       )}
 
       {isRest && (
-        <p className="text-grey text-sm mt-4">Take it easy today — recovery is part of the plan. Your next session is around the corner.</p>
+        <>
+          <p className="text-grey text-sm mt-4">
+            {plan.sessionType === "cardio" ? "Log your cardio, and add some strength or core work if you'd like." : "Take it easy today — recovery is part of the plan. Your next session is around the corner."}
+          </p>
+          <AddDayWorkout date={plan.date} />
+        </>
       )}
 
       {/* what's coming up */}

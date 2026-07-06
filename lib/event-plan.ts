@@ -14,7 +14,7 @@ export const TAPER_CUT = 0.30;      // -30% volume in the taper
 export const TAPER_WEEKS_DEFAULT = 2;
 
 export interface PlanInput {
-  eventISO: string;          // YYYY-MM-DD
+  eventISO: string;          // YYYY-MM-DD (ignored when general is true)
   /** Weekly class load the dancer already carries (TRIMP). */
   classLoad: number;
   /** Gym sessions per week the dancer wants to commit to. */
@@ -22,6 +22,10 @@ export interface PlanInput {
   /** Where the gym load starts in week 1 (TRIMP across all gym sessions). */
   gymStart?: number;
   today?: Date;
+  /** No event — build a rolling general block (no taper, no event week). */
+  general?: boolean;
+  /** How many weeks the general block runs (default 8). */
+  horizonWeeks?: number;
 }
 
 export type PlanTone = "base" | "build" | "taper" | "event" | "past";
@@ -44,6 +48,7 @@ export interface EventPlan {
   gymDays: number;
   weeks: PlanWeek[];
   peakTotal: number;
+  general?: boolean;         // true = rolling block, no taper / event week
 }
 
 function weeksUntil(eventISO: string, today: Date): number {
@@ -61,13 +66,41 @@ const round = (n: number) => Math.round(n);
  */
 export function buildEventPlan(input: PlanInput): EventPlan | null {
   const today = input.today ?? new Date();
-  const weeksOut = weeksUntil(input.eventISO, today);
-  if (weeksOut < 0) return null;
+  const weeksOut = input.general ? -2 : weeksUntil(input.eventISO, today);
+  if (!input.general && weeksOut < 0) return null;
 
   const classLoad = Math.max(0, round(input.classLoad));
   const gymDays = Math.max(1, Math.min(6, Math.round(input.gymDays)));
   // sensible starting gym load if not given: a moderate session (~30min × RPE6) per day
   const gymStart = Math.max(gymDays * 60, round(input.gymStart ?? gymDays * 180));
+
+  // ---- no event: a rolling general block that just builds steadily ----
+  if (input.general) {
+    const horizon = Math.max(2, Math.min(24, Math.round(input.horizonWeeks ?? 8)));
+    const baseCount = horizon >= 6 ? Math.ceil(horizon / 3) : 0;
+    const gWeeks: PlanWeek[] = [];
+    let gPrev: number | null = null;
+    let g = gymStart;
+    for (let i = 0; i < horizon; i++) {
+      const total = classLoad + g;
+      const changePct = gPrev ? round(((total - gPrev) / gPrev) * 100) : null;
+      const isBase = i < baseCount;
+      gWeeks.push({
+        index: i + 1, weeksOut: horizon - i,
+        label: isBase ? `Base week ${i + 1}` : `Build week ${i + 1 - baseCount}`,
+        tone: isBase ? "base" : "build",
+        classLoad, gymLoad: round(g), totalLoad: round(total), perSession: round(g / gymDays),
+        changePct,
+        focus: isBase
+          ? "Rebuild the base — control and clean technique. Moderate gym sessions; install the pattern before loading it."
+          : "Push the gym load a little past last week — add a set, a little weight, or a few minutes. Keep classes as they are.",
+      });
+      gPrev = total;
+      const nextTotal = total * (1 + WEEKLY_BUILD);
+      g = Math.max(gymDays * 60, nextTotal - classLoad);
+    }
+    return { weeksOut: horizon, gymDays, weeks: gWeeks, peakTotal: round(gPrev ?? classLoad + gymStart), general: true };
+  }
 
   if (weeksOut === 0) {
     const wk: PlanWeek = {
@@ -294,7 +327,7 @@ export function buildDailySchedule(
       detail = restIdea(dayOffset);
     }
 
-    if (tone === "event" || dayOffset === totalDays - 1) {
+    if (!plan.general && (tone === "event" || dayOffset === totalDays - 1)) {
       type = "rest";
       title = "Event week — keep it light";
       detail = "Gentle mobility and a thorough warm-up only. Trust the work you've banked. Then perform.";
