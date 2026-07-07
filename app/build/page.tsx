@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function BuildPage() {
   const [allExercises, customDays] = await Promise.all([listExercises(), getCustomDays()]);
   // shape current routine as dayIndex -> exerciseIds
-  const initial = customDays.map((d) => ({ dayIndex: d.dayIndex, exerciseIds: d.exercises.map((e) => e.id) }));
+  const initial = customDays.map((d) => ({ dayIndex: d.dayIndex, exerciseIds: d.exercises.map((e) => e.id), groups: d.groups }));
   return (
     <div className="min-h-screen">
       <NavBar />

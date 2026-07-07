@@ -17,6 +17,8 @@ export interface TodayData {
   dayTitle: string;
   rx: ResolvedRx;
   exercises: ExerciseRow[];
+  // parallel to exercises: superset group id (same id = done back-to-back), custom programs only
+  supersetGroups?: (number | null)[];
   // exercise id -> set_number -> {weight, reps}
   logs: Record<number, Record<number, { weight: number; reps: number }>>;
   // exercise id -> last logged {weight, reps} from an earlier session (prefill)

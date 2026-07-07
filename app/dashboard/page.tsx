@@ -183,19 +183,25 @@ export default async function Dashboard() {
         )}
 
         <div data-tour="log" className="grid md:grid-cols-2 gap-4">
-          {today.exercises.map((ex) => (
-            <ExerciseCard
-              key={ex.id}
-              exercise={ex}
-              rx={today.rx}
-              programId={today.programId}
-              week={today.week}
-              dayIndex={today.dayIndex}
-              timed={today.mode === "timed"}
-              initialLogs={today.logs[ex.id] ?? {}}
-              lastLog={today.lastLogs?.[ex.id]}
-            />
-          ))}
+          {today.exercises.map((ex, i) => {
+            const g = today.supersetGroups?.[i] ?? null;
+            const firstOfGroup = g != null && (i === 0 || (today.supersetGroups?.[i - 1] ?? null) !== g);
+            return (
+              <div key={i} style={g != null ? { boxShadow: "inset 3px 0 0 var(--c-teal)", borderRadius: "18px" } : undefined}>
+                {firstOfGroup && <p className="text-[11px] font-bold uppercase tracking-wide text-tealdark mb-1 pl-2">Superset · do back to back</p>}
+                <ExerciseCard
+                  exercise={ex}
+                  rx={today.rx}
+                  programId={today.programId}
+                  week={today.week}
+                  dayIndex={today.dayIndex}
+                  timed={today.mode === "timed"}
+                  initialLogs={today.logs[ex.id] ?? {}}
+                  lastLog={today.lastLogs?.[ex.id]}
+                />
+              </div>
+            );
+          })}
         </div>
 
         {today.exercises.length === 0 && (

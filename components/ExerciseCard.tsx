@@ -31,14 +31,16 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
     return <HoldCard exercise={exercise} rx={rx} programId={programId} week={week} dayIndex={dayIndex} initialLogs={initialLogs} />;
   }
 
-  const sets = Array.from({ length: rx.sets }, (_, i) => i + 1);
   // pre-fill: today's log if present, else last session's weight/reps (so the
   // dancer just confirms instead of typing).
   const preW = lastLog?.weight != null ? String(lastLog.weight) : "";
   const preR = lastLog?.reps != null ? String(lastLog.reps) : "";
+  // extra sets the dancer adds on top of the prescribed count
+  const [extra, setExtra] = useState(0);
+  const sets = Array.from({ length: rx.sets + extra }, (_, i) => i + 1);
   const [vals, setVals] = useState<Record<number, { weight: string; reps: string }>>(() => {
     const init: Record<number, { weight: string; reps: string }> = {};
-    for (const s of sets) {
+    for (let s = 1; s <= rx.sets; s++) {
       init[s] = {
         weight: initialLogs[s]?.weight != null ? String(initialLogs[s].weight) : preW,
         reps: initialLogs[s]?.reps != null ? String(initialLogs[s].reps) : preR,
@@ -46,6 +48,12 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
     }
     return init;
   });
+
+  function addSet() {
+    const n = rx.sets + extra + 1; // the new set's number
+    setVals((v) => ({ ...v, [n]: { weight: v[1]?.weight ?? preW, reps: v[1]?.reps ?? preR } }));
+    setExtra((e) => e + 1);
+  }
   const [saved, setSaved] = useState<Record<number, "idle" | "saving" | "ok">>({});
   const [restKey, setRestKey] = useState(0); // bump to auto-start the rest timer
 
@@ -115,6 +123,7 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
         logAll={logAll}
         allBusy={allBusy}
         canLogAll={canLogAll}
+        addSet={addSet}
       />
 
       <RestTimer defaultSec={rx.restSec ?? 60} autoStartKey={restKey} />
@@ -126,7 +135,7 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
 
 // One-tap logging: enter set 1, tap "Log all sets". Individual sets are tucked
 // behind a toggle for the rare case where they differ.
-function OneTapLog({ sets, vals, setVals, saved, save, logAll, allBusy, canLogAll }: {
+function OneTapLog({ sets, vals, setVals, saved, save, logAll, allBusy, canLogAll, addSet }: {
   sets: number[];
   vals: Record<number, { weight: string; reps: string }>;
   setVals: React.Dispatch<React.SetStateAction<Record<number, { weight: string; reps: string }>>>;
@@ -135,6 +144,7 @@ function OneTapLog({ sets, vals, setVals, saved, save, logAll, allBusy, canLogAl
   logAll: () => void;
   allBusy: boolean;
   canLogAll: boolean;
+  addSet: () => void;
 }) {
   const [showEach, setShowEach] = useState(false);
   const allDone = sets.every((s) => saved[s] === "ok");
@@ -162,11 +172,16 @@ function OneTapLog({ sets, vals, setVals, saved, save, logAll, allBusy, canLogAl
       </button>
 
       {/* secondary: per-set entry, only when they differ */}
-      {sets.length > 1 && (
-        <button onClick={() => setShowEach((v) => !v)} className="text-teal text-xs font-semibold mt-2">
-          {showEach ? "Hide individual sets" : "Sets weren’t the same? Log each →"}
+      <div className="flex items-center gap-3 mt-2">
+        {sets.length > 1 && (
+          <button onClick={() => setShowEach((v) => !v)} className="text-teal text-xs font-semibold">
+            {showEach ? "Hide individual sets" : "Sets weren’t the same? Log each →"}
+          </button>
+        )}
+        <button onClick={() => { addSet(); setShowEach(true); }} className="text-teal text-xs font-semibold ml-auto">
+          + Add a set
         </button>
-      )}
+      </div>
 
       {showEach && (
         <div className="mt-2 space-y-2">
@@ -174,12 +189,12 @@ function OneTapLog({ sets, vals, setVals, saved, save, logAll, allBusy, canLogAl
             <div key={s} className="flex items-center gap-2">
               <span className="w-11 shrink-0 text-sm text-grey">Set {s}</span>
               <input className="input py-1.5 flex-1 min-w-0" inputMode="decimal" placeholder="kg"
-                value={vals[s].weight}
-                onChange={(e) => setVals((v) => ({ ...v, [s]: { ...v[s], weight: e.target.value } }))} />
+                value={vals[s]?.weight ?? ""}
+                onChange={(e) => setVals((v) => ({ ...v, [s]: { ...(v[s] ?? { weight: "", reps: "" }), weight: e.target.value } }))} />
               <span className="text-grey shrink-0">×</span>
               <input className="input py-1.5 flex-1 min-w-0" inputMode="numeric" placeholder="reps"
-                value={vals[s].reps}
-                onChange={(e) => setVals((v) => ({ ...v, [s]: { ...v[s], reps: e.target.value } }))} />
+                value={vals[s]?.reps ?? ""}
+                onChange={(e) => setVals((v) => ({ ...v, [s]: { ...(v[s] ?? { weight: "", reps: "" }), reps: e.target.value } }))} />
               <button className="btn-primary py-1.5 text-sm shrink-0" onClick={() => save(s)}>
                 {saved[s] === "saving" ? <Dots /> : saved[s] === "ok" ? "✓" : "Save"}
               </button>

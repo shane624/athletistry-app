@@ -53,6 +53,7 @@ export async function getToday(): Promise<TodayData & { programId: string; progr
     : 1;
 
   let exercises: ExerciseRow[];
+  let supersetGroups: (number | null)[] = [];
   let dayIndex: number;
   let dayTitle: string;
   let dayCount: number;
@@ -66,6 +67,7 @@ export async function getToday(): Promise<TodayData & { programId: string; progr
     dayIndex = Math.min(st.selectedDay, dayCount - 1);
     const sel = customDays.find((d) => d.dayIndex === dayIndex) ?? customDays[0];
     exercises = sel?.exercises ?? [];
+    supersetGroups = sel?.groups ?? [];
     dayTitle = `My Routine — Day ${dayIndex + 1}`;
   } else {
     // Weekday programs default to the server's weekday, but a client-side
@@ -122,41 +124,45 @@ export async function getToday(): Promise<TodayData & { programId: string; progr
   }
 
   return {
-    week, dayIndex, dayTitle, phase, principle, rx: rx as any, exercises, logs, lastLogs,
+    week, dayIndex, dayTitle, phase, principle, rx: rx as any, exercises, supersetGroups, logs, lastLogs,
     programId: program.id, programName: program.name, programType: program.type,
     mode: program.mode, dayCount, scheduling: program.scheduling, isCustom,
   };
 }
 
 /** Read the user's custom routine, grouped by day with resolved exercise rows. */
-export async function getCustomDays(): Promise<{ dayIndex: number; exercises: ExerciseRow[] }[]> {
+export async function getCustomDays(): Promise<{ dayIndex: number; exercises: ExerciseRow[]; groups: (number | null)[] }[]> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [{ dayIndex: 0, exercises: [] }];
+  if (!user) return [{ dayIndex: 0, exercises: [], groups: [] }];
   const { data: rows } = await supabase
     .from("custom_program_exercises")
-    .select("day_index, ord, exercises(id,name,youtube_id,cloudinary_id,level,category)")
+    .select("day_index, ord, superset_group, exercises(id,name,youtube_id,cloudinary_id,level,category)")
     .eq("user_id", user.id)
     .order("day_index").order("ord");
-  const byDay = new Map<number, ExerciseRow[]>();
+  const byDay = new Map<number, { exercises: ExerciseRow[]; groups: (number | null)[] }>();
   for (const r of (rows ?? []) as any[]) {
-    const arr = byDay.get(r.day_index) ?? [];
-    if (r.exercises) arr.push(r.exercises);
-    byDay.set(r.day_index, arr);
+    const bucket = byDay.get(r.day_index) ?? { exercises: [], groups: [] };
+    if (r.exercises) { bucket.exercises.push(r.exercises); bucket.groups.push(r.superset_group ?? null); }
+    byDay.set(r.day_index, bucket);
   }
-  if (byDay.size === 0) return [{ dayIndex: 0, exercises: [] }];
-  return [...byDay.entries()].sort((a, b) => a[0] - b[0]).map(([dayIndex, exercises]) => ({ dayIndex, exercises }));
+  if (byDay.size === 0) return [{ dayIndex: 0, exercises: [], groups: [] }];
+  return [...byDay.entries()].sort((a, b) => a[0] - b[0]).map(([dayIndex, b]) => ({ dayIndex, exercises: b.exercises, groups: b.groups }));
 }
 
-/** Replace the user's custom routine for one day with a new ordered list of exercise ids. */
-export async function saveCustomDay(dayIndex: number, exerciseIds: number[]) {
+/** Replace the user's custom routine for one day with a new ordered list of
+ *  exercise ids (duplicates allowed) and optional parallel superset groups. */
+export async function saveCustomDay(dayIndex: number, exerciseIds: number[], groups?: (number | null)[]) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Not signed in" };
   // clear existing rows for that day, then insert the new order
   await supabase.from("custom_program_exercises").delete().eq("user_id", user.id).eq("day_index", dayIndex);
   if (exerciseIds.length) {
-    const rows = exerciseIds.map((id, i) => ({ user_id: user.id, day_index: dayIndex, exercise_id: id, ord: i }));
+    const rows = exerciseIds.map((id, i) => ({
+      user_id: user.id, day_index: dayIndex, exercise_id: id, ord: i,
+      superset_group: groups?.[i] ?? null,
+    }));
     const { error } = await supabase.from("custom_program_exercises").insert(rows);
     if (error) return { ok: false, error: error.message };
   }

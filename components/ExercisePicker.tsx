@@ -30,11 +30,13 @@ type Mode = "az" | "body" | "recent";
  * fast-scroll rail, thumbnails and multi-select. Tapping a row toggles it.
  */
 export default function ExercisePicker({
-  allExercises, chosen, onToggle,
+  allExercises, counts, onAdd,
 }: {
   allExercises: ExerciseRow[];
-  chosen: Set<number>;
-  onToggle: (id: number) => void;
+  /** how many times each exercise is already in the routine (for the ×N badge) */
+  counts: Record<number, number>;
+  /** add another copy of this exercise */
+  onAdd: (id: number) => void;
 }) {
   const [q, setQ] = useState("");
   const [mode, setMode] = useState<Mode>("az");
@@ -72,9 +74,9 @@ export default function ExercisePicker({
     el?.scrollIntoView({ block: "start", behavior: "smooth" });
   }
 
-  function toggle(id: number) {
-    if (!chosen.has(id)) pushRecent(id);
-    onToggle(id);
+  function add(id: number) {
+    pushRecent(id);
+    onAdd(id);
   }
 
   return (
@@ -102,10 +104,10 @@ export default function ExercisePicker({
             <div key={sec.key} data-sec={sec.key}>
               <p className="sticky top-0 bg-surface/95 backdrop-blur text-[11px] font-bold uppercase tracking-wide text-grey py-1.5 z-[1]">{sec.key}</p>
               {sec.rows.map((e) => {
-                const on = chosen.has(e.id);
+                const n = counts[e.id] ?? 0;
                 const t = thumb(e);
                 return (
-                  <button key={e.id} onClick={() => toggle(e.id)}
+                  <button key={e.id} onClick={() => add(e.id)}
                     className="w-full flex items-center gap-3 py-2 border-b border-line text-left">
                     <span className="w-11 h-11 rounded-lg bg-black/5 overflow-hidden shrink-0">
                       {t && <img src={t} alt="" className="w-full h-full object-cover" loading="lazy" />}
@@ -114,9 +116,8 @@ export default function ExercisePicker({
                       <span className="block text-sm text-navy truncate">{e.name}</span>
                       <span className="block text-xs text-grey">L{e.level} · {e.category}</span>
                     </span>
-                    <span className={`w-6 h-6 rounded-full border flex items-center justify-center shrink-0 ${on ? "bg-teal border-teal text-white" : "border-line text-transparent"}`}>
-                      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    </span>
+                    {n > 0 && <span className="text-[11px] font-bold text-tealdark shrink-0">×{n}</span>}
+                    <span className="w-7 h-7 rounded-full border border-teal text-teal flex items-center justify-center shrink-0 text-lg leading-none" aria-label={`Add ${e.name}`}>+</span>
                   </button>
                 );
               })}
