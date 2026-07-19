@@ -323,7 +323,11 @@ export function framing(f: PoseFrame): Framing {
   // judging "cut off" by x/y position gives false positives. Instead: if the
   // model confidently sees a joint, it's in frame. It won't confidently detect
   // a joint that's genuinely off-screen, so real cut-offs still get caught.
-  const seen = (a: number, b: number) => ok(f, a) || ok(f, b); // at least one side (works from a profile)
+  // Very low confidence bar: dim rooms / bare legs / busy backgrounds pull the
+  // model's visibility scores down even when a joint is clearly tracked. A
+  // genuinely off-screen limb still drops well below this (~0.1).
+  const V = (i: number) => (f[i]?.visibility ?? 1) > 0.25;
+  const seen = (a: number, b: number) => V(a) || V(b); // at least one side (works from a profile)
 
   if (!seen(P.LEFT_SHOULDER, P.RIGHT_SHOULDER) || !seen(P.LEFT_HIP, P.RIGHT_HIP)) {
     return { ready: false, hint: "Step into view so your whole body shows" };
@@ -331,13 +335,13 @@ export function framing(f: PoseFrame): Framing {
   if (!seen(P.LEFT_ANKLE, P.RIGHT_ANKLE) || !seen(P.LEFT_KNEE, P.RIGHT_KNEE)) {
     return { ready: false, hint: "Step back so your legs and feet are in view" };
   }
-  if (!(ok(f, P.NOSE) || ok(f, P.LEFT_EAR) || ok(f, P.RIGHT_EAR))) {
+  if (!(V(P.NOSE) || V(P.LEFT_EAR) || V(P.RIGHT_EAR))) {
     return { ready: false, hint: "Make sure your head is in the frame too" };
   }
 
   // Only remaining guard: are they far too small in the frame? (very loose)
-  const headY = [P.NOSE, P.LEFT_EAR, P.RIGHT_EAR].filter((i) => ok(f, i)).map((i) => f[i].y);
-  const ankleY = [P.LEFT_ANKLE, P.RIGHT_ANKLE].filter((i) => ok(f, i)).map((i) => f[i].y);
+  const headY = [P.NOSE, P.LEFT_EAR, P.RIGHT_EAR].filter((i) => V(i)).map((i) => f[i].y);
+  const ankleY = [P.LEFT_ANKLE, P.RIGHT_ANKLE].filter((i) => V(i)).map((i) => f[i].y);
   const top = headY.length ? Math.min(...headY) : 0;
   const bottom = ankleY.length ? Math.max(...ankleY) : 1;
   if (bottom - top < 0.2) return { ready: false, hint: "Come a little closer" };

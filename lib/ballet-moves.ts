@@ -15,7 +15,9 @@ function mid(a: LM, b: LM): LM { return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2
 function d(a: LM, b: LM): number { return Math.hypot(a.x - b.x, a.y - b.y); }
 function sx(p: LM, a: number): LM { return { x: p.x * a, y: p.y }; }
 function vis(p?: LM): number { return p ? (p.visibility ?? 1) : 0; }
-function has(f: PoseFrame, ...idx: number[]): boolean { return idx.every((i) => vis(f[i]) > 0.5); }
+// Low confidence bar — dim rooms / bare legs pull visibility scores down even
+// when a joint is clearly tracked (a genuinely missing joint sits far lower).
+function has(f: PoseFrame, ...idx: number[]): boolean { return idx.every((i) => vis(f[i]) > 0.25); }
 function perp(p: LM, a: LM, b: LM): number {
   const dx = b.x - a.x, dy = b.y - a.y;
   const len = Math.hypot(dx, dy) || 1e-6;
@@ -203,7 +205,7 @@ const portDeBras: BalletMove = {
   setup: "Facing the camera, start with arms down. Then raise both arms overhead slowly.",
   tip: "We first note your relaxed shoulder height, then check the shoulders don't ride up as the arms lift.",
   evaluate(f, a, baseline) {
-    if (!has(f, P.LEFT_SHOULDER, P.RIGHT_SHOULDER) || vis(f[15]) < 0.5 || vis(f[16]) < 0.5) return { valid: false, peak: 0, cues: [], hint: "Keep your shoulders and wrists in frame." };
+    if (!has(f, P.LEFT_SHOULDER, P.RIGHT_SHOULDER) || vis(f[15]) < 0.25 || vis(f[16]) < 0.25) return { valid: false, peak: 0, cues: [], hint: "Keep your shoulders and wrists in frame." };
     const { armsUp, elevation, shMidY, wristMinY } = pdbMetrics(f, a, baseline);
     return {
       valid: armsUp, peak: shMidY - wristMinY,
@@ -243,7 +245,7 @@ const kneeLine: BalletMove = {
   setup: "Turn side-on to the camera and stand tall with straight legs.",
   tip: "Side-on, we check whether your knee stacks over the ankle–hip line or pushes back into hyperextension.",
   evaluate(f, a) {
-    const side = (l: number, r: number) => vis(f[l]) > 0.5 || vis(f[r]) > 0.5;
+    const side = (l: number, r: number) => vis(f[l]) > 0.25 || vis(f[r]) > 0.25;
     if (!side(P.LEFT_HIP, P.RIGHT_HIP) || !side(P.LEFT_KNEE, P.RIGHT_KNEE) || !side(P.LEFT_ANKLE, P.RIGHT_ANKLE)) {
       return { valid: false, peak: 0, cues: [], hint: "Turn side-on with your whole leg in frame." };
     }
