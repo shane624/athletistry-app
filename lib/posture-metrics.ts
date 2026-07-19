@@ -238,23 +238,48 @@ function avgVis(f: PoseFrame, idxs: number[]): number {
 export interface Framing { ready: boolean; hint: string }
 
 export function framing(f: PoseFrame): Framing {
-  // Core body must be present & visible (works from front, side, or back).
-  const core = [P.LEFT_SHOULDER, P.RIGHT_SHOULDER, P.LEFT_HIP, P.RIGHT_HIP, P.LEFT_KNEE, P.RIGHT_KNEE, P.LEFT_ANKLE, P.RIGHT_ANKLE];
-  for (const i of core) if (!ok(f, i)) return { ready: false, hint: "Step into view so your whole body shows" };
+  // Each body segment must have AT LEAST ONE side visible — from a true profile
+  // the far shoulder/hip/knee/ankle drop below the visibility threshold, so
+  // requiring both would wrongly reject a side view.
+  const pair = (a: number, b: number) => ok(f, a) || ok(f, b);
+  if (!pair(P.LEFT_SHOULDER, P.RIGHT_SHOULDER) || !pair(P.LEFT_HIP, P.RIGHT_HIP)
+    || !pair(P.LEFT_KNEE, P.RIGHT_KNEE) || !pair(P.LEFT_ANKLE, P.RIGHT_ANKLE)) {
+    return { ready: false, hint: "Step into view so your whole body shows" };
+  }
 
-  const headIdx = [P.NOSE, P.LEFT_EAR, P.RIGHT_EAR].filter((i) => ok(f, i));
-  const top = headIdx.length ? Math.min(...headIdx.map((i) => f[i].y)) : Math.min(f[P.LEFT_SHOULDER].y, f[P.RIGHT_SHOULDER].y);
-  const bottom = Math.max(f[P.LEFT_ANKLE].y, f[P.RIGHT_ANKLE].y, f[P.LEFT_FOOT]?.y ?? 0, f[P.RIGHT_FOOT]?.y ?? 0);
-  const xs = core.map((i) => f[i].x);
+  const vy = (idxs: number[]) => idxs.filter((i) => ok(f, i)).map((i) => f[i].y);
+  const headY = vy([P.NOSE, P.LEFT_EAR, P.RIGHT_EAR]);
+  const ankleY = vy([P.LEFT_ANKLE, P.RIGHT_ANKLE, P.LEFT_FOOT, P.RIGHT_FOOT]);
+  const shoulderY = vy([P.LEFT_SHOULDER, P.RIGHT_SHOULDER]);
+  const top = headY.length ? Math.min(...headY) : Math.min(...shoulderY);
+  const bottom = ankleY.length ? Math.max(...ankleY) : 1;
+  const xs = [P.LEFT_SHOULDER, P.RIGHT_SHOULDER, P.LEFT_HIP, P.RIGHT_HIP, P.LEFT_KNEE, P.RIGHT_KNEE, P.LEFT_ANKLE, P.RIGHT_ANKLE]
+    .filter((i) => ok(f, i)).map((i) => f[i].x);
   const left = Math.min(...xs), right = Math.max(...xs);
 
-  if (headIdx.length && top < 0.04) return { ready: false, hint: "Aim the camera up a little — your head is cut off" };
+  if (headY.length && top < 0.04) return { ready: false, hint: "Aim the camera up a little — your head is cut off" };
   if (bottom > 0.98) return { ready: false, hint: "Aim the camera down a little — your feet are cut off" };
   if (left < 0.03 || right > 0.97) return { ready: false, hint: "Centre yourself — you're cut off at the edge" };
 
   const span = bottom - top;
   if (span < 0.3) return { ready: false, hint: "Come a little closer — you're a bit small in frame" };
   return { ready: true, hint: "" };
+}
+
+// Coarse orientation: the ONE thing a single camera reads reliably is whether
+// the shoulders are square-on (wide) or edge-on (side). Front vs back is left
+// to the capture sequence, which is far more robust than guessing from pixels.
+// Also returns face visibility so the caller can sanity-check a back view.
+export function orientationKind(f: PoseFrame, aspect = 1): { kind: "side" | "wide" | "unknown"; faceVis: number } {
+  if (!f[P.LEFT_SHOULDER] || !f[P.RIGHT_SHOULDER] || !f[P.LEFT_HIP] || !f[P.RIGHT_HIP]) {
+    return { kind: "unknown", faceVis: 0 };
+  }
+  const shMid = mid(f[P.LEFT_SHOULDER], f[P.RIGHT_SHOULDER]);
+  const hpMid = mid(f[P.LEFT_HIP], f[P.RIGHT_HIP]);
+  const torsoH = Math.hypot((shMid.x - hpMid.x) * aspect, shMid.y - hpMid.y) || 1e-6;
+  const shoulderW = Math.abs(f[P.LEFT_SHOULDER].x - f[P.RIGHT_SHOULDER].x) * aspect / torsoH;
+  const faceVis = avgVis(f, [P.NOSE, 2, 5, 9, 10]);
+  return { kind: shoulderW < 0.5 ? "side" : "wide", faceVis };
 }
 
 // `aspect` = frame width / height. MediaPipe normalises x by width and y by

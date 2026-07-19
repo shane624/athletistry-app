@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Icon from "@/components/Icon";
-import { analyzeAll, detectOrientation, framing, type Captures, type LM, type PoseFrame } from "@/lib/posture-metrics";
+import { analyzeAll, orientationKind, framing, type Captures, type LM, type PoseFrame } from "@/lib/posture-metrics";
 import { postureToScores, buildPostureSummary, type PostureSummary } from "@/lib/posture-to-type";
 import { saveMovementScan } from "@/lib/movement-map-actions";
 import type { TypeId } from "@/lib/movement-map";
@@ -14,7 +14,6 @@ const MP_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vis
 const MP_WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm";
 const MODEL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
 
-// Which body-point pairs to draw as a skeleton.
 const BONES: [number, number][] = [
   [11, 12], [11, 23], [12, 24], [23, 24],
   [11, 13], [13, 15], [12, 14], [14, 16],
@@ -23,10 +22,16 @@ const BONES: [number, number][] = [
 ];
 
 type ViewId = "front" | "side" | "back";
+const ORDER: ViewId[] = ["front", "side", "back"];
 const VIEW_LABEL: Record<ViewId, string> = { front: "Front", side: "Side", back: "Back" };
-const ALL_VIEWS: ViewId[] = ["front", "side", "back"];
-const HOLD_MS = 2600;   // hold an angle steady this long before it auto-captures
-const STILL_EPS = 0.012; // per-point movement below this = "standing still"
+const CUE: Record<ViewId, string> = {
+  front: "Face the camera — feet hip-width, arms relaxed by your sides.",
+  side: "Turn side-on (either side) to the camera, eyes forward.",
+  back: "Turn your back to the camera and stand naturally.",
+};
+const SHORT: Record<ViewId, string> = { front: "Face the camera", side: "Turn side-on", back: "Turn your back to the camera" };
+const HOLD_MS = 2600;
+const STILL_EPS = 0.012;
 
 type Phase = "intro" | "starting" | "scanning" | "saving" | "done" | "error";
 
@@ -39,8 +44,8 @@ export default function PoseCamera() {
   const streamRef = useRef<MediaStream | null>(null);
 
   const [phase, setPhase] = useState<Phase>("intro");
-  const [detView, setDetView] = useState<ViewId | "unknown">("unknown");
   const [frameHint, setFrameHint] = useState("Step into view so your whole body shows");
+  const [aligned, setAligned] = useState(false);   // pose matches the current target
   const [holdPct, setHoldPct] = useState(0);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [moving, setMoving] = useState(false);
@@ -50,11 +55,13 @@ export default function PoseCamera() {
 
   const capturesRef = useRef<Captures>({});
   const motionRef = useRef<{ x: number; y: number }[] | null>(null);
-  const stableRef = useRef<{ view: ViewId | "unknown"; since: number }>({ view: "unknown", since: 0 });
-  const busyRef = useRef(false); // guards against double-capture / finishing
+  const stableRef = useRef<{ key: string; since: number }>({ key: "none", since: 0 });
+  const busyRef = useRef(false);
   const [result, setResult] = useState<{ summary: PostureSummary; primary: TypeId; secondary: TypeId } | null>(null);
 
-  // --- draw the landmark overlay ---
+  const nextTarget = (): ViewId | null => ORDER.find((v) => !capturesRef.current[v]) ?? null;
+
+  // --- overlay ---
   const draw = useCallback((lms: PoseFrame | null) => {
     const cv = canvasRef.current, vid = videoRef.current;
     if (!cv || !vid) return;
@@ -66,14 +73,10 @@ export default function PoseCamera() {
     ctx.clearRect(0, 0, w, h);
     if (!lms) return;
     const px = (p: LM) => ({ x: p.x * w, y: p.y * h });
-
-    // plumb line through the shoulder midpoint
     const smx = (lms[11].x + lms[12].x) / 2 * w;
     ctx.strokeStyle = "rgba(39,174,159,0.55)"; ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
     ctx.beginPath(); ctx.moveTo(smx, 0); ctx.lineTo(smx, h); ctx.stroke();
     ctx.setLineDash([]);
-
-    // bones
     ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.lineWidth = 3;
     for (const [a, b] of BONES) {
       const pa = lms[a], pb = lms[b];
@@ -81,13 +84,8 @@ export default function PoseCamera() {
       const A = px(pa), B = px(pb);
       ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
     }
-    // points
     ctx.fillStyle = "#27ae9f";
-    for (const p of lms) {
-      if (!p) continue;
-      const P = px(p);
-      ctx.beginPath(); ctx.arc(P.x, P.y, 4, 0, Math.PI * 2); ctx.fill();
-    }
+    for (const p of lms) { if (!p) continue; const P = px(p); ctx.beginPath(); ctx.arc(P.x, P.y, 4, 0, Math.PI * 2); ctx.fill(); }
   }, []);
 
   const stopCamera = useCallback(() => {
@@ -111,19 +109,18 @@ export default function PoseCamera() {
     setPhase("done");
   }, [stopCamera]);
 
-  // store a captured view, flash it, and finish once all three are in
   const commitCapture = useCallback((view: ViewId, lms: PoseFrame) => {
     if (capturesRef.current[view]) return;
     capturesRef.current[view] = lms.map((p) => ({ ...p })) as PoseFrame;
-    const done = ALL_VIEWS.filter((v) => capturesRef.current[v]);
+    const done = ORDER.filter((v) => capturesRef.current[v]);
     setCapturedViews(done);
     setFlash(view); setTimeout(() => setFlash(null), 650);
-    stableRef.current = { view: "unknown", since: performance.now() }; // require a fresh hold
-    motionRef.current = null; setHoldPct(0); setCountdown(null);
-    if (done.length === ALL_VIEWS.length) finish();
+    stableRef.current = { key: "none", since: performance.now() };
+    motionRef.current = null; setHoldPct(0); setCountdown(null); setAligned(false);
+    if (done.length === ORDER.length) finish();
   }, [finish]);
 
-  // --- detection + auto-capture loop ---
+  // --- loop: framing → target match → stillness → countdown → capture ---
   const loop = useCallback(() => {
     const vid = videoRef.current, lk = landmarkerRef.current;
     if (vid && lk && vid.readyState >= 2 && !busyRef.current) {
@@ -133,16 +130,23 @@ export default function PoseCamera() {
         latestRef.current = lms;
         draw(lms);
 
-        // 1) Is the whole body actually in frame? (hands-free / distance use)
         const fr = lms ? framing(lms) : { ready: false, hint: "Step into view so your whole body shows" };
         setFrameHint((h) => (h === fr.hint ? h : fr.hint));
 
-        // 2) Only read orientation + capture once framing is good.
+        const target = nextTarget();
         const aspect = (vid.videoWidth || 640) / (vid.videoHeight || 480);
-        const view = lms && fr.ready ? detectOrientation(lms, aspect).view : "unknown";
-        setDetView((prev) => (prev === view ? prev : view));
+        const kind = lms && fr.ready ? orientationKind(lms, aspect) : { kind: "unknown" as const, faceVis: 0 };
 
-        // 3) Are they standing still? (don't start the timer while they walk in)
+        // Does the current pose match the angle we're waiting for?
+        let match = false;
+        if (target && lms && fr.ready) {
+          if (target === "front") match = kind.kind === "wide" && kind.faceVis > 0.35;
+          else if (target === "side") match = kind.kind === "side";
+          else if (target === "back") match = kind.kind === "wide" && kind.faceVis < 0.8;
+        }
+        setAligned((a) => (a === match ? a : match));
+
+        // stillness
         let still = true;
         if (lms) {
           const key = [11, 12, 23, 24, 27, 28].map((i) => lms[i]);
@@ -154,20 +158,18 @@ export default function PoseCamera() {
           }
           motionRef.current = key.map((p) => ({ x: p.x, y: p.y }));
         }
+        setMoving((m) => { const v = match && !still; return m === v ? m : v; });
 
         const now = performance.now();
-        // reset the hold if the angle changed OR they're still moving
-        if (view !== stableRef.current.view || !still) stableRef.current = { view, since: now };
+        const stateKey = match ? (target as string) : "none";
+        if (stateKey !== stableRef.current.key || !still) stableRef.current = { key: stateKey, since: now };
         const held = now - stableRef.current.since;
 
-        const counting = !!lms && fr.ready && still && view !== "unknown" && !capturesRef.current[view];
-        setMoving((m) => (m === (!still && fr.ready) ? m : (!still && fr.ready)));
-        if (counting) {
+        if (match && still && target) {
           const pct = Math.min(1, held / HOLD_MS);
           setHoldPct((p) => (Math.abs(p - pct) > 0.03 ? pct : p));
-          const secs = Math.max(1, Math.ceil((HOLD_MS - held) / 1000));
-          setCountdown((c) => (c === secs ? c : secs));
-          if (held >= HOLD_MS) commitCapture(view, lms);
+          setCountdown((c) => { const s = Math.max(1, Math.ceil((HOLD_MS - held) / 1000)); return c === s ? c : s; });
+          if (held >= HOLD_MS) commitCapture(target, lms!);
         } else {
           setHoldPct((p) => (p !== 0 ? 0 : p));
           setCountdown((c) => (c !== null ? null : c));
@@ -177,11 +179,10 @@ export default function PoseCamera() {
     rafRef.current = requestAnimationFrame(loop);
   }, [draw, commitCapture]);
 
-  // --- start camera + model ---
   const start = useCallback(async () => {
     setPhase("starting"); setErrMsg("");
-    capturesRef.current = {}; setCapturedViews([]); setCountdown(null);
-    stableRef.current = { view: "unknown", since: 0 }; motionRef.current = null; busyRef.current = false;
+    capturesRef.current = {}; setCapturedViews([]); setCountdown(null); setAligned(false);
+    stableRef.current = { key: "none", since: 0 }; motionRef.current = null; busyRef.current = false;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 640, height: 480 }, audio: false });
       streamRef.current = stream;
@@ -194,13 +195,11 @@ export default function PoseCamera() {
       let lk: any;
       try {
         lk = await vision.PoseLandmarker.createFromOptions(fileset, {
-          baseOptions: { modelAssetPath: MODEL, delegate: "GPU" },
-          runningMode: "VIDEO", numPoses: 1,
+          baseOptions: { modelAssetPath: MODEL, delegate: "GPU" }, runningMode: "VIDEO", numPoses: 1,
         });
       } catch {
         lk = await vision.PoseLandmarker.createFromOptions(fileset, {
-          baseOptions: { modelAssetPath: MODEL, delegate: "CPU" },
-          runningMode: "VIDEO", numPoses: 1,
+          baseOptions: { modelAssetPath: MODEL, delegate: "CPU" }, runningMode: "VIDEO", numPoses: 1,
         });
       }
       landmarkerRef.current = lk;
@@ -215,11 +214,12 @@ export default function PoseCamera() {
     }
   }, [loop, stopCamera]);
 
-  // manual fallback: capture whatever's currently detected
+  // manual backup: force-capture the current target with the latest frame
   const manualCapture = useCallback(() => {
     const lms = latestRef.current;
-    if (lms && detView !== "unknown" && !capturesRef.current[detView]) commitCapture(detView, lms);
-  }, [detView, commitCapture]);
+    const target = nextTarget();
+    if (lms && target) commitCapture(target, lms);
+  }, [commitCapture]);
 
   useEffect(() => () => stopCamera(), [stopCamera]);
 
@@ -245,13 +245,13 @@ export default function PoseCamera() {
       <div className="card p-5 mt-5 border-l-2 border-teal animate-in">
         <p className="eyebrow">Camera posture scan</p>
         <p className="text-navy text-sm mt-1 leading-relaxed">
-          Your camera tracks your body points and reads your alignment from three angles — front, side, and back.
-          It knows which way you&apos;re facing, so you just <b>turn slowly</b> and it captures each angle on its own. Takes about a minute.
+          Your camera tracks your body points and reads your alignment. It guides you through three angles —
+          <b> front, then side, then back</b> — and captures each one on its own once you hold still. Takes about a minute.
         </p>
         <ul className="mt-3 space-y-1.5">
           {["Nothing is recorded or uploaded — the scan runs entirely on your device.",
             "Prop your phone/laptop up, then step back until your whole body is in frame — no need to touch it.",
-            "It waits until you're fully in shot, then auto-captures front, side, and back as you slowly turn."].map((s) => (
+            "Follow the prompts: face the camera, turn side-on, then turn your back. Each captures automatically."].map((s) => (
             <li key={s} className="text-grey text-sm flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-teal shrink-0" />{s}
             </li>
@@ -268,10 +268,19 @@ export default function PoseCamera() {
     );
   }
 
-  // starting / scanning / saving — camera stage
-  const detLabel = detView === "unknown" ? null : VIEW_LABEL[detView];
-  const detCaptured = detView !== "unknown" && capturedViews.includes(detView);
-  const remaining = ALL_VIEWS.filter((v) => !capturedViews.includes(v)).map((v) => VIEW_LABEL[v].toLowerCase());
+  // scanning stage
+  const target = ORDER.find((v) => !capturedViews.includes(v)) ?? null;
+  const targetLabel = target ? VIEW_LABEL[target] : null;
+  const framed = !frameHint;
+  const pill = !framed
+    ? (frameHint || "Finding your position…")
+    : !target
+      ? "All angles captured"
+      : moving
+        ? "Hold still…"
+        : countdown !== null
+          ? `Hold ${targetLabel} — capturing in ${countdown}…`
+          : SHORT[target];
 
   return (
     <div className="mt-5 animate-in">
@@ -281,49 +290,34 @@ export default function PoseCamera() {
           <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
         </div>
 
-        {/* detected-orientation pill + hold ring */}
         <div className="absolute top-3 left-3 flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur">
-          <span className={`w-2 h-2 rounded-full ${detView === "unknown" ? "bg-amber-400" : detCaptured ? "bg-teal" : "bg-emerald-400"}`} />
-          <span className="text-white text-xs font-medium">
-            {detView === "unknown"
-              ? (frameHint || "Finding your position…")
-              : detCaptured
-                ? `${detLabel} captured ✓`
-                : moving
-                  ? "Hold still…"
-                  : countdown !== null
-                    ? `Hold ${detLabel} — capturing in ${countdown}…`
-                    : `Get into ${detLabel} position`}
-          </span>
+          <span className={`w-2 h-2 rounded-full ${!framed ? "bg-amber-400" : aligned ? "bg-emerald-400" : "bg-white/70"}`} />
+          <span className="text-white text-xs font-medium">{pill}</span>
         </div>
 
-        {/* captured-view chips */}
         <div className="absolute top-3 right-3 flex items-center gap-1.5">
-          {ALL_VIEWS.map((v) => {
+          {ORDER.map((v) => {
             const got = capturedViews.includes(v);
             return (
-              <span key={v} className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${got ? "bg-teal text-white" : detView === v ? "bg-white text-navy" : "bg-white/25 text-white"}`}>
+              <span key={v} className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${got ? "bg-teal text-white" : target === v ? "bg-white text-navy" : "bg-white/25 text-white"}`}>
                 {VIEW_LABEL[v]}{got ? " ✓" : ""}
               </span>
             );
           })}
         </div>
 
-        {/* hold-to-capture progress bar */}
-        {phase === "scanning" && detView !== "unknown" && !detCaptured && (
+        {phase === "scanning" && aligned && !moving && (
           <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/15">
             <div className="h-full bg-teal transition-[width] duration-75" style={{ width: `${Math.round(holdPct * 100)}%` }} />
           </div>
         )}
 
-        {/* big countdown while holding steady */}
         {phase === "scanning" && countdown !== null && !flash && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="text-white text-7xl font-extrabold drop-shadow-lg" style={{ textShadow: "0 2px 12px rgba(0,0,0,.5)" }}>{countdown}</span>
+            <span className="text-white text-7xl font-extrabold" style={{ textShadow: "0 2px 12px rgba(0,0,0,.5)" }}>{countdown}</span>
           </div>
         )}
 
-        {/* capture flash */}
         {flash && <div className="absolute inset-0 bg-white/70 animate-in" style={{ animationDuration: "120ms" }} />}
 
         {(phase === "starting" || phase === "saving") && (
@@ -335,24 +329,23 @@ export default function PoseCamera() {
         )}
       </div>
 
-      {/* guidance + manual fallback */}
       <div className="card p-4 mt-3">
-        <p className="eyebrow">{capturedViews.length} of {ALL_VIEWS.length} angles captured</p>
+        <p className="eyebrow">Step {Math.min(capturedViews.length + 1, ORDER.length)} of {ORDER.length}{target ? ` · ${targetLabel} view` : ""}</p>
         <p className="text-navy text-sm mt-1">
-          {capturedViews.length === 0
-            ? "Stand tall, feet hip-width, arms relaxed. Face the camera to capture your front, then slowly turn."
-            : remaining.length
-              ? `Nice — now turn to show your ${remaining.join(" and ")}. Hold each angle steady and it captures automatically.`
-              : "All angles captured — reading your alignment…"}
+          {target ? CUE[target] : "All angles captured — reading your alignment…"}
         </p>
-        <button
-          onClick={manualCapture}
-          disabled={phase !== "scanning" || detView === "unknown" || detCaptured}
-          className="btn-ghost w-full py-2.5 mt-3 disabled:opacity-40 text-sm"
-        >
-          {detView === "unknown" || detCaptured ? "Waiting for a clear angle…" : `Capture ${detLabel?.toLowerCase()} now`}
-        </button>
-        <p className="text-grey text-xs mt-2 text-center">It captures on its own — the button is just a manual backup.</p>
+        {target && (
+          <>
+            <button
+              onClick={manualCapture}
+              disabled={phase !== "scanning"}
+              className="btn-ghost w-full py-2.5 mt-3 disabled:opacity-40 text-sm"
+            >
+              Capture {targetLabel?.toLowerCase()} now
+            </button>
+            <p className="text-grey text-xs mt-2 text-center">It captures on its own once you hold still — the button is just a manual backup.</p>
+          </>
+        )}
       </div>
     </div>
   );
