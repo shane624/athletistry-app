@@ -27,6 +27,37 @@ export const P = {
 export type Severity = "ok" | "mild" | "notable" | "unknown";
 export type ViewId = "front" | "side" | "back";
 
+// ---- Temporal smoothing ---------------------------------------------------
+// Median-average a short buffer of frames captured while the dancer held still.
+// Median (not mean) rejects the odd jittery frame, giving a far steadier read
+// than a single-frame snapshot — the payoff of capturing a clip, not a photo.
+function median(a: number[]): number {
+  if (!a.length) return 0;
+  const s = [...a].sort((x, y) => x - y);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+export function averageFrames(frames: PoseFrame[]): PoseFrame {
+  if (frames.length <= 1) return frames[0] ?? [];
+  const n = Math.max(...frames.map((f) => f.length));
+  const out: LM[] = [];
+  for (let i = 0; i < n; i++) {
+    const xs: number[] = [], ys: number[] = [], zs: number[] = [], vs: number[] = [];
+    for (const f of frames) {
+      const p = f[i]; if (!p) continue;
+      xs.push(p.x); ys.push(p.y);
+      if (p.z !== undefined) zs.push(p.z);
+      if (p.visibility !== undefined) vs.push(p.visibility);
+    }
+    out.push({
+      x: median(xs), y: median(ys),
+      z: zs.length ? median(zs) : undefined,
+      visibility: vs.length ? median(vs) : undefined,
+    });
+  }
+  return out;
+}
+
 export interface Finding {
   key: string;
   region: "feet" | "knees" | "hips" | "shoulders" | "head" | "spine" | "whole";

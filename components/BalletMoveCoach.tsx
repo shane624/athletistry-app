@@ -4,14 +4,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Icon from "@/components/Icon";
-import { framing, type LM, type PoseFrame, type Finding } from "@/lib/posture-metrics";
+import { framing, averageFrames, type LM, type PoseFrame, type Finding } from "@/lib/posture-metrics";
 import { getBalletMove, type Cue, type MoveResult } from "@/lib/ballet-moves";
 import { MOVEMENT_TYPES, type TypeId } from "@/lib/movement-map";
 import { saveBalletResult } from "@/lib/ballet-actions";
 
 const MP_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
 const MP_WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm";
-const MODEL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
+const MODEL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/1/pose_landmarker_heavy.task";
+const SMOOTH_MAX = 40; // frames of the held rep to median-average
 
 const BONES: [number, number][] = [
   [11, 12], [11, 23], [12, 24], [23, 24], [11, 13], [13, 15], [12, 14], [14, 16],
@@ -34,6 +35,8 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
   const aspectRef = useRef(4 / 3);
   const baselineRef = useRef<PoseFrame | null>(null);
   const bestRef = useRef<{ peak: number; frame: PoseFrame } | null>(null);
+  const smoothRef = useRef<PoseFrame[]>([]); // held-rep clip buffer
+  const baseBufRef = useRef<PoseFrame[]>([]); // neutral clip buffer
   const motionRef = useRef<{ x: number; y: number }[] | null>(null);
   const stableRef = useRef<{ key: string; since: number }>({ key: "none", since: 0 });
   const busyRef = useRef(false);
@@ -119,26 +122,32 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
           setHint((h) => (h === "" ? h : ""));
           setCues((c) => (c.length ? [] : c));
           if (still) {
-            if (stableRef.current.key !== "base") stableRef.current = { key: "base", since: now };
+            if (stableRef.current.key !== "base") { stableRef.current = { key: "base", since: now }; baseBufRef.current = []; }
+            baseBufRef.current.push(lms.map((p) => ({ ...p })) as PoseFrame);
+            if (baseBufRef.current.length > SMOOTH_MAX) baseBufRef.current.shift();
             const held = now - stableRef.current.since;
             setHoldPct((p) => { const v = Math.min(1, held / BASE_MS); return Math.abs(p - v) > 0.03 ? v : p; });
-            if (held >= BASE_MS) { baselineRef.current = lms.map((p) => ({ ...p })) as PoseFrame; bestRef.current = null; stableRef.current = { key: "none", since: now }; setHoldPct(0); setPhase("assess"); }
-          } else { stableRef.current = { key: "none", since: now }; setHoldPct((p) => (p ? 0 : p)); }
+            if (held >= BASE_MS) { baselineRef.current = averageFrames(baseBufRef.current); bestRef.current = null; smoothRef.current = []; stableRef.current = { key: "none", since: now }; setHoldPct(0); setPhase("assess"); }
+          } else { stableRef.current = { key: "none", since: now }; baseBufRef.current = []; setHoldPct((p) => (p ? 0 : p)); }
         } else if (phase === "assess") {
           const ev = move.evaluate(lms, aspect, baselineRef.current);
           setCues(ev.cues);
           setHint((h) => (h === ev.hint ? h : ev.hint));
           if (ev.valid) {
-            // track the best rep seen this attempt
-            if (!bestRef.current || ev.peak > bestRef.current.peak) bestRef.current = { peak: ev.peak, frame: lms.map((p) => ({ ...p })) as PoseFrame };
+            const clone = lms.map((p) => ({ ...p })) as PoseFrame;
+            // track the best rep seen this attempt (fallback if hold is brief)
+            if (!bestRef.current || ev.peak > bestRef.current.peak) bestRef.current = { peak: ev.peak, frame: clone };
             if (still) {
-              if (stableRef.current.key !== "hold") stableRef.current = { key: "hold", since: now };
+              if (stableRef.current.key !== "hold") { stableRef.current = { key: "hold", since: now }; smoothRef.current = []; }
+              smoothRef.current.push(clone);
+              if (smoothRef.current.length > SMOOTH_MAX) smoothRef.current.shift();
               const held = now - stableRef.current.since;
               setHoldPct((p) => { const v = Math.min(1, held / HOLD_MS); return Math.abs(p - v) > 0.03 ? v : p; });
               setCountdown((c) => { const s = Math.max(1, Math.ceil((HOLD_MS - held) / 1000)); return c === s ? c : s; });
-              if (held >= HOLD_MS) finalize(bestRef.current!.frame);
-            } else { stableRef.current = { key: "none", since: now }; setHoldPct((p) => (p ? 0 : p)); setCountdown((c) => (c !== null ? null : c)); }
+              if (held >= HOLD_MS) finalize(averageFrames(smoothRef.current.length ? smoothRef.current : [bestRef.current!.frame]));
+            } else { stableRef.current = { key: "none", since: now }; smoothRef.current = []; setHoldPct((p) => (p ? 0 : p)); setCountdown((c) => (c !== null ? null : c)); }
           } else {
+            smoothRef.current = [];
             setHoldPct((p) => (p ? 0 : p)); setCountdown((c) => (c !== null ? null : c));
             stableRef.current = { key: "none", since: now };
           }
@@ -152,6 +161,7 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
     if (!move) return;
     setPhase("starting"); setErrMsg(""); setResult(null);
     baselineRef.current = null; bestRef.current = null; motionRef.current = null;
+    smoothRef.current = []; baseBufRef.current = [];
     stableRef.current = { key: "none", since: 0 }; busyRef.current = false;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 640, height: 480 }, audio: false });

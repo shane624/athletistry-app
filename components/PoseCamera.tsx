@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Icon from "@/components/Icon";
-import { analyzeAll, orientationKind, framing, type Captures, type LM, type PoseFrame } from "@/lib/posture-metrics";
+import { analyzeAll, orientationKind, framing, averageFrames, type Captures, type LM, type PoseFrame } from "@/lib/posture-metrics";
 import { postureToScores, buildPostureSummary, type PostureSummary } from "@/lib/posture-to-type";
 import { saveMovementScan } from "@/lib/movement-map-actions";
 import type { TypeId } from "@/lib/movement-map";
@@ -12,7 +12,8 @@ import PoseScanResult from "@/components/PoseScanResult";
 
 const MP_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
 const MP_WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm";
-const MODEL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
+const MODEL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/1/pose_landmarker_heavy.task";
+const SMOOTH_MAX = 45; // frames of the steady hold to median-average on capture
 
 const BONES: [number, number][] = [
   [11, 12], [11, 23], [12, 24], [23, 24],
@@ -55,6 +56,7 @@ export default function PoseCamera() {
   const [errMsg, setErrMsg] = useState("");
 
   const capturesRef = useRef<Captures>({});
+  const smoothRef = useRef<PoseFrame[]>([]); // steady-hold clip buffer
   const motionRef = useRef<{ x: number; y: number }[] | null>(null);
   const stableRef = useRef<{ key: string; since: number }>({ key: "none", since: 0 });
   const busyRef = useRef(false);
@@ -170,11 +172,15 @@ export default function PoseCamera() {
         const held = now - stableRef.current.since;
 
         if (match && still && target) {
+          // buffer the held pose so we median-average a clip, not one frame
+          smoothRef.current.push(lms!.map((p) => ({ ...p })) as PoseFrame);
+          if (smoothRef.current.length > SMOOTH_MAX) smoothRef.current.shift();
           const pct = Math.min(1, held / HOLD_MS);
           setHoldPct((p) => (Math.abs(p - pct) > 0.03 ? pct : p));
           setCountdown((c) => { const s = Math.max(1, Math.ceil((HOLD_MS - held) / 1000)); return c === s ? c : s; });
-          if (held >= HOLD_MS) commitCapture(target, lms!);
+          if (held >= HOLD_MS) commitCapture(target, averageFrames(smoothRef.current));
         } else {
+          smoothRef.current = [];
           setHoldPct((p) => (p !== 0 ? 0 : p));
           setCountdown((c) => (c !== null ? null : c));
         }
@@ -327,7 +333,7 @@ export default function PoseCamera() {
         {(phase === "starting" || phase === "saving") && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/45">
             <p className="text-white text-sm font-medium animate-pulse">
-              {phase === "starting" ? "Starting camera + loading the model…" : "Reading your alignment…"}
+              {phase === "starting" ? "Starting camera + loading the model… (first time can take a few seconds)" : "Reading your alignment…"}
             </p>
           </div>
         )}
