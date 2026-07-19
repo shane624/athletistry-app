@@ -21,6 +21,7 @@ const GROUPS: Group[] = [
       { href: "/dashboard", label: "Today" },
       { href: "/explore", label: "Explore" },
       { href: "/movement-map", label: "Movement Map" },
+      { href: "/movement-map/ballet", label: "Ballet Movement Lab" },
       { href: "/programs", label: "Programs" },
       { href: "/plan", label: "Training Plan Builder" },
       { href: "/generate", label: "Practice Generator" },

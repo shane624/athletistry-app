@@ -7,12 +7,16 @@ import MovementMapResult from "@/components/MovementMapResult";
 import PoseScanResult from "@/components/PoseScanResult";
 import { getMovementMap } from "@/lib/movement-map-data";
 import { buildPostureSummary } from "@/lib/posture-to-type";
-import { MAP_TESTS } from "@/lib/movement-map";
+import { MAP_TESTS, MOVEMENT_TYPES } from "@/lib/movement-map";
+import { BALLET_MOVES, buildBalletLeaning } from "@/lib/ballet-moves";
+import { getBalletResults } from "@/lib/ballet-data";
 
 export const dynamic = "force-dynamic";
 
 export default async function MovementMapPage({ searchParams }: { searchParams: { retake?: string; quiz?: string } }) {
   const saved = await getMovementMap();
+  const ballet = await getBalletResults();
+  const balletLean = ballet.length ? buildBalletLeaning(ballet.flatMap((r) => r.votes), ballet.length) : null;
   const retaking = searchParams?.retake === "1";
   const forceQuiz = searchParams?.quiz === "1";
   const showResult = saved && !retaking && !forceQuiz;
@@ -86,6 +90,15 @@ export default async function MovementMapPage({ searchParams }: { searchParams: 
             </p>
           </>
         )}
+
+        {/* Ballet Movement Lab — dynamic tests that also feed the 6 types */}
+        <Link href="/movement-map/ballet" className="card card-hover block p-4 mt-8 border-l-2 border-teal animate-in">
+          <p className="eyebrow">Ballet Movement Lab</p>
+          <p className="text-navy text-sm font-semibold mt-0.5">Assess développé, à la seconde, turnout, port de bras &amp; knee line on camera.</p>
+          {balletLean
+            ? <p className="text-grey text-xs mt-1">{ballet.length}/{BALLET_MOVES.length} movements done · leaning {MOVEMENT_TYPES[balletLean.primary].name}. Tap to continue →</p>
+            : <p className="text-grey text-xs mt-1">Live-cue movement tests that reveal patterns a static scan can&apos;t. Tap to start →</p>}
+        </Link>
       </main>
     </div>
   );
