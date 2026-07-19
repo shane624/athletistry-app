@@ -10,6 +10,8 @@ export const NAV_GROUPS: NavGroup[] = [
     title: "Train",
     items: [
       { href: "/dashboard", label: "Today", icon: "home" },
+      { href: "/explore", label: "Explore", icon: "sparkle" },
+      { href: "/movement-map", label: "Movement Map", icon: "target" },
       { href: "/programs", label: "Programs", icon: "grid" },
       { href: "/plan", label: "Training Plan Builder", icon: "target" },
       { href: "/generate", label: "Practice Generator", icon: "bolt" },
