@@ -25,7 +25,8 @@ const BONES: [number, number][] = [
 type ViewId = "front" | "side" | "back";
 const VIEW_LABEL: Record<ViewId, string> = { front: "Front", side: "Side", back: "Back" };
 const ALL_VIEWS: ViewId[] = ["front", "side", "back"];
-const HOLD_MS = 900; // hold an angle steady this long before it auto-captures
+const HOLD_MS = 2600;   // hold an angle steady this long before it auto-captures
+const STILL_EPS = 0.012; // per-point movement below this = "standing still"
 
 type Phase = "intro" | "starting" | "scanning" | "saving" | "done" | "error";
 
@@ -41,11 +42,14 @@ export default function PoseCamera() {
   const [detView, setDetView] = useState<ViewId | "unknown">("unknown");
   const [frameHint, setFrameHint] = useState("Step into view so your whole body shows");
   const [holdPct, setHoldPct] = useState(0);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [moving, setMoving] = useState(false);
   const [capturedViews, setCapturedViews] = useState<ViewId[]>([]);
   const [flash, setFlash] = useState<ViewId | null>(null);
   const [errMsg, setErrMsg] = useState("");
 
   const capturesRef = useRef<Captures>({});
+  const motionRef = useRef<{ x: number; y: number }[] | null>(null);
   const stableRef = useRef<{ view: ViewId | "unknown"; since: number }>({ view: "unknown", since: 0 });
   const busyRef = useRef(false); // guards against double-capture / finishing
   const [result, setResult] = useState<{ summary: PostureSummary; primary: TypeId; secondary: TypeId } | null>(null);
@@ -115,7 +119,7 @@ export default function PoseCamera() {
     setCapturedViews(done);
     setFlash(view); setTimeout(() => setFlash(null), 650);
     stableRef.current = { view: "unknown", since: performance.now() }; // require a fresh hold
-    setHoldPct(0);
+    motionRef.current = null; setHoldPct(0); setCountdown(null);
     if (done.length === ALL_VIEWS.length) finish();
   }, [finish]);
 
@@ -137,16 +141,35 @@ export default function PoseCamera() {
         const view = lms && fr.ready ? detectOrientation(lms).view : "unknown";
         setDetView((prev) => (prev === view ? prev : view));
 
+        // 3) Are they standing still? (don't start the timer while they walk in)
+        let still = true;
+        if (lms) {
+          const key = [11, 12, 23, 24, 27, 28].map((i) => lms[i]);
+          const prev = motionRef.current;
+          if (prev) {
+            let sum = 0;
+            for (let i = 0; i < key.length; i++) sum += Math.hypot(key[i].x - prev[i].x, key[i].y - prev[i].y);
+            still = sum / key.length < STILL_EPS;
+          }
+          motionRef.current = key.map((p) => ({ x: p.x, y: p.y }));
+        }
+
         const now = performance.now();
-        if (view !== stableRef.current.view) stableRef.current = { view, since: now };
+        // reset the hold if the angle changed OR they're still moving
+        if (view !== stableRef.current.view || !still) stableRef.current = { view, since: now };
         const held = now - stableRef.current.since;
 
-        if (lms && fr.ready && view !== "unknown" && !capturesRef.current[view]) {
+        const counting = !!lms && fr.ready && still && view !== "unknown" && !capturesRef.current[view];
+        setMoving((m) => (m === (!still && fr.ready) ? m : (!still && fr.ready)));
+        if (counting) {
           const pct = Math.min(1, held / HOLD_MS);
           setHoldPct((p) => (Math.abs(p - pct) > 0.03 ? pct : p));
+          const secs = Math.max(1, Math.ceil((HOLD_MS - held) / 1000));
+          setCountdown((c) => (c === secs ? c : secs));
           if (held >= HOLD_MS) commitCapture(view, lms);
         } else {
           setHoldPct((p) => (p !== 0 ? 0 : p));
+          setCountdown((c) => (c !== null ? null : c));
         }
       } catch { /* frame skipped */ }
     }
@@ -156,8 +179,8 @@ export default function PoseCamera() {
   // --- start camera + model ---
   const start = useCallback(async () => {
     setPhase("starting"); setErrMsg("");
-    capturesRef.current = {}; setCapturedViews([]);
-    stableRef.current = { view: "unknown", since: 0 }; busyRef.current = false;
+    capturesRef.current = {}; setCapturedViews([]); setCountdown(null);
+    stableRef.current = { view: "unknown", since: 0 }; motionRef.current = null; busyRef.current = false;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 640, height: 480 }, audio: false });
       streamRef.current = stream;
@@ -261,7 +284,15 @@ export default function PoseCamera() {
         <div className="absolute top-3 left-3 flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur">
           <span className={`w-2 h-2 rounded-full ${detView === "unknown" ? "bg-amber-400" : detCaptured ? "bg-teal" : "bg-emerald-400"}`} />
           <span className="text-white text-xs font-medium">
-            {detView === "unknown" ? (frameHint || "Finding your position…") : detCaptured ? `${detLabel} captured ✓` : `Facing: ${detLabel}`}
+            {detView === "unknown"
+              ? (frameHint || "Finding your position…")
+              : detCaptured
+                ? `${detLabel} captured ✓`
+                : moving
+                  ? "Hold still…"
+                  : countdown !== null
+                    ? `Hold ${detLabel} — capturing in ${countdown}…`
+                    : `Get into ${detLabel} position`}
           </span>
         </div>
 
@@ -281,6 +312,13 @@ export default function PoseCamera() {
         {phase === "scanning" && detView !== "unknown" && !detCaptured && (
           <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-white/15">
             <div className="h-full bg-teal transition-[width] duration-75" style={{ width: `${Math.round(holdPct * 100)}%` }} />
+          </div>
+        )}
+
+        {/* big countdown while holding steady */}
+        {phase === "scanning" && countdown !== null && !flash && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span className="text-white text-7xl font-extrabold drop-shadow-lg" style={{ textShadow: "0 2px 12px rgba(0,0,0,.5)" }}>{countdown}</span>
           </div>
         )}
 
