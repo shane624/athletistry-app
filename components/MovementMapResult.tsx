@@ -14,14 +14,15 @@ export default function MovementMapResult({ primary, secondary }: { primary: Typ
   const [copied, setCopied] = useState(false);
   const [imgOk, setImgOk] = useState(true);
 
-  const emblem = `/movement-map/${primary}.png`;
+  const emblem = `/movement-map/${primary}.png`;              // 1:1 feed card
+  const story = `/movement-map/${primary}-story.png`;         // 9:16 story card
   const caption = `I'm ${t.name} on the Athletistry Movement Map — ${t.tagline}\n\nFind your Dancer Movement Type → athletistry.app/movement-map\n#AthletistryMovementMap`;
 
-  // Native share sheet with the actual emblem image (posts to Instagram/Facebook
-  // on mobile). Falls back to copying the caption.
-  async function share() {
+  // Native share sheet with the actual image (posts to Instagram/Facebook on
+  // mobile). Falls back to copying the caption.
+  async function share(url: string) {
     try {
-      const res = await fetch(emblem);
+      const res = await fetch(url);
       const blob = await res.blob();
       const file = new File([blob], `athletistry-${primary}.png`, { type: "image/png" });
       const nav = navigator as Navigator & { canShare?: (d: unknown) => boolean };
@@ -58,13 +59,17 @@ export default function MovementMapResult({ primary, secondary }: { primary: Typ
 
       {/* share actions */}
       <div className="flex items-center gap-2 mt-3 flex-wrap animate-in">
-        <button onClick={share} className="btn-primary py-2 px-4 text-sm inline-flex items-center gap-2">
-          <Icon name="sparkle" className="w-4 h-4" /> Share to Instagram / Facebook
+        <button onClick={() => share(emblem)} className="btn-primary py-2 px-4 text-sm inline-flex items-center gap-2">
+          <Icon name="sparkle" className="w-4 h-4" /> Share to feed
         </button>
-        <a href={emblem} download={`athletistry-${primary}.png`} className="btn-ghost py-2 px-4 text-sm">Save image</a>
+        <button onClick={() => share(story)} className="btn-primary py-2 px-4 text-sm inline-flex items-center gap-2">
+          <Icon name="sparkle" className="w-4 h-4" /> Share to Story
+        </button>
+        <a href={emblem} download={`athletistry-${primary}.png`} className="btn-ghost py-2 px-4 text-sm">Save post</a>
+        <a href={story} download={`athletistry-${primary}-story.png`} className="btn-ghost py-2 px-4 text-sm">Save Story</a>
         <button onClick={copyCaption} className="btn-ghost py-2 px-4 text-sm">{copied ? "Copied ✓" : "Copy caption"}</button>
       </div>
-      <p className="text-grey text-xs mt-2">Secondary tendency: <b className="text-navy">{s.name}</b> · On desktop, save the image then upload it with the caption.</p>
+      <p className="text-grey text-xs mt-2">Secondary tendency: <b className="text-navy">{s.name}</b> · &ldquo;Feed&rdquo; is the square card, &ldquo;Story&rdquo; is the tall one. On desktop, save then upload with the caption.</p>
 
       {/* superpower */}
       <div className="card p-4 mt-4 animate-in border-l-2 border-teal">
