@@ -47,6 +47,8 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
   const [hint, setHint] = useState("");
   const [holdPct, setHoldPct] = useState(0);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [selfTimer, setSelfTimer] = useState<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [errMsg, setErrMsg] = useState("");
   const [result, setResult] = useState<MoveResult | null>(null);
 
@@ -164,6 +166,7 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
     setPhase("starting"); setErrMsg(""); setResult(null);
     baselineRef.current = null; bestRef.current = null; motionRef.current = null;
     smoothRef.current = []; baseBufRef.current = [];
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } setSelfTimer(null);
     stableRef.current = { key: "none", since: 0 }; busyRef.current = false;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 640, height: 480 }, audio: false });
@@ -200,7 +203,24 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
     if (frame) finalize(frame);
   }, [move, phase, finalize]);
 
-  useEffect(() => () => stopCamera(), [stopCamera]);
+  const clearTimer = useCallback(() => {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    setSelfTimer(null);
+  }, []);
+
+  // Self-timer — tap to start a 10s countdown so you can walk back into frame,
+  // then it captures a smoothed frame on its own. Tap again to cancel.
+  const startSelfTimer = useCallback(() => {
+    if (timerRef.current) { clearTimer(); return; }
+    let n = 10; setSelfTimer(n);
+    timerRef.current = setInterval(() => {
+      n -= 1;
+      if (n <= 0) { clearTimer(); manualCapture(); }
+      else setSelfTimer(n);
+    }, 1000);
+  }, [clearTimer, manualCapture]);
+
+  useEffect(() => () => { stopCamera(); if (timerRef.current) clearInterval(timerRef.current); }, [stopCamera]);
 
   if (!move) return <div className="card p-5 mt-5"><p className="text-navy text-sm">That movement wasn&apos;t found. <Link href="/movement-map/ballet" className="text-teal font-semibold">Back to the Lab</Link>.</p></div>;
 
@@ -301,9 +321,15 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
             <div className="h-full bg-teal transition-[width] duration-75" style={{ width: `${Math.round(holdPct * 100)}%` }} />
           </div>
         )}
-        {showCountdown && (
+        {showCountdown && selfTimer === null && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <span className="text-white text-7xl font-extrabold" style={{ textShadow: "0 2px 12px rgba(0,0,0,.5)" }}>{countdown}</span>
+          </div>
+        )}
+        {selfTimer !== null && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span className="text-white text-8xl font-extrabold" style={{ textShadow: "0 2px 12px rgba(0,0,0,.6)" }}>{selfTimer}</span>
+            <span className="text-white/90 text-sm font-semibold mt-1" style={{ textShadow: "0 1px 6px rgba(0,0,0,.6)" }}>Get into position…</span>
           </div>
         )}
       </div>
@@ -313,10 +339,10 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
         <p className="text-navy text-sm mt-1">{phase === "baseline" ? "First, stand relaxed with your arms down and hold still for a moment." : move.setup}</p>
         {(phase === "baseline" || phase === "assess") && (
           <>
-            <button onClick={manualCapture} className="btn-ghost w-full py-2.5 mt-3 text-sm">
-              {phase === "baseline" ? "Use this as my neutral" : "Capture now"}
+            <button onClick={startSelfTimer} className={`w-full py-2.5 mt-3 text-sm ${selfTimer !== null ? "btn-primary" : "btn-ghost"}`}>
+              {selfTimer !== null ? `Capturing in ${selfTimer}s — tap to cancel` : phase === "baseline" ? "Set my neutral in 10s" : "Capture in 10s"}
             </button>
-            <p className="text-grey text-xs mt-2 text-center">It captures on its own once you hold still — this is a manual backup.</p>
+            <p className="text-grey text-xs mt-2 text-center">Tap the timer, then get into position — it captures on its own once you hold still, too.</p>
           </>
         )}
       </div>
