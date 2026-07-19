@@ -104,6 +104,18 @@ export function analyzeFrontal(f: PoseFrame, view: "front" | "back", aspect = 1)
     });
   }
 
+  // Head tilt — ears off level (lateral neck tilt).
+  if (ok(f, P.LEFT_EAR) && ok(f, P.RIGHT_EAR)) {
+    const r = Math.abs(f[P.LEFT_EAR].y - f[P.RIGHT_EAR].y) / scale;
+    const sev = grade(r, 0.05, 0.10);
+    const low = f[P.LEFT_EAR].y > f[P.RIGHT_EAR].y ? "left" : "right";
+    out.push({
+      key: "head-tilt", region: "head", view, label: "Head tilt",
+      severity: sev,
+      note: sev === "ok" ? "Head sits level." : `Your head tilts toward the ${low}${sev === "notable" ? " (notable)" : ""}.`,
+    });
+  }
+
   // Knee alignment (valgus / varus) — compare knee gap to ankle gap.
   if (ok(f, P.LEFT_KNEE) && ok(f, P.RIGHT_KNEE) && ok(f, P.LEFT_ANKLE) && ok(f, P.RIGHT_ANKLE)) {
     const kneeGap = Math.abs(f[P.LEFT_KNEE].x - f[P.RIGHT_KNEE].x);
@@ -128,7 +140,22 @@ export function analyzeFrontal(f: PoseFrame, view: "front" | "back", aspect = 1)
     });
   }
 
-  // Foot / arch — cannot be judged from pose landmarks; flag honestly.
+  // Foot turnout / symmetry — toe direction vs the ankle (a proxy for how much
+  // each foot turns out, and whether it's even). Not true hip rotation.
+  if (ok(f, P.LEFT_ANKLE) && ok(f, P.RIGHT_ANKLE) && ok(f, P.LEFT_FOOT) && ok(f, P.RIGHT_FOOT)) {
+    const lenL = dist(sx(f[P.LEFT_ANKLE], aspect), sx(f[P.LEFT_FOOT], aspect)) || 1e-6;
+    const lenR = dist(sx(f[P.RIGHT_ANKLE], aspect), sx(f[P.RIGHT_FOOT], aspect)) || 1e-6;
+    const turnL = (f[P.LEFT_ANKLE].x - f[P.LEFT_FOOT].x) * aspect / lenL;  // + = left toe points out
+    const turnR = (f[P.RIGHT_FOOT].x - f[P.RIGHT_ANKLE].x) * aspect / lenR; // + = right toe points out
+    const asym = Math.abs(turnL - turnR);
+    const both = (turnL + turnR) / 2;
+    let sev: Severity = "ok"; let note = "Feet turn out evenly.";
+    if (asym > 0.2) { sev = asym > 0.35 ? "notable" : "mild"; note = "Your feet turn out unevenly — one is more turned out than the other."; }
+    else if (both > 0.85) { sev = "mild"; note = "Both feet are forced very turned out — often from cranking the feet rather than the hips."; }
+    out.push({ key: "foot-turnout", region: "feet", view, label: "Foot turnout & symmetry", severity: sev, note });
+  }
+
+  // Pronation is a separate thing the camera genuinely can't grade.
   out.push({
     key: "foot-arch", region: "feet", view, label: view === "back" ? "Foot & heel (pronation)" : "Foot & arch (pronation)",
     severity: "unknown",
@@ -188,6 +215,17 @@ export function analyzeSagittal(f: PoseFrame, aspect = 1): Finding[] {
       key: "knee-stack", region: "knees", view: "side", label: "Knee stacking",
       severity: sev,
       note: sev === "ok" ? "Knees stack over the ankles." : `Your knees don't stack over the ankle–hip line — possible hyperextension or a soft-knee lean${sev === "notable" ? " (notable)" : ""}.`,
+    });
+  }
+
+  // Pelvic sway — hips drifting forward of the ankles (sway-back tendency).
+  {
+    const r = Math.abs(hp.x - an.x) * aspect / scale;
+    const sev = grade(r, 0.12, 0.22);
+    out.push({
+      key: "pelvic-sway", region: "hips", view: "side", label: "Hips over ankles",
+      severity: sev,
+      note: sev === "ok" ? "Hips stack over the ankles." : `Your hips push forward of your ankles — a sway-back lean${sev === "notable" ? " (notable)" : ""}.`,
     });
   }
 

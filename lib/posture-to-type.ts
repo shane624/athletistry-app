@@ -12,11 +12,15 @@ const WEIGHT: Record<Severity, number> = { ok: 0, unknown: 0, mild: 1, notable: 
 function findingType(f: Finding): TypeId {
   switch (f.key) {
     case "hip-level":         return "hiker";        // pelvis hikes / drops to help
-    case "shoulder-level":    return "twister";      // asymmetry = a spiral/twist
+    case "shoulder-level":    return "hiker";        // a shoulder rides up
+    case "head-tilt":         return "twister";      // asymmetry = a spiral/twist
     case "lateral-shift":     return "twister";      // rearranging the base to balance
+    case "foot-turnout":
+      return /forced|cranking/.test(f.note) ? "gripper" : "twister"; // forced = grip; uneven = twist
     case "forward-head":      return "collapser";    // postural collapse forward
     case "forward-shoulders": return "collapser";
     case "knee-stack":        return "rangeChaser";  // hyperextension / laxity
+    case "pelvic-sway":       return "rangeChaser";  // sway-back / hangs on ligaments
     case "knee-track":
       return /wider|varus|bow/.test(f.note) ? "gripper" : "collapser";
     default:                  return "controller";
@@ -36,11 +40,16 @@ export function postureToScores(findings: Finding[]): PostureScore {
   for (const f of flags) scores[findingType(f)] += WEIGHT[f.severity];
 
   const total = Object.values(scores).reduce((a, b) => a + b, 0);
-  const clean = total <= 1;
-  // Clean, controlled posture reads as The Controller (conscious, disciplined).
-  if (clean) scores.controller += 3;
+  // Controller is ONLY chosen when nothing at all flagged (clean, disciplined
+  // posture) — never as a fallback that swallows a single real finding.
+  const clean = total === 0;
+  if (clean) scores.controller += 2;
 
-  const ranked = [...TYPE_ORDER].sort((a, b) => scores[b] - scores[a]);
+  // Tie-break by whichever type has the most DISTINCT findings, so a single
+  // notable doesn't automatically outrank a spread of related mild ones.
+  const distinct = Object.fromEntries(TYPE_ORDER.map((t) => [t, 0])) as Record<TypeId, number>;
+  for (const f of flags) distinct[findingType(f)] += 1;
+  const ranked = [...TYPE_ORDER].sort((a, b) => scores[b] - scores[a] || distinct[b] - distinct[a]);
   return { primary: ranked[0], secondary: ranked[1], scores, clean };
 }
 
@@ -54,6 +63,9 @@ const CORRECTIVE: Record<string, string> = {
   "forward-shoulders": "Open the chest — thoracic extension over a roller and wall slides for the mid-back.",
   "knee-stack": "Own the knee position — control the last few degrees of extension; avoid locking/hyperextending in balances.",
   "knee-track": "Track the knees over the toes — banded squats and glute-med work so the knees stop falling in.",
+  "head-tilt": "Level the head — mirror checks and gentle neck-lengthening; watch for always turning/tilting one way.",
+  "foot-turnout": "Even out turnout from the hips — banded external rotation on both legs; stop cranking the feet on the floor.",
+  "pelvic-sway": "Stack ribs over pelvis over ankles — glute and deep-core work to stop hanging back on your ligaments.",
 };
 
 export interface PostureSummary {
