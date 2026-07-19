@@ -50,47 +50,56 @@ export interface BalletMove {
 // =========================================================================
 // 1) DÉVELOPPÉ DEVANT (front) — pelvis level as the leg rises + knee in line
 // =========================================================================
+// Working leg is chosen by the higher KNEE (knees track reliably even when the
+// devant foot points at the camera and MediaPipe loses the ankle). The ankle is
+// used for extension/knee-line only when it's actually tracked.
 function devMetrics(f: PoseFrame, a: number) {
   const scale = torsoA(f, a);
   const hipMidY = (f[P.LEFT_HIP].y + f[P.RIGHT_HIP].y) / 2;
-  const workL = f[P.LEFT_ANKLE].y <= f[P.RIGHT_ANKLE].y; // higher ankle = working leg
-  const wAnk = workL ? f[P.LEFT_ANKLE] : f[P.RIGHT_ANKLE];
+  const workL = f[P.LEFT_KNEE].y <= f[P.RIGHT_KNEE].y; // higher knee = working leg
   const wKnee = workL ? f[P.LEFT_KNEE] : f[P.RIGHT_KNEE];
   const wHip = workL ? f[P.LEFT_HIP] : f[P.RIGHT_HIP];
-  const lift = (hipMidY - wAnk.y) / scale;                       // >0 = ankle above hips
+  const wAnk = workL ? f[P.LEFT_ANKLE] : f[P.RIGHT_ANKLE];
+  const ankleOk = vis(wAnk) > 0.4;
+  const liftPt = ankleOk ? wAnk : wKnee;                          // measure from ankle if tracked, else knee
+  const lift = (hipMidY - liftPt.y) / scale;                     // >0 = above hip line
   const pelvis = Math.abs(f[P.LEFT_HIP].y - f[P.RIGHT_HIP].y) / scale;
-  const kneeOff = perp(sx(wKnee, a), sx(wHip, a), sx(wAnk, a)) / scale;
-  return { lift, pelvis, kneeOff };
+  const kneeOff = ankleOk ? perp(sx(wKnee, a), sx(wHip, a), sx(wAnk, a)) / scale : 0;
+  return { lift, pelvis, kneeOff, ankleOk };
 }
 const developpe: BalletMove = {
   id: "developpe", name: "Développé devant", view: "front",
   setup: "Stand facing the camera. Slowly développé your working leg to the front, as high as stays controlled.",
   tip: "The test is whether your pelvis stays level as the leg lifts — not how high the leg goes.",
   evaluate(f, a) {
-    if (!has(f, P.LEFT_HIP, P.RIGHT_HIP, P.LEFT_ANKLE, P.RIGHT_ANKLE)) return { valid: false, peak: 0, cues: [], hint: "Step back so your whole body is in frame." };
-    const { lift, pelvis, kneeOff } = devMetrics(f, a);
+    if (!has(f, P.LEFT_HIP, P.RIGHT_HIP, P.LEFT_KNEE, P.RIGHT_KNEE)) return { valid: false, peak: 0, cues: [], hint: "Step back so your hips and both knees are in frame." };
+    const { lift, pelvis, kneeOff, ankleOk } = devMetrics(f, a);
     const valid = lift > 0.05;
     return {
       valid, peak: lift,
       hint: valid ? "" : "Lift your working leg to the front — at least knee height.",
       cues: [
         { key: "pelvis", label: "Pelvis level", ok: pelvis < 0.09, detail: pelvis < 0.09 ? "Hips staying level" : "Hip hiking to help the lift" },
-        { key: "knee", label: "Knee in line", ok: kneeOff < 0.12, detail: kneeOff < 0.12 ? "Knee tracks the line" : "Knee drifting off the hip–ankle line" },
+        ...(ankleOk ? [{ key: "knee", label: "Knee in line", ok: kneeOff < 0.12, detail: kneeOff < 0.12 ? "Knee tracks the line" : "Knee drifting off the hip–ankle line" }] : []),
         { key: "height", label: "Leg height", ok: true, detail: `${Math.round(Math.max(0, lift) * 100)}% of torso above hip` },
       ],
     };
   },
   score(f, a) {
-    const { pelvis, kneeOff } = devMetrics(f, a);
-    const pSev = grade(pelvis, 0.09, 0.16), kSev = grade(kneeOff, 0.12, 0.2);
+    const { pelvis, kneeOff, ankleOk } = devMetrics(f, a);
+    const pSev = grade(pelvis, 0.09, 0.16);
     const findings: Finding[] = [
       { key: "dev-pelvis", region: "hips", view: "front", label: "Pelvis level in développé", severity: pSev,
         note: pSev === "ok" ? "Your pelvis stayed level as the leg rose." : `Your pelvis hikes to lift the leg${pSev === "notable" ? " (notable)" : ""} — the height is coming from the trunk.` },
-      { key: "dev-knee", region: "knees", view: "front", label: "Working-knee alignment", severity: kSev,
-        note: kSev === "ok" ? "Your working knee tracked in line." : `Your working knee drifts off the hip–ankle line${kSev === "notable" ? " (notable)" : ""}.` },
     ];
-    const votes = [...votesFor(pSev, "hiker"), ...votesFor(kSev, "collapser")];
-    return { findings, votes, headline: pSev !== "ok" ? "Pelvis is helping the lift" : kSev !== "ok" ? "Knee drifts off line" : "Clean, level développé" };
+    const votes = [...votesFor(pSev, "hiker")];
+    if (ankleOk) {
+      const kSev = grade(kneeOff, 0.12, 0.2);
+      findings.push({ key: "dev-knee", region: "knees", view: "front", label: "Working-knee alignment", severity: kSev,
+        note: kSev === "ok" ? "Your working knee tracked in line." : `Your working knee drifts off the hip–ankle line${kSev === "notable" ? " (notable)" : ""}.` });
+      votes.push(...votesFor(kSev, "collapser"));
+    }
+    return { findings, votes, headline: pSev !== "ok" ? "Pelvis is helping the lift" : "Level développé" };
   },
 };
 
