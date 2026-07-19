@@ -257,16 +257,21 @@ export function framing(f: PoseFrame): Framing {
   return { ready: true, hint: "" };
 }
 
-export function detectOrientation(f: PoseFrame): { view: ViewId | "unknown"; confidence: number } {
+// `aspect` = frame width / height. MediaPipe normalises x by width and y by
+// height, so horizontal distances must be multiplied by aspect to be compared
+// against vertical ones — otherwise a front view can masquerade as a side.
+export function detectOrientation(f: PoseFrame, aspect = 1): { view: ViewId | "unknown"; confidence: number } {
   if (!ok(f, P.LEFT_SHOULDER) || !ok(f, P.RIGHT_SHOULDER) || !f[P.LEFT_HIP] || !f[P.RIGHT_HIP]) {
     return { view: "unknown", confidence: 0 };
   }
-  const scale = torso(f);
-  const shoulderW = Math.abs(f[P.LEFT_SHOULDER].x - f[P.RIGHT_SHOULDER].x) / scale;
+  const shMid = mid(f[P.LEFT_SHOULDER], f[P.RIGHT_SHOULDER]);
+  const hpMid = mid(f[P.LEFT_HIP], f[P.RIGHT_HIP]);
+  const torsoH = Math.hypot((shMid.x - hpMid.x) * aspect, shMid.y - hpMid.y) || 1e-6;
+  const shoulderW = Math.abs(f[P.LEFT_SHOULDER].x - f[P.RIGHT_SHOULDER].x) * aspect / torsoH;
 
   // Shoulders collapsed onto each other → we're looking at a side.
-  if (shoulderW < 0.55) {
-    const conf = Math.min(1, (0.55 - shoulderW) / 0.35 + 0.4);
+  if (shoulderW < 0.5) {
+    const conf = Math.min(1, (0.5 - shoulderW) / 0.3 + 0.4);
     return { view: "side", confidence: conf };
   }
 

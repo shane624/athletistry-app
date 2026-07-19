@@ -138,7 +138,8 @@ export default function PoseCamera() {
         setFrameHint((h) => (h === fr.hint ? h : fr.hint));
 
         // 2) Only read orientation + capture once framing is good.
-        const view = lms && fr.ready ? detectOrientation(lms).view : "unknown";
+        const aspect = (vid.videoWidth || 640) / (vid.videoHeight || 480);
+        const view = lms && fr.ready ? detectOrientation(lms, aspect).view : "unknown";
         setDetView((prev) => (prev === view ? prev : view));
 
         // 3) Are they standing still? (don't start the timer while they walk in)
