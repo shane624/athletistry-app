@@ -137,12 +137,14 @@ export default function PoseCamera() {
         const aspect = (vid.videoWidth || 640) / (vid.videoHeight || 480);
         const kind = lms && fr.ready ? orientationKind(lms, aspect) : { kind: "unknown" as const, faceVis: 0 };
 
-        // Does the current pose match the angle we're waiting for?
+        // Match the pose to the angle we're waiting for. We rely ONLY on the
+        // reliable side-vs-wide signal plus the guided order — face visibility
+        // is untrustworthy from behind (MediaPipe hallucinates the face), so
+        // front and back are simply the 1st and 3rd "wide" steps in sequence.
         let match = false;
         if (target && lms && fr.ready) {
-          if (target === "front") match = kind.kind === "wide" && kind.faceVis > 0.35;
-          else if (target === "side") match = kind.kind === "side";
-          else if (target === "back") match = kind.kind === "wide" && kind.faceVis < 0.8;
+          if (target === "side") match = kind.kind === "side";
+          else match = kind.kind === "wide"; // front (step 1) or back (step 3)
         }
         setAligned((a) => (a === match ? a : match));
 
