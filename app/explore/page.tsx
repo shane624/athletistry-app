@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 // Goal tiles — the main entry points, browsable at a glance.
 const TILES: { href: string; label: string; icon: IconName; grad: string }[] = [
+  { href: "/movement-map", label: "Movement Map", icon: "target", grad: "linear-gradient(135deg,#1f2a44,#27ae9f)" },
   { href: "/programs", label: "Programs", icon: "stack", grad: "linear-gradient(135deg,#1f2a44,#3a4a6b)" },
   { href: "/plan", label: "Plan for an event", icon: "target", grad: "linear-gradient(135deg,#1f2a44,#27ae9f)" },
   { href: "/generate", label: "Practice Generator", icon: "bolt", grad: "linear-gradient(135deg,#3a4a6b,#27ae9f)" },
