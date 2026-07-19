@@ -329,7 +329,9 @@ export function framing(f: PoseFrame): Framing {
 
   const vy = (idxs: number[]) => idxs.filter((i) => ok(f, i)).map((i) => f[i].y);
   const headY = vy([P.NOSE, P.LEFT_EAR, P.RIGHT_EAR]);
-  const ankleY = vy([P.LEFT_ANKLE, P.RIGHT_ANKLE, P.LEFT_FOOT, P.RIGHT_FOOT]);
+  // Use ANKLES (not the toe landmarks) for the bottom — MediaPipe often places
+  // foot_index at or past the frame edge even when the foot is clearly in shot.
+  const ankleY = vy([P.LEFT_ANKLE, P.RIGHT_ANKLE]);
   const shoulderY = vy([P.LEFT_SHOULDER, P.RIGHT_SHOULDER]);
   const top = headY.length ? Math.min(...headY) : Math.min(...shoulderY);
   const bottom = ankleY.length ? Math.max(...ankleY) : 1;
@@ -337,12 +339,12 @@ export function framing(f: PoseFrame): Framing {
     .filter((i) => ok(f, i)).map((i) => f[i].x);
   const left = Math.min(...xs), right = Math.max(...xs);
 
-  if (headY.length && top < 0.04) return { ready: false, hint: "Aim the camera up a little — your head is cut off" };
-  if (bottom > 0.98) return { ready: false, hint: "Aim the camera down a little — your feet are cut off" };
-  if (left < 0.03 || right > 0.97) return { ready: false, hint: "Centre yourself — you're cut off at the edge" };
+  if (headY.length && top < 0.015) return { ready: false, hint: "Aim the camera up a little — your head is cut off" };
+  if (bottom > 0.995) return { ready: false, hint: "Aim the camera down a little — your feet are cut off" };
+  if (left < 0.01 || right > 0.99) return { ready: false, hint: "Centre yourself — you're cut off at the edge" };
 
   const span = bottom - top;
-  if (span < 0.3) return { ready: false, hint: "Come a little closer — you're a bit small in frame" };
+  if (span < 0.25) return { ready: false, hint: "Come a little closer — you're a bit small in frame" };
   return { ready: true, hint: "" };
 }
 
