@@ -318,33 +318,30 @@ function avgVis(f: PoseFrame, idxs: number[]): number {
 export interface Framing { ready: boolean; hint: string }
 
 export function framing(f: PoseFrame): Framing {
-  // Each body segment must have AT LEAST ONE side visible — from a true profile
-  // the far shoulder/hip/knee/ankle drop below the visibility threshold, so
-  // requiring both would wrongly reject a side view.
-  const pair = (a: number, b: number) => ok(f, a) || ok(f, b);
-  if (!pair(P.LEFT_SHOULDER, P.RIGHT_SHOULDER) || !pair(P.LEFT_HIP, P.RIGHT_HIP)
-    || !pair(P.LEFT_KNEE, P.RIGHT_KNEE) || !pair(P.LEFT_ANKLE, P.RIGHT_ANKLE)) {
+  // Presence-based, NOT coordinate-based. MediaPipe extrapolates landmark
+  // positions past the frame edge even when a joint is clearly in shot, so
+  // judging "cut off" by x/y position gives false positives. Instead: if the
+  // model confidently sees a joint, it's in frame. It won't confidently detect
+  // a joint that's genuinely off-screen, so real cut-offs still get caught.
+  const seen = (a: number, b: number) => ok(f, a) || ok(f, b); // at least one side (works from a profile)
+
+  if (!seen(P.LEFT_SHOULDER, P.RIGHT_SHOULDER) || !seen(P.LEFT_HIP, P.RIGHT_HIP)) {
     return { ready: false, hint: "Step into view so your whole body shows" };
   }
+  if (!seen(P.LEFT_ANKLE, P.RIGHT_ANKLE) || !seen(P.LEFT_KNEE, P.RIGHT_KNEE)) {
+    return { ready: false, hint: "Step back so your legs and feet are in view" };
+  }
+  if (!(ok(f, P.NOSE) || ok(f, P.LEFT_EAR) || ok(f, P.RIGHT_EAR))) {
+    return { ready: false, hint: "Make sure your head is in the frame too" };
+  }
 
-  const vy = (idxs: number[]) => idxs.filter((i) => ok(f, i)).map((i) => f[i].y);
-  const headY = vy([P.NOSE, P.LEFT_EAR, P.RIGHT_EAR]);
-  // Use ANKLES (not the toe landmarks) for the bottom — MediaPipe often places
-  // foot_index at or past the frame edge even when the foot is clearly in shot.
-  const ankleY = vy([P.LEFT_ANKLE, P.RIGHT_ANKLE]);
-  const shoulderY = vy([P.LEFT_SHOULDER, P.RIGHT_SHOULDER]);
-  const top = headY.length ? Math.min(...headY) : Math.min(...shoulderY);
+  // Only remaining guard: are they far too small in the frame? (very loose)
+  const headY = [P.NOSE, P.LEFT_EAR, P.RIGHT_EAR].filter((i) => ok(f, i)).map((i) => f[i].y);
+  const ankleY = [P.LEFT_ANKLE, P.RIGHT_ANKLE].filter((i) => ok(f, i)).map((i) => f[i].y);
+  const top = headY.length ? Math.min(...headY) : 0;
   const bottom = ankleY.length ? Math.max(...ankleY) : 1;
-  const xs = [P.LEFT_SHOULDER, P.RIGHT_SHOULDER, P.LEFT_HIP, P.RIGHT_HIP, P.LEFT_KNEE, P.RIGHT_KNEE, P.LEFT_ANKLE, P.RIGHT_ANKLE]
-    .filter((i) => ok(f, i)).map((i) => f[i].x);
-  const left = Math.min(...xs), right = Math.max(...xs);
+  if (bottom - top < 0.2) return { ready: false, hint: "Come a little closer" };
 
-  if (headY.length && top < 0.015) return { ready: false, hint: "Aim the camera up a little — your head is cut off" };
-  if (bottom > 0.995) return { ready: false, hint: "Aim the camera down a little — your feet are cut off" };
-  if (left < 0.01 || right > 0.99) return { ready: false, hint: "Centre yourself — you're cut off at the edge" };
-
-  const span = bottom - top;
-  if (span < 0.25) return { ready: false, hint: "Come a little closer — you're a bit small in frame" };
   return { ready: true, hint: "" };
 }
 
