@@ -53,32 +53,36 @@ function perpOffset(p: LM, a: LM, b: LM): number {
   return Math.abs((p.x - a.x) * dy - (p.y - a.y) * dx) / len;
 }
 
-// Body scale = shoulder-mid to hip-mid distance. Everything is normalised by
-// this so findings are independent of how close the dancer stands.
-function torso(f: PoseFrame): number {
-  const sh = mid(f[P.LEFT_SHOULDER], f[P.RIGHT_SHOULDER]);
-  const hp = mid(f[P.LEFT_HIP], f[P.RIGHT_HIP]);
-  return dist(sh, hp) || 1e-6;
-}
-
 function grade(ratio: number, mildAt: number, notableAt: number): Severity {
   if (ratio >= notableAt) return "notable";
   if (ratio >= mildAt) return "mild";
   return "ok";
 }
 
+// MediaPipe normalises x by width and y by height, so horizontal offsets must
+// be multiplied by the frame aspect (w/h) before being compared to vertical
+// distances — otherwise every horizontal deviation reads ~25% too small.
+function sx(p: LM, aspect: number): LM { return { x: p.x * aspect, y: p.y }; }
+function visOf(p?: LM): number { return p ? (p.visibility ?? 1) : 0; }
+
+function torsoA(f: PoseFrame, aspect: number): number {
+  const sh = mid(f[P.LEFT_SHOULDER], f[P.RIGHT_SHOULDER]);
+  const hp = mid(f[P.LEFT_HIP], f[P.RIGHT_HIP]);
+  return dist(sx(sh, aspect), sx(hp, aspect)) || 1e-6;
+}
+
 // ---- Frontal analysis (used for BOTH front and back views) ----------------
 // Level checks + knee gap. From behind, the same joints are visible, so the
 // same maths applies; we only relabel foot/scapula notes per view.
 
-export function analyzeFrontal(f: PoseFrame, view: "front" | "back"): Finding[] {
+export function analyzeFrontal(f: PoseFrame, view: "front" | "back", aspect = 1): Finding[] {
   const out: Finding[] = [];
-  const scale = torso(f);
+  const scale = torsoA(f, aspect);
 
   // Shoulder level
   if (ok(f, P.LEFT_SHOULDER) && ok(f, P.RIGHT_SHOULDER)) {
     const r = Math.abs(f[P.LEFT_SHOULDER].y - f[P.RIGHT_SHOULDER].y) / scale;
-    const sev = grade(r, 0.06, 0.12);
+    const sev = grade(r, 0.05, 0.10);
     const lower = f[P.LEFT_SHOULDER].y > f[P.RIGHT_SHOULDER].y ? "left" : "right";
     out.push({
       key: "shoulder-level", region: "shoulders", view,
@@ -91,7 +95,7 @@ export function analyzeFrontal(f: PoseFrame, view: "front" | "back"): Finding[] 
   // Hip level
   if (ok(f, P.LEFT_HIP) && ok(f, P.RIGHT_HIP)) {
     const r = Math.abs(f[P.LEFT_HIP].y - f[P.RIGHT_HIP].y) / scale;
-    const sev = grade(r, 0.05, 0.1);
+    const sev = grade(r, 0.04, 0.09);
     const lower = f[P.LEFT_HIP].y > f[P.RIGHT_HIP].y ? "left" : "right";
     out.push({
       key: "hip-level", region: "hips", view, label: "Hip level",
@@ -114,8 +118,8 @@ export function analyzeFrontal(f: PoseFrame, view: "front" | "back"): Finding[] 
   // Whole-body lateral shift — nose over the base of support.
   if (ok(f, P.NOSE) && ok(f, P.LEFT_ANKLE) && ok(f, P.RIGHT_ANKLE)) {
     const base = mid(f[P.LEFT_ANKLE], f[P.RIGHT_ANKLE]);
-    const r = Math.abs(f[P.NOSE].x - base.x) / scale;
-    const sev = grade(r, 0.12, 0.22);
+    const r = Math.abs(f[P.NOSE].x - base.x) * aspect / scale;
+    const sev = grade(r, 0.10, 0.20);
     const side = f[P.NOSE].x > base.x ? "right" : "left";
     out.push({
       key: "lateral-shift", region: "whole", view, label: "Overall balance",
@@ -135,22 +139,29 @@ export function analyzeFrontal(f: PoseFrame, view: "front" | "back"): Finding[] 
 }
 
 // ---- Sagittal analysis (side view) ----------------------------------------
-// We don't know which way the dancer faces, so joints are averaged L/R and we
-// report plumb-line offsets by magnitude (phrased as "sits forward of").
+// On a true profile the FAR-side landmarks are unreliable, so we read the
+// silhouette from the near (camera-facing) side only — averaging L/R would
+// cancel out the very forward-head / rounded-shoulder offset we're measuring.
+// Horizontal offsets are aspect-corrected and phrased by magnitude.
 
-export function analyzeSagittal(f: PoseFrame): Finding[] {
+export function analyzeSagittal(f: PoseFrame, aspect = 1): Finding[] {
   const out: Finding[] = [];
-  const scale = torso(f);
-  const ear = ok(f, P.LEFT_EAR) && ok(f, P.RIGHT_EAR) ? mid(f[P.LEFT_EAR], f[P.RIGHT_EAR]) : (ok(f, P.LEFT_EAR) ? f[P.LEFT_EAR] : f[P.RIGHT_EAR]);
-  const sh = mid(f[P.LEFT_SHOULDER], f[P.RIGHT_SHOULDER]);
-  const hp = mid(f[P.LEFT_HIP], f[P.RIGHT_HIP]);
-  const kn = mid(f[P.LEFT_KNEE], f[P.RIGHT_KNEE]);
-  const an = mid(f[P.LEFT_ANKLE], f[P.RIGHT_ANKLE]);
+  const scale = torsoA(f, aspect);
+
+  // Pick the more-visible side and read every joint from it, consistently.
+  const leftVis = visOf(f[P.LEFT_SHOULDER]) + visOf(f[P.LEFT_HIP]) + visOf(f[P.LEFT_KNEE]) + visOf(f[P.LEFT_ANKLE]);
+  const rightVis = visOf(f[P.RIGHT_SHOULDER]) + visOf(f[P.RIGHT_HIP]) + visOf(f[P.RIGHT_KNEE]) + visOf(f[P.RIGHT_ANKLE]);
+  const L = leftVis >= rightVis;
+  const ear = L ? f[P.LEFT_EAR] : f[P.RIGHT_EAR];
+  const sh = L ? f[P.LEFT_SHOULDER] : f[P.RIGHT_SHOULDER];
+  const hp = L ? f[P.LEFT_HIP] : f[P.RIGHT_HIP];
+  const kn = L ? f[P.LEFT_KNEE] : f[P.RIGHT_KNEE];
+  const an = L ? f[P.LEFT_ANKLE] : f[P.RIGHT_ANKLE];
 
   // Forward head — ear horizontal offset from the shoulder.
   if (ear) {
-    const r = Math.abs(ear.x - sh.x) / scale;
-    const sev = grade(r, 0.18, 0.32);
+    const r = Math.abs(ear.x - sh.x) * aspect / scale;
+    const sev = grade(r, 0.14, 0.26);
     out.push({
       key: "forward-head", region: "head", view: "side", label: "Head over shoulders",
       severity: sev,
@@ -160,8 +171,8 @@ export function analyzeSagittal(f: PoseFrame): Finding[] {
 
   // Forward / rounded shoulders — shoulder offset from the hip plumb line.
   {
-    const r = Math.abs(sh.x - hp.x) / scale;
-    const sev = grade(r, 0.16, 0.3);
+    const r = Math.abs(sh.x - hp.x) * aspect / scale;
+    const sev = grade(r, 0.12, 0.24);
     out.push({
       key: "forward-shoulders", region: "shoulders", view: "side", label: "Shoulders over hips",
       severity: sev,
@@ -171,8 +182,8 @@ export function analyzeSagittal(f: PoseFrame): Finding[] {
 
   // Knee stacking / hyperextension — knee offset from the ankle→hip line.
   {
-    const r = perpOffset(kn, an, hp) / scale;
-    const sev = grade(r, 0.1, 0.2);
+    const r = perpOffset(sx(kn, aspect), sx(an, aspect), sx(hp, aspect)) / scale;
+    const sev = grade(r, 0.08, 0.16);
     out.push({
       key: "knee-stack", region: "knees", view: "side", label: "Knee stacking",
       severity: sev,
@@ -203,11 +214,11 @@ export interface Captures {
   back?: PoseFrame | null;
 }
 
-export function analyzeAll(cap: Captures): Finding[] {
+export function analyzeAll(cap: Captures, aspect = 1): Finding[] {
   const out: Finding[] = [];
-  if (cap.front) out.push(...analyzeFrontal(cap.front, "front"));
-  if (cap.side) out.push(...analyzeSagittal(cap.side));
-  if (cap.back) out.push(...analyzeFrontal(cap.back, "back"));
+  if (cap.front) out.push(...analyzeFrontal(cap.front, "front", aspect));
+  if (cap.side) out.push(...analyzeSagittal(cap.side, aspect));
+  if (cap.back) out.push(...analyzeFrontal(cap.back, "back", aspect));
   return out;
 }
 

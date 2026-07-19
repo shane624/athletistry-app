@@ -42,6 +42,7 @@ export default function PoseCamera() {
   const rafRef = useRef<number>(0);
   const latestRef = useRef<PoseFrame | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const aspectRef = useRef(4 / 3);
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [frameHint, setFrameHint] = useState("Step into view so your whole body shows");
@@ -101,7 +102,7 @@ export default function PoseCamera() {
     busyRef.current = true;
     setPhase("saving");
     stopCamera();
-    const findings = analyzeAll(capturesRef.current);
+    const findings = analyzeAll(capturesRef.current, aspectRef.current);
     const score = postureToScores(findings);
     const summary = buildPostureSummary(findings);
     try { await saveMovementScan(score.primary, score.secondary, findings); } catch { /* still show */ }
@@ -135,6 +136,7 @@ export default function PoseCamera() {
 
         const target = nextTarget();
         const aspect = (vid.videoWidth || 640) / (vid.videoHeight || 480);
+        aspectRef.current = aspect;
         const kind = lms && fr.ready ? orientationKind(lms, aspect) : { kind: "unknown" as const, faceVis: 0 };
 
         // Match the pose to the angle we're waiting for. We rely ONLY on the
