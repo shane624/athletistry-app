@@ -215,3 +215,40 @@ export function analyzeAll(cap: Captures): Finding[] {
 export function flagged(findings: Finding[]): Finding[] {
   return findings.filter((f) => f.severity === "mild" || f.severity === "notable");
 }
+
+// ---- Auto orientation detection -------------------------------------------
+// Works out whether the dancer is facing front, side, or back from the pose,
+// so the camera can capture each angle on its own.
+//   • Side: the shoulders overlap, so shoulder width collapses.
+//   • Front vs back: MediaPipe returns RAW (un-mirrored) image coords, so when
+//     facing the camera the person's LEFT shoulder sits at a higher x than their
+//     RIGHT shoulder (sign > 0); facing away it flips (sign < 0). Face-landmark
+//     visibility confirms it (high when we can see the face).
+
+function avgVis(f: PoseFrame, idxs: number[]): number {
+  let sum = 0, n = 0;
+  for (const i of idxs) { const v = f?.[i]?.visibility; if (v !== undefined) { sum += v; n++; } }
+  return n ? sum / n : 1; // if a model doesn't report visibility, assume visible
+}
+
+export function detectOrientation(f: PoseFrame): { view: ViewId | "unknown"; confidence: number } {
+  if (!ok(f, P.LEFT_SHOULDER) || !ok(f, P.RIGHT_SHOULDER) || !f[P.LEFT_HIP] || !f[P.RIGHT_HIP]) {
+    return { view: "unknown", confidence: 0 };
+  }
+  const scale = torso(f);
+  const shoulderW = Math.abs(f[P.LEFT_SHOULDER].x - f[P.RIGHT_SHOULDER].x) / scale;
+
+  // Shoulders collapsed onto each other → we're looking at a side.
+  if (shoulderW < 0.55) {
+    const conf = Math.min(1, (0.55 - shoulderW) / 0.35 + 0.4);
+    return { view: "side", confidence: conf };
+  }
+
+  // Otherwise front or back.
+  const sign = f[P.LEFT_SHOULDER].x - f[P.RIGHT_SHOULDER].x; // >0 front, <0 back
+  const faceVis = avgVis(f, [P.NOSE, 2, 5, 9, 10]); // nose, inner eyes, mouth corners
+  const frontScore = (sign > 0 ? 1 : 0) + (faceVis > 0.6 ? 1 : 0);
+  const backScore = (sign < 0 ? 1 : 0) + (faceVis < 0.45 ? 1 : 0);
+  if (frontScore >= backScore) return { view: "front", confidence: Math.min(1, 0.5 + frontScore * 0.25) };
+  return { view: "back", confidence: Math.min(1, 0.5 + backScore * 0.25) };
+}
