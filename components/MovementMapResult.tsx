@@ -12,33 +12,59 @@ export default function MovementMapResult({ primary, secondary }: { primary: Typ
   const t = MOVEMENT_TYPES[primary];
   const s = MOVEMENT_TYPES[secondary];
   const [copied, setCopied] = useState(false);
+  const [imgOk, setImgOk] = useState(true);
 
+  const emblem = `/movement-map/${primary}.png`;
+  const caption = `I'm ${t.name} on the Athletistry Movement Map — ${t.tagline}\n\nFind your Dancer Movement Type → athletistry.app/movement-map\n#AthletistryMovementMap`;
+
+  // Native share sheet with the actual emblem image (posts to Instagram/Facebook
+  // on mobile). Falls back to copying the caption.
   async function share() {
-    const text = `I'm ${t.name} (with a bit of ${s.name}) on the Athletistry Movement Map — ${t.tagline} #AthletistryMovementMap`;
     try {
-      if (navigator.share) { await navigator.share({ text }); return; }
-      await navigator.clipboard.writeText(text);
-      setCopied(true); setTimeout(() => setCopied(false), 1800);
-    } catch { /* user cancelled */ }
+      const res = await fetch(emblem);
+      const blob = await res.blob();
+      const file = new File([blob], `athletistry-${primary}.png`, { type: "image/png" });
+      const nav = navigator as Navigator & { canShare?: (d: unknown) => boolean };
+      if (nav.share && (!nav.canShare || nav.canShare({ files: [file] }))) {
+        await nav.share({ files: [file], text: caption });
+        return;
+      }
+      if (nav.share) { await nav.share({ text: caption }); return; }
+      throw new Error("no share");
+    } catch {
+      try { await navigator.clipboard.writeText(caption); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { /* noop */ }
+    }
+  }
+
+  async function copyCaption() {
+    try { await navigator.clipboard.writeText(caption); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { /* noop */ }
   }
 
   return (
     <div className="mt-5 stagger">
-      {/* shareable hero card */}
-      <div className="rounded-2xl overflow-hidden text-white animate-in" style={{ background: t.grad }}>
-        <div className="p-6">
-          <p className="text-white/75 text-xs font-semibold uppercase tracking-widest">Your Dancer Movement Type</p>
-          <h1 className="text-3xl font-extrabold mt-1">{t.name}</h1>
-          <p className="text-white/90 text-sm mt-2 italic">{t.tagline}</p>
-          <p className="text-white/70 text-xs mt-4">with a secondary tendency toward <b className="text-white/90">{s.name}</b></p>
-          <div className="mt-5 flex items-center gap-3">
-            <button onClick={share} className="bg-white text-navy font-bold rounded-xl px-4 py-2 text-sm inline-flex items-center gap-2 active:scale-95 transition">
-              <Icon name="sparkle" className="w-4 h-4" /> {copied ? "Copied!" : "Share my type"}
-            </button>
-            <span className="text-white/60 text-xs">#AthletistryMovementMap</span>
+      {/* shareable emblem card */}
+      <div className="rounded-2xl overflow-hidden animate-in" style={{ background: t.grad }}>
+        {imgOk ? (
+          <img src={emblem} alt={`${t.name} — Athletistry Movement Map`} className="w-full block"
+            onError={() => setImgOk(false)} />
+        ) : (
+          <div className="p-6 text-white">
+            <p className="text-white/75 text-xs font-semibold uppercase tracking-widest">Your Dancer Movement Type</p>
+            <h1 className="text-3xl font-extrabold mt-1">{t.name}</h1>
+            <p className="text-white/90 text-sm mt-2 italic">{t.tagline}</p>
           </div>
-        </div>
+        )}
       </div>
+
+      {/* share actions */}
+      <div className="flex items-center gap-2 mt-3 flex-wrap animate-in">
+        <button onClick={share} className="btn-primary py-2 px-4 text-sm inline-flex items-center gap-2">
+          <Icon name="sparkle" className="w-4 h-4" /> Share to Instagram / Facebook
+        </button>
+        <a href={emblem} download={`athletistry-${primary}.png`} className="btn-ghost py-2 px-4 text-sm">Save image</a>
+        <button onClick={copyCaption} className="btn-ghost py-2 px-4 text-sm">{copied ? "Copied ✓" : "Copy caption"}</button>
+      </div>
+      <p className="text-grey text-xs mt-2">Secondary tendency: <b className="text-navy">{s.name}</b> · On desktop, save the image then upload it with the caption.</p>
 
       {/* superpower */}
       <div className="card p-4 mt-4 animate-in border-l-2 border-teal">
