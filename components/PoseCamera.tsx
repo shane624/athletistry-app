@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Icon from "@/components/Icon";
-import { analyzeAll, detectOrientation, type Captures, type LM, type PoseFrame } from "@/lib/posture-metrics";
+import { analyzeAll, detectOrientation, framing, type Captures, type LM, type PoseFrame } from "@/lib/posture-metrics";
 import { postureToScores, buildPostureSummary, type PostureSummary } from "@/lib/posture-to-type";
 import { saveMovementScan } from "@/lib/movement-map-actions";
 import type { TypeId } from "@/lib/movement-map";
@@ -39,6 +39,7 @@ export default function PoseCamera() {
 
   const [phase, setPhase] = useState<Phase>("intro");
   const [detView, setDetView] = useState<ViewId | "unknown">("unknown");
+  const [frameHint, setFrameHint] = useState("Step into view so your whole body shows");
   const [holdPct, setHoldPct] = useState(0);
   const [capturedViews, setCapturedViews] = useState<ViewId[]>([]);
   const [flash, setFlash] = useState<ViewId | null>(null);
@@ -128,14 +129,19 @@ export default function PoseCamera() {
         latestRef.current = lms;
         draw(lms);
 
-        const view = lms ? detectOrientation(lms).view : "unknown";
+        // 1) Is the whole body actually in frame? (hands-free / distance use)
+        const fr = lms ? framing(lms) : { ready: false, hint: "Step into view so your whole body shows" };
+        setFrameHint((h) => (h === fr.hint ? h : fr.hint));
+
+        // 2) Only read orientation + capture once framing is good.
+        const view = lms && fr.ready ? detectOrientation(lms).view : "unknown";
         setDetView((prev) => (prev === view ? prev : view));
 
         const now = performance.now();
         if (view !== stableRef.current.view) stableRef.current = { view, since: now };
         const held = now - stableRef.current.since;
 
-        if (lms && view !== "unknown" && !capturesRef.current[view]) {
+        if (lms && fr.ready && view !== "unknown" && !capturesRef.current[view]) {
           const pct = Math.min(1, held / HOLD_MS);
           setHoldPct((p) => (Math.abs(p - pct) > 0.03 ? pct : p));
           if (held >= HOLD_MS) commitCapture(view, lms);
@@ -220,8 +226,8 @@ export default function PoseCamera() {
         </p>
         <ul className="mt-3 space-y-1.5">
           {["Nothing is recorded or uploaded — the scan runs entirely on your device.",
-            "Prop your phone/laptop so your whole body is in frame, ~2–3m back, in fitted clothing.",
-            "Slowly turn a full circle — front, side, then back auto-capture as you hold each."].map((s) => (
+            "Prop your phone/laptop up, then step back until your whole body is in frame — no need to touch it.",
+            "It waits until you're fully in shot, then auto-captures front, side, and back as you slowly turn."].map((s) => (
             <li key={s} className="text-grey text-sm flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-teal shrink-0" />{s}
             </li>
@@ -255,7 +261,7 @@ export default function PoseCamera() {
         <div className="absolute top-3 left-3 flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur">
           <span className={`w-2 h-2 rounded-full ${detView === "unknown" ? "bg-amber-400" : detCaptured ? "bg-teal" : "bg-emerald-400"}`} />
           <span className="text-white text-xs font-medium">
-            {detView === "unknown" ? "Step fully into frame" : detCaptured ? `${detLabel} captured ✓` : `Facing: ${detLabel}`}
+            {detView === "unknown" ? (frameHint || "Finding your position…") : detCaptured ? `${detLabel} captured ✓` : `Facing: ${detLabel}`}
           </span>
         </div>
 

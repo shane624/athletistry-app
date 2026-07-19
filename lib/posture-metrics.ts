@@ -231,6 +231,32 @@ function avgVis(f: PoseFrame, idxs: number[]): number {
   return n ? sum / n : 1; // if a model doesn't report visibility, assume visible
 }
 
+// ---- Framing / "is the whole body in shot" check --------------------------
+// Lets the scan run hands-free from across the room: it only captures once the
+// full body is inside the frame, and otherwise coaches the dancer to fix it.
+
+export interface Framing { ready: boolean; hint: string }
+
+export function framing(f: PoseFrame): Framing {
+  // Core body must be present & visible (works from front, side, or back).
+  const core = [P.LEFT_SHOULDER, P.RIGHT_SHOULDER, P.LEFT_HIP, P.RIGHT_HIP, P.LEFT_KNEE, P.RIGHT_KNEE, P.LEFT_ANKLE, P.RIGHT_ANKLE];
+  for (const i of core) if (!ok(f, i)) return { ready: false, hint: "Step into view so your whole body shows" };
+
+  const headIdx = [P.NOSE, P.LEFT_EAR, P.RIGHT_EAR].filter((i) => ok(f, i));
+  const top = headIdx.length ? Math.min(...headIdx.map((i) => f[i].y)) : Math.min(f[P.LEFT_SHOULDER].y, f[P.RIGHT_SHOULDER].y);
+  const bottom = Math.max(f[P.LEFT_ANKLE].y, f[P.RIGHT_ANKLE].y, f[P.LEFT_FOOT]?.y ?? 0, f[P.RIGHT_FOOT]?.y ?? 0);
+  const xs = core.map((i) => f[i].x);
+  const left = Math.min(...xs), right = Math.max(...xs);
+
+  if (headIdx.length && top < 0.04) return { ready: false, hint: "Aim the camera up a little — your head is cut off" };
+  if (bottom > 0.98) return { ready: false, hint: "Aim the camera down a little — your feet are cut off" };
+  if (left < 0.03 || right > 0.97) return { ready: false, hint: "Centre yourself — you're cut off at the edge" };
+
+  const span = bottom - top;
+  if (span < 0.3) return { ready: false, hint: "Come a little closer — you're a bit small in frame" };
+  return { ready: true, hint: "" };
+}
+
 export function detectOrientation(f: PoseFrame): { view: ViewId | "unknown"; confidence: number } {
   if (!ok(f, P.LEFT_SHOULDER) || !ok(f, P.RIGHT_SHOULDER) || !f[P.LEFT_HIP] || !f[P.RIGHT_HIP]) {
     return { view: "unknown", confidence: 0 };
