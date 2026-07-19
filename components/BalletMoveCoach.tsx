@@ -33,6 +33,7 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
   const rafRef = useRef<number>(0);
   const streamRef = useRef<MediaStream | null>(null);
   const aspectRef = useRef(4 / 3);
+  const latestFrameRef = useRef<PoseFrame | null>(null);
   const baselineRef = useRef<PoseFrame | null>(null);
   const bestRef = useRef<{ peak: number; frame: PoseFrame } | null>(null);
   const smoothRef = useRef<PoseFrame[]>([]); // held-rep clip buffer
@@ -95,6 +96,7 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
       try {
         const res = lk.detectForVideo(vid, performance.now());
         const lms: PoseFrame | null = res?.landmarks?.[0] ?? null;
+        if (lms) latestFrameRef.current = lms;
         draw(lms);
         const aspect = (vid.videoWidth || 640) / (vid.videoHeight || 480);
         aspectRef.current = aspect;
@@ -180,6 +182,23 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
       setPhase("error"); stopCamera();
     }
   }, [move, loop, stopCamera]);
+
+  // Manual override — never let the framing check fully block the dancer.
+  const manualCapture = useCallback(() => {
+    if (busyRef.current || !move) return;
+    if (phase === "baseline") {
+      if (latestFrameRef.current) {
+        baselineRef.current = latestFrameRef.current.map((p) => ({ ...p })) as PoseFrame;
+        smoothRef.current = []; bestRef.current = null;
+        stableRef.current = { key: "none", since: performance.now() }; setHoldPct(0);
+        setPhase("assess");
+      }
+      return;
+    }
+    const frame = smoothRef.current.length ? averageFrames(smoothRef.current)
+      : (bestRef.current?.frame ?? latestFrameRef.current);
+    if (frame) finalize(frame);
+  }, [move, phase, finalize]);
 
   useEffect(() => () => stopCamera(), [stopCamera]);
 
@@ -292,6 +311,14 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
       <div className="card p-4 mt-3">
         <p className="eyebrow">{move.name}{phase === "baseline" ? " · neutral" : ""}</p>
         <p className="text-navy text-sm mt-1">{phase === "baseline" ? "First, stand relaxed with your arms down and hold still for a moment." : move.setup}</p>
+        {(phase === "baseline" || phase === "assess") && (
+          <>
+            <button onClick={manualCapture} className="btn-ghost w-full py-2.5 mt-3 text-sm">
+              {phase === "baseline" ? "Use this as my neutral" : "Capture now"}
+            </button>
+            <p className="text-grey text-xs mt-2 text-center">It captures on its own once you hold still — this is a manual backup.</p>
+          </>
+        )}
       </div>
     </div>
   );
