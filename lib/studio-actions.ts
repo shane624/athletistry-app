@@ -41,6 +41,9 @@ export async function createStudio(name: string): Promise<{ ok: boolean; id?: st
   const user = await me();
   if (!user) return { ok: false, error: "Please sign in first." };
   const admin = createAdminClient();
+  // One studio per account (also enforced by a DB unique index as a backstop).
+  const { data: already } = await admin.from("studios").select("id").eq("owner_id", user.id).maybeSingle();
+  if (already) return { ok: false, error: "Your account already runs a studio — each account can have one." };
   const code = await uniqueCode(admin);
   const clean = (name || "").trim().slice(0, 80) || "My Studio";
   const { data, error } = await admin.from("studios")

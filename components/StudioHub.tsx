@@ -57,15 +57,20 @@ export default function StudioHub({ owned, joined, initialCode }: { owned: Studi
             ))}
           </div>
         )}
-        <div className="card p-4">
-          <p className="text-navy text-sm font-semibold">Create a studio</p>
-          <p className="text-grey text-xs mt-0.5">You&apos;ll get a join code to share with your dancers.</p>
-          <div className="flex gap-2 mt-3">
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Studio name"
-              className="input flex-1" onKeyDown={(e) => e.key === "Enter" && create()} />
-            <button onClick={create} disabled={busy || !name.trim()} className="btn-primary px-4 disabled:opacity-50">Create</button>
+        {owned.length === 0 ? (
+          <div className="card p-4">
+            <p className="text-navy text-sm font-semibold">Create a studio</p>
+            <p className="text-grey text-xs mt-0.5">You&apos;ll get a join code to share with your dancers. Each account can run one studio.</p>
+            <div className="flex gap-2 mt-3">
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Studio name"
+                className="input flex-1" onKeyDown={(e) => e.key === "Enter" && create()} />
+              <button onClick={create} disabled={busy || !name.trim()} className="btn-primary px-4 disabled:opacity-50">Create</button>
+            </div>
+            {msg && !msg.ok && <p className="text-sm mt-2 text-red-600">{msg.text}</p>}
           </div>
-        </div>
+        ) : (
+          <p className="text-grey text-xs">Each account can run one studio. Open yours above to manage dancers and billing.</p>
+        )}
       </section>
 
       {/* Student section */}

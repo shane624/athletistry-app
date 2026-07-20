@@ -15,16 +15,22 @@ export default function SideNav() {
   const router = useRouter();
   const supabase = createClient();
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showStudio, setShowStudio] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setShowAdmin((data.user?.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase());
     });
+    // RLS: returns a row only if the user owns OR belongs to a studio.
+    supabase.from("studios").select("id").limit(1).then(({ data }) => setShowStudio(!!data?.length));
   }, [supabase]);
 
+  const base: NavGroup[] = showStudio
+    ? NAV_GROUPS
+    : NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((it) => it.href !== "/studio") }));
   const groups: NavGroup[] = showAdmin
-    ? [...NAV_GROUPS, { title: "Admin", items: [{ href: "/admin", label: "Members", icon: "user" }] }]
-    : NAV_GROUPS;
+    ? [...base, { title: "Admin", items: [{ href: "/admin", label: "Members", icon: "user" }] }]
+    : base;
 
   async function signOut() {
     await supabase.auth.signOut();

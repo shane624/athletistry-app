@@ -66,6 +66,7 @@ export default function NavBar() {
   const supabase = createClient();
   const [open, setOpen] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showStudio, setShowStudio] = useState(false);
 
   useEffect(() => { setOpen(false); }, [pathname]);
 
@@ -73,11 +74,17 @@ export default function NavBar() {
     supabase.auth.getUser().then(({ data }) => {
       setShowAdmin((data.user?.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase());
     });
+    // RLS: this returns a row only if the user owns OR belongs to a studio.
+    supabase.from("studios").select("id").limit(1).then(({ data }) => setShowStudio(!!data?.length));
   }, [supabase]);
 
+  // Hide "Studios" from the menu unless the user actually has one.
+  const base: Group[] = showStudio
+    ? GROUPS
+    : GROUPS.map((g) => ({ ...g, items: g.items.filter((it) => it.href !== "/studio") }));
   const groups: Group[] = showAdmin
-    ? [...GROUPS, { title: "Admin", items: [{ href: "/admin", label: "Members" }] }]
-    : GROUPS;
+    ? [...base, { title: "Admin", items: [{ href: "/admin", label: "Members" }] }]
+    : base;
 
   // current page label for the menu button
   const allItems = groups.flatMap((g) => g.items);

@@ -48,6 +48,10 @@ export async function POST(request: Request) {
 
   await admin.from("profiles").upsert({ id: userId, display_name: name || email.split("@")[0] }, { onConflict: "id" });
 
+  // one studio per account
+  const { data: alreadyOwns } = await admin.from("studios").select("id").eq("owner_id", userId).maybeSingle();
+  if (alreadyOwns) return NextResponse.json({ ok: false, error: "This email already runs a studio. Log in to manage it." }, { status: 409 });
+
   // unique join code + studio
   let code = genCode();
   for (let i = 0; i < 8; i++) { const { data } = await admin.from("studios").select("id").eq("join_code", code).maybeSingle(); if (!data) break; code = genCode(); }
