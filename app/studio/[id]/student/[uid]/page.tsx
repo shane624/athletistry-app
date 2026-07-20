@@ -1,6 +1,7 @@
 import Link from "next/link";
 import NavBar from "@/components/NavBar";
 import Icon from "@/components/Icon";
+import StudentCalendar from "@/components/StudentCalendar";
 import { redirect } from "next/navigation";
 import { getStudentOverview } from "@/lib/studio-data";
 
@@ -74,6 +75,11 @@ export default async function StudentOverviewPage({ params }: { params: { id: st
               </div>
             </>
           )}
+        </div>
+
+        {/* Training calendar */}
+        <div className="mt-4">
+          <StudentCalendar sessions={o.calendar.sessions} events={o.calendar.events} />
         </div>
 
         {/* Movement type */}

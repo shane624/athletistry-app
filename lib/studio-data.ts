@@ -163,6 +163,7 @@ export interface StudentOverview {
   movement: { primary: string; secondary: string } | null;
   ballet: { move: string; headline: string }[];
   load: { status: LoadStatus; label: string; message: string; weeklyTrimp: number | null; changePct: number | null; weeks: WeekLoad[]; tracking: boolean; lastTracked: string | null };
+  calendar: { sessions: { date: string; kind: string; durationMin: number; rpe: number }[]; events: { date: string; kind: string; name: string }[] };
 }
 
 export async function getStudentOverview(studioId: string, userId: string): Promise<StudentOverview> {
@@ -170,14 +171,15 @@ export async function getStudentOverview(studioId: string, userId: string): Prom
   const { data: mem } = await admin.from("studio_members").select("user_id, joined_at").eq("studio_id", studioId).eq("user_id", userId).maybeSingle();
   if (!mem) throw new Error("That dancer isn't in this studio");
 
-  const [{ data: prof }, userRes, { data: logs }, { data: state }, { data: map }, { data: ballet }, { data: sessions }] = await Promise.all([
+  const [{ data: prof }, userRes, { data: logs }, { data: state }, { data: map }, { data: ballet }, { data: sessions }, { data: events }] = await Promise.all([
     admin.from("profiles").select("display_name").eq("id", userId).maybeSingle(),
     admin.auth.admin.getUserById(userId),
     admin.from("set_logs").select("logged_at, weight, reps").eq("user_id", userId),
     admin.from("user_program_state").select("active_program").eq("user_id", userId).maybeSingle(),
     admin.from("movement_map").select("primary_type, secondary_type").eq("user_id", userId).maybeSingle(),
     admin.from("ballet_assessments").select("move_id, headline").eq("user_id", userId),
-    admin.from("training_sessions").select("session_date, duration_min, rpe").eq("user_id", userId),
+    admin.from("training_sessions").select("session_date, kind, duration_min, rpe").eq("user_id", userId).order("session_date", { ascending: false }),
+    admin.from("events").select("event_date, kind, name").eq("user_id", userId).order("event_date", { ascending: true }),
   ]);
 
   const email = (userRes as any)?.data?.user?.email || "";
@@ -205,6 +207,10 @@ export async function getStudentOverview(studioId: string, userId: string): Prom
       status: assess.status, label: LOAD_LABEL[assess.status], message: assess.message,
       weeklyTrimp: assess.thisWeek?.trimp ?? null, changePct: assess.changePct,
       weeks: weeklyLoads(inputs).slice(-8), tracking: since !== null && since <= 10, lastTracked,
+    },
+    calendar: {
+      sessions: (sessions ?? []).map((s: any) => ({ date: s.session_date, kind: s.kind, durationMin: s.duration_min, rpe: s.rpe })),
+      events: (events ?? []).map((e: any) => ({ date: e.event_date, kind: e.kind, name: e.name })),
     },
   };
 }
