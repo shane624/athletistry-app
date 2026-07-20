@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase-server";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { canAddStudent, syncSeats } from "@/lib/billing";
 
 // Unambiguous code alphabet (no O/0/I/1).
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -57,9 +58,18 @@ export async function joinStudio(code: string): Promise<{ ok: boolean; studioId?
   if (!clean) return { ok: false, error: "Enter a studio code." };
   const { data: studio } = await admin.from("studios").select("id, name").eq("join_code", clean).maybeSingle();
   if (!studio) return { ok: false, error: "No studio found for that code." };
+
+  // Seat gate — free up to 2 dancers, then the studio needs an active subscription.
+  const { data: existing } = await admin.from("studio_members")
+    .select("user_id").eq("studio_id", studio.id).eq("user_id", user.id).maybeSingle();
+  if (!existing && !(await canAddStudent(studio.id))) {
+    return { ok: false, error: "This studio is full on the free plan (2 dancers). Ask them to add a seat, then try again." };
+  }
+
   const { error } = await admin.from("studio_members")
     .upsert({ studio_id: studio.id, user_id: user.id, role: "student" }, { onConflict: "studio_id,user_id" });
   if (error) return { ok: false, error: error.message };
+  await syncSeats(studio.id);
   return { ok: true, studioId: studio.id, studioName: studio.name };
 }
 
@@ -69,7 +79,9 @@ export async function leaveStudio(studioId: string): Promise<{ ok: boolean; erro
   if (!user) return { ok: false, error: "Please sign in first." };
   const supabase = createClient();
   const { error } = await supabase.from("studio_members").delete().eq("studio_id", studioId).eq("user_id", user.id);
-  return error ? { ok: false, error: error.message } : { ok: true };
+  if (error) return { ok: false, error: error.message };
+  await syncSeats(studioId);
+  return { ok: true };
 }
 
 /** Owner: generate a fresh join code (old links stop working). */
@@ -96,7 +108,9 @@ export async function removeStudent(studioId: string, userId: string): Promise<{
   const admin = await asOwner(studioId);
   if (!admin) return { ok: false, error: "Not authorized." };
   const { error } = await admin.from("studio_members").delete().eq("studio_id", studioId).eq("user_id", userId);
-  return error ? { ok: false, error: error.message } : { ok: true };
+  if (error) return { ok: false, error: error.message };
+  await syncSeats(studioId);
+  return { ok: true };
 }
 
 /** Owner: delete the studio entirely (roster links removed; student data untouched). */

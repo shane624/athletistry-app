@@ -8,6 +8,7 @@ import { getProgram } from "@/lib/programs";
 import { assessLoad, weeklyLoads, type LoadStatus, type WeekLoad, type SessionInput } from "@/lib/load";
 import { MOVEMENT_TYPES, type TypeId } from "@/lib/movement-map";
 import { getBalletMove } from "@/lib/ballet-moves";
+import { billableSeats, isActive, FREE_SEATS } from "@/lib/stripe";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -23,7 +24,7 @@ async function requireStudioOwner(studioId: string) {
   if (!user) throw new Error("Not signed in");
   const admin = createAdminClient();
   const { data: studio } = await admin.from("studios")
-    .select("id, name, owner_id, join_code, created_at").eq("id", studioId).maybeSingle();
+    .select("id, name, owner_id, join_code, created_at, subscription_status").eq("id", studioId).maybeSingle();
   if (!studio || studio.owner_id !== user.id) throw new Error("Not authorized");
   return { admin, studio, user };
 }
@@ -44,20 +45,30 @@ function daysSince(iso: string | null): number | null {
 }
 
 // ---- owner: my studios ----------------------------------------------------
-export interface StudioSummary { id: string; name: string; joinCode: string; memberCount: number; createdAt: string }
+export interface StudioSummary {
+  id: string; name: string; joinCode: string; memberCount: number; createdAt: string;
+  subscriptionStatus: string; active: boolean; billableSeats: number; freeSeats: number;
+}
 
 export async function getMyStudios(): Promise<StudioSummary[]> {
   const user = await currentUser();
   if (!user) return [];
   const admin = createAdminClient();
   const { data: studios } = await admin.from("studios")
-    .select("id, name, join_code, created_at").eq("owner_id", user.id).order("created_at");
+    .select("id, name, join_code, created_at, subscription_status").eq("owner_id", user.id).order("created_at");
   if (!studios?.length) return [];
   const ids = studios.map((s: any) => s.id);
   const { data: members } = await admin.from("studio_members").select("studio_id").in("studio_id", ids);
   const counts = new Map<string, number>();
   for (const m of members ?? []) counts.set(m.studio_id, (counts.get(m.studio_id) ?? 0) + 1);
-  return studios.map((s: any) => ({ id: s.id, name: s.name, joinCode: s.join_code, memberCount: counts.get(s.id) ?? 0, createdAt: s.created_at }));
+  return studios.map((s: any) => {
+    const memberCount = counts.get(s.id) ?? 0;
+    return {
+      id: s.id, name: s.name, joinCode: s.join_code, memberCount, createdAt: s.created_at,
+      subscriptionStatus: s.subscription_status ?? "none", active: isActive(s.subscription_status),
+      billableSeats: billableSeats(memberCount), freeSeats: FREE_SEATS,
+    };
+  });
 }
 
 // ---- student: studios I've joined ----------------------------------------
@@ -85,7 +96,11 @@ export async function getStudioRoster(studioId: string): Promise<{ studio: Studi
   const { data: members } = await admin.from("studio_members").select("user_id, joined_at").eq("studio_id", studioId);
   const rows = members ?? [];
   const ids = rows.map((m: any) => m.user_id);
-  const summary: StudioSummary = { id: studio.id, name: studio.name, joinCode: studio.join_code, memberCount: ids.length, createdAt: studio.created_at };
+  const summary: StudioSummary = {
+    id: studio.id, name: studio.name, joinCode: studio.join_code, memberCount: ids.length, createdAt: studio.created_at,
+    subscriptionStatus: (studio as any).subscription_status ?? "none", active: isActive((studio as any).subscription_status),
+    billableSeats: billableSeats(ids.length), freeSeats: FREE_SEATS,
+  };
   if (!ids.length) return { studio: summary, students: [] };
 
   const [{ data: profiles }, { data: logs }, { data: maps }, { data: sessions }, ...userResults] = await Promise.all([

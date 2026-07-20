@@ -81,7 +81,13 @@ export default function LoginPage() {
 
         {msg && <p className="text-sm text-grey mt-3 text-center">{msg}</p>}
 
-        <div className="mt-6 pt-5 border-t border-line text-center">
+        <div className="mt-6 pt-5 border-t border-line text-center space-y-2">
+          <p className="text-sm text-grey">
+            Have a studio code? <a href="/studio/join" className="text-teal">Create your dancer login</a>.
+          </p>
+          <p className="text-sm text-grey">
+            Run a dance studio? <a href="/studio/create" className="text-teal">Set up a studio</a>.
+          </p>
           <p className="text-sm text-grey">
             Not a member yet? Access is included with the{" "}
             <a href="https://www.skool.com/athletistryproject" className="text-teal" target="_blank" rel="noopener">

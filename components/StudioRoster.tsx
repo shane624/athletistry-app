@@ -5,8 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Icon from "@/components/Icon";
 import { regenerateCode, renameStudio, deleteStudio, removeStudent } from "@/lib/studio-actions";
+import { startStudioCheckout, openBillingPortal } from "@/lib/billing-actions";
 
-interface StudioSummary { id: string; name: string; joinCode: string; memberCount: number; createdAt: string }
+interface StudioSummary {
+  id: string; name: string; joinCode: string; memberCount: number; createdAt: string;
+  subscriptionStatus: string; active: boolean; billableSeats: number; freeSeats: number;
+}
 interface RosterStudent {
   id: string; name: string; email: string; joinedAt: string;
   lastActive: string | null; totalWorkouts: number; currentStreak: number; rank: string;
@@ -37,7 +41,7 @@ export default function StudioRoster({ studio, students }: { studio: StudioSumma
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const joinLink = typeof window !== "undefined" ? `${window.location.origin}/studio?code=${code}` : "";
+  const joinLink = typeof window !== "undefined" ? `${window.location.origin}/studio/join?code=${code}` : "";
   const notTracking = students.filter((s) => !s.tracking).length;
   const flagged = students.filter((s) => s.tracking && (s.loadStatus === "over" || s.loadStatus === "under")).length;
 
@@ -62,6 +66,16 @@ export default function StudioRoster({ studio, students }: { studio: StudioSumma
     setBusy(true); const res = await deleteStudio(studio.id); setBusy(false);
     if (res.ok) router.push("/studio");
   }
+  async function subscribe() {
+    setBusy(true); const res = await startStudioCheckout(studio.id); setBusy(false);
+    if (res.ok && res.url) window.location.href = res.url;
+    else window.alert(res.error || "Couldn't start checkout.");
+  }
+  async function manage() {
+    setBusy(true); const res = await openBillingPortal(studio.id); setBusy(false);
+    if (res.ok && res.url) window.location.href = res.url;
+    else window.alert(res.error || "Couldn't open billing.");
+  }
 
   return (
     <div>
@@ -84,12 +98,35 @@ export default function StudioRoster({ studio, students }: { studio: StudioSumma
       {/* Join code panel */}
       <div className="card p-4 mt-4">
         <p className="eyebrow">Invite your dancers</p>
-        <p className="text-grey text-xs mt-1">Share this code (or link). When they join, you&apos;ll see their training here.</p>
+        <p className="text-grey text-xs mt-1">Share this code or link. Dancers use it to create their own Athletistry account — no invite emails needed — and they appear here automatically.</p>
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           <span className="text-2xl font-mono font-extrabold tracking-widest text-navy">{code}</span>
           <button onClick={copy} className="btn-ghost py-1.5 px-3 text-sm">{copied ? "Copied ✓" : "Copy link"}</button>
           <button onClick={regen} disabled={busy} className="btn-ghost py-1.5 px-3 text-sm">New code</button>
         </div>
+      </div>
+
+      {/* Plan / billing */}
+      <div className="card p-4 mt-4">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div>
+            <p className="eyebrow">Plan</p>
+            {studio.active ? (
+              <p className="text-navy text-sm font-semibold mt-0.5">
+                Active · {studio.billableSeats} paid {studio.billableSeats === 1 ? "seat" : "seats"} · $20 AUD/dancer/mo
+              </p>
+            ) : (
+              <p className="text-navy text-sm font-semibold mt-0.5">Free — {studio.freeSeats} dancers included</p>
+            )}
+            {studio.subscriptionStatus === "past_due" && <p className="text-red-600 text-xs mt-0.5">Payment failed — update your card to keep access.</p>}
+          </div>
+          {studio.active
+            ? <button onClick={manage} disabled={busy} className="btn-ghost py-2 px-4 text-sm">Manage billing</button>
+            : <button onClick={subscribe} disabled={busy} className="btn-primary py-2 px-4 text-sm">Add dancers ($20/mo each)</button>}
+        </div>
+        {!studio.active && studio.memberCount >= studio.freeSeats && (
+          <p className="text-grey text-xs mt-2">You&apos;re at the free limit of {studio.freeSeats} dancers. Subscribe to invite more — you&apos;re billed $20 AUD/month per dancer beyond the first {studio.freeSeats}, and it adjusts automatically as your roster changes.</p>
+        )}
       </div>
 
       {/* At-a-glance */}
