@@ -42,6 +42,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     title: "More",
     items: [
+      { href: "/studio", label: "Studios", icon: "users" },
       { href: "/exercises", label: "Library", icon: "library" },
       { href: "/settings", label: "Settings", icon: "settings" },
     ],

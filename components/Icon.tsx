@@ -8,7 +8,7 @@ type IconName =
   | "calendar" | "target" | "book" | "body" | "flask"
   | "ballet" | "warmup" | "library" | "settings" | "user"
   | "dumbbell" | "clock" | "check" | "chevron" | "sparkle"
-  | "bolt" | "heart" | "ruler" | "stack";
+  | "bolt" | "heart" | "ruler" | "stack" | "users";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   home: <path d="M3 11.5 12 4l9 7.5M5 10v9h5v-5h4v5h5v-9" />,
@@ -40,6 +40,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
   heart: <path d="M12 20s-7-4.5-9-9a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c-2 4.5-9 9-9 9z" />,
   ruler: <><rect x="3" y="8" width="18" height="8" rx="1.5" transform="rotate(0 12 12)" /><path d="M7 8v3M11 8v4M15 8v3M19 8v4" /></>,
   stack: <><path d="M12 3l9 5-9 5-9-5z" /><path d="M3 12l9 5 9-5M3 16l9 5 9-5" /></>,
+  users: <><circle cx="9" cy="8" r="3.2" /><path d="M3.5 20a5.5 5.5 0 0 1 11 0" /><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M17.5 20a5.5 5.5 0 0 0-3-4.9" /></>,
 };
 
 export default function Icon({
