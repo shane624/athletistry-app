@@ -77,7 +77,7 @@ export default function PoseCamera() {
     if (!lms) return;
     const px = (p: LM) => ({ x: p.x * w, y: p.y * h });
     const smx = (lms[11].x + lms[12].x) / 2 * w;
-    ctx.strokeStyle = "rgba(39,174,159,0.55)"; ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
+    ctx.strokeStyle = "rgba(30,80,160,0.55)"; ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
     ctx.beginPath(); ctx.moveTo(smx, 0); ctx.lineTo(smx, h); ctx.stroke();
     ctx.setLineDash([]);
     ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.lineWidth = 3;
@@ -87,7 +87,7 @@ export default function PoseCamera() {
       const A = px(pa), B = px(pb);
       ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
     }
-    ctx.fillStyle = "#27ae9f";
+    ctx.fillStyle = "#1E50A0";
     for (const p of lms) { if (!p) continue; const P = px(p); ctx.beginPath(); ctx.arc(P.x, P.y, 4, 0, Math.PI * 2); ctx.fill(); }
   }, []);
 

@@ -69,7 +69,7 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
       const A = px(pa), B = px(pb);
       ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke();
     }
-    ctx.fillStyle = "#27ae9f";
+    ctx.fillStyle = "#1E50A0";
     for (const p of lms) { if (!p) continue; const P = px(p); ctx.beginPath(); ctx.arc(P.x, P.y, 4, 0, Math.PI * 2); ctx.fill(); }
   }, []);
 

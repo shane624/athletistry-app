@@ -114,7 +114,7 @@ export default async function Dashboard() {
         <DailyQuote />
 
         {/* today's session header */}
-        <div data-tour="today-session" className={`${blockColor} text-white p-5 animate-in`} style={{ borderRadius: "18px", boxShadow: "0 12px 34px rgba(31,42,68,.2)" }}>
+        <div data-tour="today-session" className={`${blockColor} text-white p-5 animate-in`} style={{ borderRadius: "18px", boxShadow: "0 12px 34px rgba(42,47,54,.2)" }}>
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <p className="text-white/75 text-xs font-semibold tracking-wide uppercase">

@@ -4,59 +4,70 @@
 
 :root {
   color-scheme: light;
-  /* Light palette — the design tokens (see tailwind.config) read these. */
-  --c-navy: #1f2a44;
-  --c-navy2: #3a4a6b;
-  --c-teal: #27ae9f;
-  --c-tealdark: #1f8b7f;
-  --c-light: #eef6f5;
-  --c-rowalt: #f6f9f9;
-  --c-line: #d6e0df;
-  --c-ink: #2c3038;
-  --c-grey: #4d5561;
-  --c-surface: #ffffff;
-  --c-page: #eef6f5;
-  --card-border: rgba(31,42,68,.06);
-  --card-shadow: 0 6px 20px rgba(31,42,68,.07);
-  --card-shadow-hover: 0 12px 30px rgba(31,42,68,.12);
+  /* Athletistry Project palette — marble paper, graphite/silver metal, one
+     royal-blue accent. Token names kept (navy/teal) so the whole app recolours
+     without touching components:
+       navy = Graphite ink   teal = Royal blue (the accent)
+       light = cool panel     gold = Silver (eyebrows/hairlines) */
+  --c-navy: #2A2F36;       /* Graphite — headings + dark surfaces */
+  --c-navy2: #3A414A;      /* Steel, for gradients */
+  --c-teal: #1E50A0;       /* Royal blue — the hero accent */
+  --c-tealdark: #163C7A;   /* darker blue (hover) */
+  --c-gold: #8B93A0;       /* Silver/steel — eyebrows, hairlines */
+  --c-light: #EEF1F5;      /* cool light panels */
+  --c-rowalt: #F3F5F8;     /* alt rows */
+  --c-line: #DCE1E8;       /* cool hairline rules */
+  --c-ink: #2A2F36;        /* primary text */
+  --c-grey: #6B7280;       /* cool secondary text/captions */
+  --c-surface: #FFFFFF;    /* clean white cards */
+  --c-page: #F5F6F8;       /* Marble — primary paper */
+  --card-border: rgba(42,47,54,.07);
+  --card-shadow: 0 6px 20px rgba(42,47,54,.06);
+  --card-shadow-hover: 0 12px 30px rgba(42,47,54,.12);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    /* Dark palette. navy/navy2 stay the brand DARK (used as surfaces like the
-       header & hero), so they don't invert. Heading text that used text-navy
-       is remapped to ink below. */
-    --c-navy: #1f2a44;
-    --c-navy2: #2a3650;
-    --c-teal: #34c9b6;        /* a touch brighter so it pops on dark */
-    --c-tealdark: #2bb3a2;
-    --c-light: #161d2e;       /* "light" surfaces become deep navy */
-    --c-rowalt: #1c2438;
-    --c-line: #2c3650;
-    --c-ink: #e8edf6;
-    --c-grey: #9aa6bd;
-    --c-surface: #1b2236;     /* card background */
-    --c-page: #10151f;        /* page background */
-    --card-border: rgba(255,255,255,.07);
-    --card-shadow: 0 6px 20px rgba(0,0,0,.34);
-    --card-shadow-hover: 0 12px 30px rgba(0,0,0,.46);
+    /* Reversed — graphite paper, light text, brighter royal blue. */
+    --c-navy: #F5F6F8;       /* headings become light on graphite */
+    --c-navy2: #3A414A;
+    --c-teal: #4A83D8;       /* royal blue, brighter on dark */
+    --c-tealdark: #1E50A0;
+    --c-gold: #AEB6C2;       /* silver on dark */
+    --c-light: #1C2029;      /* panels deep graphite */
+    --c-rowalt: #20242E;
+    --c-line: #333A44;
+    --c-ink: #EEF1F5;        /* primary text = light */
+    --c-grey: #9AA3B2;       /* muted steel */
+    --c-surface: #1A1E26;    /* card background */
+    --c-page: #12151B;       /* page background — deep graphite */
+    --card-border: rgba(255,255,255,.06);
+    --card-shadow: 0 6px 20px rgba(0,0,0,.4);
+    --card-shadow-hover: 0 12px 30px rgba(0,0,0,.5);
   }
 }
 
-/* Brand navy at the html level so the FIRST paint (before React/JS loads, and
-   the PWA cold-start frame on phones) is brand navy, not a white flash. */
+/* Marble at the html level so the FIRST paint (before React/JS loads, and the
+   PWA cold-start frame on phones) is marble paper, not a white flash. */
 html {
   -webkit-text-size-adjust: 100%;
-  background-color: var(--c-page, #1f2a44);
+  background-color: var(--c-page, #F5F6F8);
 }
 
 body {
   background: var(--c-page);
   color: var(--c-ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-overflow-scrolling: touch;
   /* respect iOS notch / home-indicator safe areas */
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Geometric display sans (Montserrat) for headings — clean, athletic, metal. */
+h1, h2, h3, .font-display {
+  font-family: var(--font-display), "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.005em;
 }
 
 /* Raw Tailwind core colors used in markup don't know about dark mode, so map
@@ -106,9 +117,9 @@ body {
 }
 .btn-primary {
   @apply btn bg-teal text-white hover:bg-tealdark;
-  box-shadow: 0 6px 18px rgba(39,174,159,.28);
+  box-shadow: 0 6px 18px rgba(30,80,160,.26);
 }
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(39,174,159,.36); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(30,80,160,.34); }
 .btn-ghost {
   @apply btn border hover:bg-rowalt;
   background: var(--c-surface);
@@ -126,21 +137,22 @@ body {
   font-size: 16px;
   transition: border-color .18s ease, box-shadow .18s ease;
 }
-.input:focus { box-shadow: 0 0 0 3px rgba(39,174,159,.14); }
+.input:focus { box-shadow: 0 0 0 3px rgba(30,80,160,.15); }
 .badge {
   @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
 }
 
-/* small teal uppercase eyebrow label, like the renderings */
+/* small silver uppercase eyebrow label — metal does the fine print */
 .eyebrow {
-  @apply text-teal font-bold;
+  color: var(--c-gold);
+  font-weight: 700;
   letter-spacing: 2px;
   font-size: 11px;
   text-transform: uppercase;
 }
-/* navy → teal gradient surface for thumbnails / accent headers */
-.grad-brand { background: linear-gradient(135deg, #3a4a6b, #27ae9f); }
-.grad-navy  { background: linear-gradient(135deg, #1f2a44, #27ae9f); }
+/* graphite → royal-blue gradient surfaces for thumbnails / accent headers */
+.grad-brand { background: linear-gradient(135deg, #3A414A, #1E50A0); }
+.grad-navy  { background: linear-gradient(135deg, #2A2F36, #1E50A0); }
 
 /* gentle entrance for page content */
 @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform:none; } }
@@ -179,26 +191,26 @@ a.card:active, button.card:active { transform: scale(.985); }
   .splash-bar { animation: none; width: 100%; }
 }
 
-/* ---- landing hero (matches the showcase rendering) ---- */
-.hero-bg { background: radial-gradient(1100px 560px at 72% -12%, #2c3c5e 0%, #1f2a44 56%); }
+/* ---- landing hero — graphite with a royal-blue glow ---- */
+.hero-bg { background: radial-gradient(1100px 560px at 72% -12%, #313842 0%, #2A2F36 56%); }
 .hero-glow {
   position:absolute; width:480px; height:480px; right:-130px; top:40px;
-  background: radial-gradient(circle, rgba(39,174,159,.30), transparent 65%);
+  background: radial-gradient(circle, rgba(30,80,160,.30), transparent 65%);
   filter: blur(18px); animation: heroFloat 9s ease-in-out infinite; z-index:0;
 }
 @keyframes heroFloat { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-24px);} }
 
 /* ---- phone mockup ---- */
 .phone-shell {
-  width: 270px; border-radius: 36px; background:#0e1626; padding:10px;
+  width: 270px; border-radius: 36px; background:#2A2F36; padding:10px;
   box-shadow: 0 34px 70px rgba(0,0,0,.42); position:relative;
   animation: phoneFloat 6s ease-in-out infinite;
 }
 .phone-shell::before {
   content:""; position:absolute; top:18px; left:50%; transform:translateX(-50%);
-  width:108px; height:22px; background:#0e1626; border-radius:0 0 14px 14px; z-index:5;
+  width:108px; height:22px; background:#2A2F36; border-radius:0 0 14px 14px; z-index:5;
 }
-.phone-screen { background:#eef6f5; border-radius:27px; overflow:hidden; }
+.phone-screen { background:#F5F6F8; border-radius:27px; overflow:hidden; }
 @keyframes phoneFloat { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-12px);} }
 
 /* animated loading dots (login button) */

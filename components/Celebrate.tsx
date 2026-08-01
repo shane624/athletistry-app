@@ -35,7 +35,7 @@ export default function Celebrate({
 
     const W = () => window.innerWidth;
     const H = () => window.innerHeight;
-    const colors = ["#27ae9f", "#1f8b7f", "#1f2a44", "#3a4a6b", "#f4c95d", "#e88aa0", "#ffffff"];
+    const colors = ["#1E50A0", "#163C7A", "#2A2F36", "#3A414A", "#f4c95d", "#e88aa0", "#ffffff"];
 
     type Bit = { x: number; y: number; vx: number; vy: number; r: number; rot: number; vr: number; color: string; shape: number };
     const bits: Bit[] = [];
@@ -96,7 +96,7 @@ export default function Celebrate({
   return (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center p-6"
-      style={{ background: "rgba(31,42,68,0.72)" }}
+      style={{ background: "rgba(42,47,54,0.72)" }}
       onClick={onClose}
     >
       <canvas ref={canvasRef} className="pointer-events-none fixed inset-0" />

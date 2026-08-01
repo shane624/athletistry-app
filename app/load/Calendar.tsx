@@ -23,7 +23,7 @@ const PLAN_LABEL: Record<string, string> = {
   cardio: "Cardio", tabata: "Tabata", rest: "Rest",
 };
 const PLAN_COLOR: Record<string, string> = {
-  strength: "#1f8b7f", hypertrophy: "#27ae9f", endurance: "#56c2b0",
+  strength: "#163C7A", hypertrophy: "#1E50A0", endurance: "#56c2b0",
   cardio: "#4aa3df", tabata: "#e0833a", rest: "#9aa3b5",
 };
 
@@ -135,13 +135,13 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
               <div className="mt-0.5 space-y-0.5">
                 {planDay && planDay.sessionType !== "rest" && (
                   <div className="text-[10px] font-bold text-white rounded px-1 py-0.5 truncate"
-                    style={{ background: PLAN_COLOR[planDay.sessionType] ?? "#27ae9f" }}
+                    style={{ background: PLAN_COLOR[planDay.sessionType] ?? "#1E50A0" }}
                     title={`Plan: ${planDay.title}`}>
                     ◆ {PLAN_LABEL[planDay.sessionType] ?? "Session"}
                   </div>
                 )}
                 {dayEvents.map((e) => (
-                  <div key={"e" + e.id} className="text-[10px] font-bold text-white rounded px-1 py-0.5 truncate" style={{ background: "#1f2a44" }} title={e.name || e.kind}>
+                  <div key={"e" + e.id} className="text-[10px] font-bold text-white rounded px-1 py-0.5 truncate" style={{ background: "#2A2F36" }} title={e.name || e.kind}>
                     ★ {e.name || e.kind}
                   </div>
                 ))}
@@ -161,7 +161,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
 
       {/* plan-day view modal — shows the prescribed session + exercises + videos */}
       {viewPlan && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: "rgba(31,42,68,.6)" }} onClick={() => setViewPlan(null)}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: "rgba(42,47,54,.6)" }} onClick={() => setViewPlan(null)}>
           <div className="card w-full max-w-md p-5 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <div>
@@ -201,7 +201,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
 
       {/* add modal */}
       {addDay && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: "rgba(31,42,68,.6)" }} onClick={closeModal}>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: "rgba(42,47,54,.6)" }} onClick={closeModal}>
           <div className="card w-full max-w-md p-5 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <p className="font-extrabold text-navy">Add to {addDay}</p>

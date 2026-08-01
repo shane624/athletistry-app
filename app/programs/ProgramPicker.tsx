@@ -10,10 +10,10 @@ interface P { id: string; name: string; tagline: string; dayCount: number; exerc
 
 // per-program accent gradient + icon for the hero strip
 function programLook(id: string): { grad: string; icon: IconName } {
-  if (id.includes("practice")) return { grad: "linear-gradient(135deg,#1f2a44,#27ae9f)", icon: "sparkle" };
-  if (id.includes("return") || id.includes("ballet")) return { grad: "linear-gradient(135deg,#3a4a6b,#27ae9f)", icon: "ballet" };
-  if (id.includes("kid")) return { grad: "linear-gradient(135deg,#2bb3a2,#1f8b7f)", icon: "heart" };
-  return { grad: "linear-gradient(135deg,#1f2a44,#3a4a6b)", icon: "stack" };
+  if (id.includes("practice")) return { grad: "linear-gradient(135deg,#2A2F36,#1E50A0)", icon: "sparkle" };
+  if (id.includes("return") || id.includes("ballet")) return { grad: "linear-gradient(135deg,#3A414A,#1E50A0)", icon: "ballet" };
+  if (id.includes("kid")) return { grad: "linear-gradient(135deg,#1E50A0,#163C7A)", icon: "heart" };
+  return { grad: "linear-gradient(135deg,#2A2F36,#3A414A)", icon: "stack" };
 }
 
 export default function ProgramPicker({ programs, active, first, customActive }: { programs: P[]; active: string; first?: boolean; customActive?: boolean }) {

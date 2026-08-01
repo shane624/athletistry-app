@@ -16,15 +16,15 @@ export const CLASS_GROUPS: ClassGroup[] = [
   {
     title: "Dance",
     items: [
-      { kind: "ballet",    label: "Ballet",    defaultMin: 90, defaultRpe: 6, color: "#27ae9f" },
-      { kind: "pointe",    label: "Pointe",    defaultMin: 45, defaultRpe: 7, color: "#1f8b7f" },
+      { kind: "ballet",    label: "Ballet",    defaultMin: 90, defaultRpe: 6, color: "#1E50A0" },
+      { kind: "pointe",    label: "Pointe",    defaultMin: 45, defaultRpe: 7, color: "#163C7A" },
       { kind: "jazz",      label: "Jazz",      defaultMin: 60, defaultRpe: 6, color: "#e88aa0" },
       { kind: "lyrical",   label: "Lyrical",   defaultMin: 60, defaultRpe: 5, color: "#b079d6" },
       { kind: "contemporary", label: "Contemporary", defaultMin: 60, defaultRpe: 6, color: "#7a6ff0" },
       { kind: "hiphop",    label: "Hip Hop",   defaultMin: 60, defaultRpe: 6, color: "#f4a261" },
       { kind: "tap",       label: "Tap",       defaultMin: 45, defaultRpe: 5, color: "#e9c46a" },
       { kind: "acro",      label: "Acro",      defaultMin: 60, defaultRpe: 7, color: "#e76f51" },
-      { kind: "rehearsal", label: "Rehearsal", defaultMin: 120, defaultRpe: 7, color: "#3a4a6b" },
+      { kind: "rehearsal", label: "Rehearsal", defaultMin: 120, defaultRpe: 7, color: "#3A414A" },
     ],
   },
   {
@@ -45,9 +45,9 @@ export const CLASS_GROUPS: ClassGroup[] = [
   {
     title: "General",
     items: [
-      { kind: "workout",  label: "Gym / Strength", defaultMin: 45, defaultRpe: 6, color: "#1f2a44" },
-      { kind: "cardio",   label: "Cardio",         defaultMin: 30, defaultRpe: 7, color: "#1f2a44" },
-      { kind: "crosstrain", label: "Cross-training", defaultMin: 45, defaultRpe: 6, color: "#3a4a6b" },
+      { kind: "workout",  label: "Gym / Strength", defaultMin: 45, defaultRpe: 6, color: "#2A2F36" },
+      { kind: "cardio",   label: "Cardio",         defaultMin: 30, defaultRpe: 7, color: "#2A2F36" },
+      { kind: "crosstrain", label: "Cross-training", defaultMin: 45, defaultRpe: 6, color: "#3A414A" },
     ],
   },
 ];

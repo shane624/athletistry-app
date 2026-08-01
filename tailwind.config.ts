@@ -8,21 +8,25 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Tokens resolve to CSS variables so the whole app supports dark mode
-        // (palettes defined in globals.css). Fallbacks keep the light palette.
-        navy: "var(--c-navy, #1f2a44)",
-        navy2: "var(--c-navy2, #3a4a6b)",
-        teal: "var(--c-teal, #27ae9f)",
-        tealdark: "var(--c-tealdark, #1f8b7f)",
-        light: "var(--c-light, #eef6f5)",
-        rowalt: "var(--c-rowalt, #f6f9f9)",
-        line: "var(--c-line, #d6e0df)",
-        ink: "var(--c-ink, #2c3038)",
-        grey: "var(--c-grey, #5b6470)",
-        surface: "var(--c-surface, #ffffff)",
+        // Tokens resolve to CSS variables (palettes in globals.css). Names are
+        // kept for compatibility; values are the Athletistry Project palette:
+        //   navy = Graphite · teal = Royal blue · light = cool panel · gold = Silver.
+        navy: "var(--c-navy, #2A2F36)",
+        navy2: "var(--c-navy2, #3A414A)",
+        teal: "var(--c-teal, #1E50A0)",
+        tealdark: "var(--c-tealdark, #163C7A)",
+        gold: "var(--c-gold, #8B93A0)",
+        light: "var(--c-light, #EEF1F5)",
+        rowalt: "var(--c-rowalt, #F3F5F8)",
+        line: "var(--c-line, #DCE1E8)",
+        ink: "var(--c-ink, #2A2F36)",
+        grey: "var(--c-grey, #6B7280)",
+        surface: "var(--c-surface, #FFFFFF)",
+        marble: "var(--c-page, #F5F6F8)",
       },
       fontFamily: {
-        sans: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],
+        display: ["var(--font-display)", "Montserrat", "ui-sans-serif", "system-ui", "sans-serif"],
       },
     },
   },

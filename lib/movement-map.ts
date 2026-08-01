@@ -32,7 +32,7 @@ export const MOVEMENT_TYPES: Record<TypeId, MovementType> = {
     oneExercise: "Foot doming — gently lift your arch without curling your toes. Find pressure without grip.",
     focus: "Efficient strength, foot pressure, and breathing.",
     pathway: { label: "The Practice", href: "/programs", why: "Anatomy-first strength so stability comes from structure, not tension." },
-    grad: "linear-gradient(135deg,#1f2a44,#3a4a6b)",
+    grad: "linear-gradient(135deg,#2A2F36,#3A414A)",
   },
   rangeChaser: {
     id: "rangeChaser", name: "The Range Chaser", tagline: "I have the movement. Now I build the support.",
@@ -45,7 +45,7 @@ export const MOVEMENT_TYPES: Record<TypeId, MovementType> = {
     oneExercise: "Slow développé to knee height only, holding the pelvis completely still the whole way.",
     focus: "Standing-leg stability and controlling transitions.",
     pathway: { label: "Train for Ballet + strength", href: "/ballet", why: "Build the stability that makes your range usable." },
-    grad: "linear-gradient(135deg,#3a4a6b,#27ae9f)",
+    grad: "linear-gradient(135deg,#3A414A,#1E50A0)",
   },
   hiker: {
     id: "hiker", name: "The Hiker", tagline: "My body is helping too much.",
@@ -58,7 +58,7 @@ export const MOVEMENT_TYPES: Record<TypeId, MovementType> = {
     oneExercise: "Passé holds at a lower knee height, keeping both hips dead level — separate the leg from the trunk.",
     focus: "Separating limb movement from the trunk; core and pelvis control.",
     pathway: { label: "Progress + core work", href: "/progress", why: "Pelvis and shoulder separation so the limbs move on their own." },
-    grad: "linear-gradient(135deg,#1f2a44,#27ae9f)",
+    grad: "linear-gradient(135deg,#2A2F36,#1E50A0)",
   },
   twister: {
     id: "twister", name: "The Twister", tagline: "Turnout is a conversation between both legs.",
@@ -71,7 +71,7 @@ export const MOVEMENT_TYPES: Record<TypeId, MovementType> = {
     oneExercise: "Banded external rotation on both legs — feel equal rotation coming from each hip.",
     focus: "True hip rotation, evenly, from both sides.",
     pathway: { label: "Train for Ballet — turnout & hips", href: "/ballet", why: "Hip external-rotation strength so turnout comes from the hip." },
-    grad: "linear-gradient(135deg,#3a4a6b,#1f8b7f)",
+    grad: "linear-gradient(135deg,#3A414A,#163C7A)",
   },
   collapser: {
     id: "collapser", name: "The Collapser", tagline: "I need strength that travels with me.",
@@ -84,7 +84,7 @@ export const MOVEMENT_TYPES: Record<TypeId, MovementType> = {
     oneExercise: "A slow, controlled close to fifth — hold even foot pressure and rotation the whole way in.",
     focus: "Strength that holds through range and transitions.",
     pathway: { label: "Strength & endurance programs", href: "/programs", why: "Strength that stays with you through the movement, not just in a pose." },
-    grad: "linear-gradient(135deg,#2bb3a2,#1f8b7f)",
+    grad: "linear-gradient(135deg,#1E50A0,#163C7A)",
   },
   controller: {
     id: "controller", name: "The Controller", tagline: "Now it needs to become a pattern, not a command.",
@@ -97,7 +97,7 @@ export const MOVEMENT_TYPES: Record<TypeId, MovementType> = {
     oneExercise: "Drill one cue at a time until it's automatic, then add speed — let it become reflex.",
     focus: "Turning conscious corrections into automatic patterns.",
     pathway: { label: "The Practice", href: "/programs", why: "Repeatable, guided patterns so technique holds up at speed." },
-    grad: "linear-gradient(135deg,#1f2a44,#3a4a6b)",
+    grad: "linear-gradient(135deg,#2A2F36,#3A414A)",
   },
 };
 

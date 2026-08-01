@@ -65,7 +65,7 @@ export default async function MovementMapPage({ searchParams }: { searchParams: 
             <div className="grid sm:grid-cols-2 gap-3 mt-4">
               <Link href="/movement-map/scan"
                 className="relative rounded-2xl overflow-hidden p-5 flex flex-col justify-end min-h-[150px] active:scale-[.98] transition"
-                style={{ background: "linear-gradient(135deg,#1f2a44,#27ae9f)" }}>
+                style={{ background: "linear-gradient(135deg,#2A2F36,#1E50A0)" }}>
                 <span className="absolute top-4 left-4 w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-white">
                   <Icon name="target" className="w-5 h-5" />
                 </span>

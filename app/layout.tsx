@@ -1,5 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { DM_Sans, Montserrat } from "next/font/google";
 import "./globals.css";
+
+// Brand type: DM Sans (body/UI) + Montserrat (geometric display for headings).
+const sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-sans", display: "swap" });
+const display = Montserrat({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-display", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://athletistry.app"),
@@ -35,7 +40,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1f2a44",
+  themeColor: "#2A2F36",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -57,8 +62,8 @@ const SPLASH: { media: string; href: string }[] = [
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={`${sans.variable} ${display.variable}`}>
+      <body className="font-sans">
         {SPLASH.map((s) => (
           <link key={s.href} rel="apple-touch-startup-image" media={s.media} href={s.href} />
         ))}

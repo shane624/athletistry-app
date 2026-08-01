@@ -22,7 +22,7 @@ export default async function StudioPage({ searchParams }: { searchParams: { cod
           <p className="text-grey text-center mt-2">Run a studio to track your dancers, or join one your teacher set up.</p>
           <div className="grid sm:grid-cols-2 gap-3 mt-8">
             <Link href="/studio/create" className="relative rounded-2xl overflow-hidden p-6 flex flex-col justify-end min-h-[170px] active:scale-[.98] transition"
-              style={{ background: "linear-gradient(135deg,#1f2a44,#27ae9f)" }}>
+              style={{ background: "linear-gradient(135deg,#2A2F36,#1E50A0)" }}>
               <span className="absolute top-5 left-5 w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center text-white"><Icon name="users" className="w-6 h-6" /></span>
               <span className="text-white font-bold text-lg leading-tight">Create a studio</span>
               <span className="text-white/85 text-xs mt-1">For teachers. Free for your first 2 dancers.</span>

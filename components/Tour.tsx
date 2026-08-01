@@ -116,7 +116,7 @@ export default function Tour({ steps: allSteps }: { steps: TourStep[] }) {
             top: rect.top - pad, left: rect.left - pad,
             width: rect.width + pad * 2, height: rect.height + pad * 2,
             boxShadow: "0 0 0 9999px rgba(15,21,31,.72)",
-            border: "2px solid #27ae9f", borderRadius: 14,
+            border: "2px solid #1E50A0", borderRadius: 14,
             transition: "all .25s ease",
           }}
         />
