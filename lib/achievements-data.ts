@@ -14,10 +14,13 @@ export async function getAchievements(): Promise<AchievementsResult> {
   if (!user) {
     return computeAchievements({ workoutDays: [], totalSets: 0, totalVolume: 0 });
   }
-  const { data: rows } = await supabase
-    .from("set_logs")
-    .select("logged_at, weight, reps")
-    .eq("user_id", user.id);
+  // Count ANY logged training as an active day — both logged sets AND logged
+  // sessions (classes / rehearsals / cardio from the calendar). Otherwise a
+  // week where the dancer only logged a class (no sets) breaks the streak.
+  const [{ data: rows }, { data: sessions }] = await Promise.all([
+    supabase.from("set_logs").select("logged_at, weight, reps").eq("user_id", user.id),
+    supabase.from("training_sessions").select("session_date").eq("user_id", user.id),
+  ]);
 
   const logs = rows ?? [];
   const daySet = new Set<string>();
@@ -27,6 +30,10 @@ export async function getAchievements(): Promise<AchievementsResult> {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     daySet.add(key);
     totalVolume += Number(r.weight || 0) * Number(r.reps || 0);
+  }
+  // session_date is already a local YYYY-MM-DD — add each as an active day
+  for (const s of sessions ?? []) {
+    if (s.session_date) daySet.add(String(s.session_date).slice(0, 10));
   }
 
   const quizzesPassed = await getAnatomyQuizCount();
