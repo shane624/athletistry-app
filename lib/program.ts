@@ -178,8 +178,15 @@ const HOLD_PATTERNS: RegExp[] = [
   /\bhover\b/i,
 ];
 
+// Exercises that LOOK like holds by name but are actually done for reps.
+// Checked first, so they always track reps even if they match a hold pattern.
+const REP_EXCEPTIONS: RegExp[] = [
+  /turnout developer plank/i, // a dynamic rep movement, not a static hold
+];
+
 /** True if this exercise should be tracked with a hold timer instead of reps. */
 export function isHoldExercise(name: string): boolean {
+  if (REP_EXCEPTIONS.some((re) => re.test(name))) return false;
   return HOLD_PATTERNS.some((re) => re.test(name));
 }
 
