@@ -8,57 +8,7 @@ import GlobalSearch from "@/components/GlobalSearch";
 import BottomTabBar from "@/components/BottomTabBar";
 import SideNav from "@/components/SideNav";
 import PageTour from "@/components/PageTour";
-import TourButton from "@/components/TourButton";
-
-type Item = { href: string; label: string };
-type Group = { title: string; items: Item[] };
-
-// Grouped menu — tidier than one long flat list.
-const GROUPS: Group[] = [
-  {
-    title: "Train",
-    items: [
-      { href: "/dashboard", label: "Today" },
-      { href: "/explore", label: "Explore" },
-      { href: "/movement-map", label: "Movement Map" },
-      { href: "/movement-map/ballet", label: "Ballet Movement Lab" },
-      { href: "/programs", label: "Programs" },
-      { href: "/plan", label: "Training Plan Builder" },
-      { href: "/generate", label: "Practice Generator" },
-      { href: "/circuit", label: "Circuit Training" },
-      { href: "/ballet", label: "Train for Ballet" },
-      { href: "/warmups", label: "Warm-Ups" },
-      { href: "/workouts", label: "Guided Workouts" },
-      { href: "/my-workouts", label: "My Workouts" },
-    ],
-  },
-  {
-    title: "Track",
-    items: [
-      { href: "/progress", label: "Progress" },
-      { href: "/load", label: "Training Calendar" },
-      { href: "/achievements", label: "Achievements" },
-    ],
-  },
-  {
-    title: "Learn",
-    items: [
-      { href: "/guide", label: "How to Use the App" },
-      { href: "/anatomy", label: "Understand Anatomy" },
-      { href: "/training-science", label: "Training Science" },
-    ],
-  },
-  {
-    title: "More",
-    items: [
-      { href: "/studio", label: "Studios" },
-      { href: "/exercises", label: "Library" },
-      { href: "/settings", label: "Settings" },
-    ],
-  },
-];
-
-const ADMIN_EMAIL = "swuerthner@gmail.com";
+import { NAV_GROUPS, ADMIN_EMAIL, type NavGroup } from "@/lib/nav-items";
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -74,21 +24,16 @@ export default function NavBar() {
     supabase.auth.getUser().then(({ data }) => {
       setShowAdmin((data.user?.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase());
     });
-    // RLS: this returns a row only if the user owns OR belongs to a studio.
     supabase.from("studios").select("id").limit(1).then(({ data }) => setShowStudio(!!data?.length));
   }, [supabase]);
 
-  // Hide "Studios" from the menu unless the user actually has one.
-  const base: Group[] = showStudio
-    ? GROUPS
-    : GROUPS.map((g) => ({ ...g, items: g.items.filter((it) => it.href !== "/studio") }));
-  const groups: Group[] = showAdmin
-    ? [...base, { title: "Admin", items: [{ href: "/admin", label: "Members" }] }]
+  const base: NavGroup[] = showStudio
+    ? NAV_GROUPS
+    : NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((it) => it.href !== "/studio") }));
+  const groups: NavGroup[] = showAdmin
+    ? [...base, { title: "Admin", items: [{ href: "/admin", label: "Members", icon: "user" }] }]
     : base;
-
-  // current page label for the menu button
-  const allItems = groups.flatMap((g) => g.items);
-  const current = allItems.find((l) => pathname.startsWith(l.href))?.label ?? "Menu";
+  const current = groups.flatMap((g) => g.items).find((l) => pathname.startsWith(l.href))?.label ?? "Menu";
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -98,65 +43,64 @@ export default function NavBar() {
 
   return (
     <>
-    <SideNav />
-    <header className="bg-navy text-white sticky top-0 z-30 safe-top">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="h-12 flex items-center gap-2">
-          <Link href="/dashboard" className="font-bold tracking-widest text-teal text-sm shrink-0 lg:hidden">ATHLETISTRY</Link>
+      <SideNav />
+      <header className="app-topbar sticky top-0 z-30 safe-top lg:hidden">
+        <div className="px-4">
+          <div className="h-[58px] flex items-center gap-3">
+            <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
+              <span className="ath-brand-mark !w-8 !h-8 !rounded-[11px] !text-[21px]">A</span>
+              <span className="ath-wordmark hidden min-[390px]:block !text-[11px]">ATHLETISTRY</span>
+            </Link>
 
-          <span data-tour="menu" className="flex-1 min-w-0 flex"><GlobalSearch /></span>
+            <span data-tour="menu" className="flex-1 min-w-0 flex justify-end"><GlobalSearch /></span>
 
-          <button
-            onClick={() => setOpen((v) => !v)}
-            className="hidden sm:flex lg:hidden items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 text-sm shrink-0 ml-auto"
-            aria-expanded={open}
-            aria-label="Open menu"
-          >
-            <span className="text-white/90 max-w-[120px] truncate">{current}</span>
-            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" className={`transition-transform ${open ? "rotate-180" : ""}`}>
-              <path d="M5.5 7.5L10 12l4.5-4.5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {open && (
-        <>
-          <div className="fixed inset-0 z-20" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 right-0 z-30 bg-navy border-t border-white/10 shadow-lg max-h-[80vh] overflow-y-auto">
-            <nav className="max-w-4xl mx-auto px-3 py-3">
-              {groups.map((g) => (
-                <div key={g.title} className="mb-3 last:mb-0">
-                  <p className="text-teal text-[11px] font-bold tracking-widest uppercase px-1 mb-1">{g.title}</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
-                    {g.items.map((l) => (
-                      <Link key={l.href} href={l.href}
-                        className={`px-3 py-2.5 rounded-md text-sm ${
-                          pathname.startsWith(l.href) ? "bg-teal text-white" : "text-white/85 hover:bg-white/10"
-                        }`}>
-                        {l.label}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              <div className="border-t border-white/10 mt-2 pt-2 space-y-1">
-                <button onClick={() => { setOpen(false); setTimeout(() => window.dispatchEvent(new Event("athl:start-tour")), 250); }}
-                  className="px-3 py-2.5 rounded-md text-sm text-left text-teal hover:bg-white/10 w-full inline-flex items-center gap-2">
-                  ✨ Show me around this page
-                </button>
-                <button onClick={signOut}
-                  className="px-3 py-2.5 rounded-md text-sm text-left text-white/70 hover:bg-white/10 w-full">
-                  Sign out
-                </button>
-              </div>
-            </nav>
+            <button
+              onClick={() => setOpen((v) => !v)}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/60 border border-black/[.06] text-[12px] shrink-0"
+              aria-expanded={open}
+              aria-label="Open menu"
+            >
+              <span className="text-ink max-w-[115px] truncate">{current}</span>
+              <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor" className={`transition-transform ${open ? "rotate-180" : ""}`}>
+                <path d="M5.5 7.5L10 12l4.5-4.5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
           </div>
-        </>
-      )}
-    </header>
-    <PageTour />
-    <BottomTabBar />
+        </div>
+
+        {open && (
+          <>
+            <div className="fixed inset-0 z-20 bg-black/10 backdrop-blur-[1px]" onClick={() => setOpen(false)} />
+            <div className="absolute left-3 right-3 top-[62px] z-30 bg-white/95 border border-black/[.07] shadow-2xl rounded-[24px] max-h-[78vh] overflow-y-auto backdrop-blur-2xl">
+              <nav className="px-3 py-4">
+                {groups.map((g) => (
+                  <div key={g.title} className="mb-4 last:mb-0">
+                    <p className="text-teal text-[9px] font-bold tracking-[.18em] uppercase px-2 mb-1.5">{g.title}</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+                      {g.items.map((l) => {
+                        const active = l.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(l.href);
+                        return (
+                          <Link key={l.href} href={l.href} className={`px-3 py-2.5 rounded-xl text-[13px] transition ${active ? "bg-navy text-white" : "text-ink hover:bg-light"}`}>
+                            {l.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+                <div className="border-t border-black/[.06] mt-2 pt-2 space-y-1">
+                  <button onClick={() => { setOpen(false); setTimeout(() => window.dispatchEvent(new Event("athl:start-tour")), 250); }} className="px-3 py-2.5 rounded-xl text-[13px] text-left text-teal hover:bg-light w-full">
+                    Show me around this page
+                  </button>
+                  <button onClick={signOut} className="px-3 py-2.5 rounded-xl text-[13px] text-left text-grey hover:bg-light w-full">Sign out</button>
+                </div>
+              </nav>
+            </div>
+          </>
+        )}
+      </header>
+      <PageTour />
+      <BottomTabBar />
     </>
   );
 }

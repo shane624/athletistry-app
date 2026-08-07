@@ -25,26 +25,24 @@ import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
-  // first-login flow: disclaimer → Start Here (learn + quiz) → program choice → dashboard
   const ob = await getOnboarding();
   if (!ob.disclaimerAccepted) redirect("/welcome");
   if (!ob.learningCompleted) redirect("/start-here");
   if (!ob.onboarded) redirect("/onboarding");
 
-  // Fetch in parallel — these are independent, so one round of latency not six.
   const [eventPlan, displayName] = await Promise.all([getEventPlanToday(), getDisplayName()]);
   if (eventPlan.active) {
     const [upcoming, planAch] = await Promise.all([getEventPlanUpcoming(5), getAchievements()]);
     return (
       <div className="min-h-screen">
         <NavBar />
-        <main className="max-w-4xl mx-auto px-4 py-6">
+        <main className="page-frame dashboard-shell">
           <LocalDateCookie />
-          <div className="flex items-center justify-between flex-wrap gap-2 mb-4 animate-in">
+          <div className="dashboard-topline flex items-end justify-between flex-wrap gap-4 animate-in">
             <Greeting name={displayName} programName={eventPlan.label ?? "Event plan"} />
-            <TourButton />
+            <TourButton className="mb-1" />
           </div>
-          <div data-tour="ring"><AchievementStrip /></div>
+          <div className="mb-5" data-tour="ring"><AchievementStrip /></div>
           <EventPlanDay
             plan={eventPlan}
             upcoming={upcoming.days}
@@ -61,134 +59,129 @@ export default async function Dashboard() {
     getToday(), getAchievements(), getAssessment(), getPausedEventPlan(),
   ]);
   const { assessment } = assessmentRes;
-  const blockColor =
-    today.rx.block === "hypertrophy" ? "grad-navy"
-    : today.rx.block === "strength" ? "grad-brand"
-    : "bg-navy2";
   const isPeriodized = today.programType === "periodized";
   const isManual = today.scheduling === "manual";
-
-  // session progress: how many exercises already have at least one logged set
   const totalEx = today.exercises.length;
   const startedEx = today.exercises.filter((ex) => Object.keys(today.logs[ex.id] ?? {}).length > 0).length;
   const pct = totalEx ? Math.round((startedEx / totalEx) * 100) : 0;
+  const phaseLabel = today.phase
+    ? `Phase · ${today.phase}`
+    : `${BLOCK_WEEKS[today.rx.block] ?? ""} · ${BLOCK_LABEL[today.rx.block] ?? ""}`;
+  const sessionTitle = `${isPeriodized ? `Week ${today.week} · ` : ""}${today.dayTitle.replace(/^Day \d+ — /, "")}`;
 
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className="page-frame dashboard-shell">
         <LocalDateCookie />
-        {today.scheduling === "weekday" && (
-          <WeekdaySync currentDay={today.dayIndex} dayCount={today.dayCount} />
-        )}
+        {today.scheduling === "weekday" && <WeekdaySync currentDay={today.dayIndex} dayCount={today.dayCount} />}
 
-        {/* greeting + program row */}
-        <div className="flex items-end justify-between flex-wrap gap-2 mb-4 animate-in">
+        <div className="dashboard-topline flex items-end justify-between flex-wrap gap-5 animate-in">
           <Greeting name={displayName} programName={today.programName} />
-          <div className="flex items-center gap-4 whitespace-nowrap">
+          <div className="flex items-center gap-4 pb-1 whitespace-nowrap">
             <TourButton />
-            <Link href="/programs" className="text-teal text-sm font-semibold hover:text-tealdark">
-              Switch program →
+            <Link href="/programs" className="inline-flex items-center gap-1 text-teal text-[12px] font-bold tracking-wide hover:text-tealdark transition">
+              Change program <span aria-hidden>↗</span>
             </Link>
           </div>
         </div>
 
-        <div data-tour="ring">
-          <AchievementStrip />
-        </div>
-
         {paused.paused && <RejoinEventPlan label={paused.label} daysLeft={paused.daysLeft} />}
 
-        {assessment.status !== "no-data" && (
-          <Link href="/load" className="card card-hover block p-4 mb-5 animate-in">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="eyebrow">{assessment.taper ? "Taper week" : "Training calendar"}</p>
-                <p className="text-navy text-sm font-semibold mt-0.5 truncate">{assessment.message}</p>
+        <div className="grid lg:grid-cols-[minmax(0,1.75fr)_minmax(285px,.72fr)] gap-4 lg:gap-5 items-stretch">
+          <section data-tour="today-session" className="dashboard-hero animate-in flex flex-col justify-between">
+            <div className="relative z-[1]">
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div>
+                  <p className="hero-kicker">Today · {phaseLabel}</p>
+                  <h2 className="hero-title">{sessionTitle}</h2>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <span className="hero-chip">{today.rx.sets} × {today.rx.repLow}–{today.rx.repHigh}</span>
+                  {today.rx.tempo !== "smooth" && <span className="hero-chip">Tempo {today.rx.tempo}</span>}
+                </div>
               </div>
-              <span className="text-teal text-sm font-semibold whitespace-nowrap shrink-0">View →</span>
+              <p className="hero-notes">{today.rx.notes}</p>
             </div>
-          </Link>
-        )}
 
-        <DailyQuote />
+            <div className="relative z-[1] mt-9">
+              <div className="flex items-center gap-x-5 gap-y-2 flex-wrap mb-5">
+                <span className="hero-stat"><Icon name="dumbbell" className="w-4 h-4" /> {totalEx} exercises</span>
+                {startedEx > 0 && <span className="hero-stat"><Icon name="check" className="w-4 h-4" /> {startedEx} started</span>}
+                {today.rx.tempo !== "smooth" && <span className="hero-stat"><Icon name="clock" className="w-4 h-4" /> {today.rx.tempo}</span>}
+              </div>
 
-        {/* today's session header */}
-        <div data-tour="today-session" className={`${blockColor} text-white p-5 animate-in`} style={{ borderRadius: "18px", boxShadow: "0 12px 34px rgba(42,47,54,.2)" }}>
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <p className="text-white/75 text-xs font-semibold tracking-wide uppercase">
-                {today.phase
-                  ? `Phase · ${today.phase}`
-                  : `${BLOCK_WEEKS[today.rx.block] ?? ""} · ${BLOCK_LABEL[today.rx.block] ?? ""}`}
-              </p>
-              <h1 className="text-2xl font-extrabold mt-1">
-                {isPeriodized ? `Week ${today.week} — ` : ""}{today.dayTitle.replace(/^Day \d+ — /, "")}
-              </h1>
-            </div>
-            <div className="text-right text-sm">
-              <span className="badge bg-white/20">{today.rx.sets} × {today.rx.repLow}–{today.rx.repHigh}</span>
-              {today.rx.tempo !== "smooth" && (
-                <span className="badge bg-white/20 ml-2">tempo {today.rx.tempo}</span>
+              {totalEx > 0 && (
+                <div className="max-w-2xl mb-5">
+                  <div className="flex items-center justify-between text-[10px] uppercase tracking-[.12em] text-white/55 mb-2">
+                    <span>Session progress</span><span>{pct}%</span>
+                  </div>
+                  <div className="hero-progress-track"><div className="hero-progress-fill transition-all duration-700" style={{ width: `${pct}%` }} /></div>
+                </div>
               )}
+
+              <Link href="/session" className="hero-cta w-full sm:w-auto">
+                <Icon name="play" className="w-4 h-4" /> {startedEx > 0 ? "Continue today's practice" : "Begin today's practice"}
+              </Link>
             </div>
-          </div>
-          <p className="text-white/85 text-sm mt-3">{today.rx.notes}</p>
+          </section>
 
-          <div className="flex items-center gap-3 mt-3 text-white/85 text-sm">
-            <span className="inline-flex items-center gap-1.5"><Icon name="dumbbell" className="w-4 h-4" />{totalEx} exercises</span>
-            {today.rx.tempo !== "smooth" && <span className="inline-flex items-center gap-1.5"><Icon name="clock" className="w-4 h-4" />tempo {today.rx.tempo}</span>}
-          </div>
-
-          {/* session progress bar */}
-          {totalEx > 0 && (
-            <div className="mt-4">
-              <div className="flex items-center justify-between text-xs text-white/80 mb-1.5">
-                <span>{startedEx} of {totalEx} exercises started</span>
-                <span>{pct}%</span>
-              </div>
-              <div className="h-1.5 rounded-full bg-white/20 overflow-hidden">
-                <div className="h-full bg-white/90 rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
-              </div>
-            </div>
-          )}
-
-          <Link href="/session" className="mt-4 w-full bg-white text-navy font-bold rounded-2xl py-3 flex items-center justify-center gap-2 active:scale-[.98] transition-transform">
-            <Icon name="play" className="w-5 h-5" />{startedEx > 0 ? "Continue workout" : "Start workout"}
-          </Link>
+          <aside className="dashboard-side-stack" data-tour="ring">
+            <AchievementStrip />
+            <DailyQuote />
+          </aside>
         </div>
 
+        {assessment.status !== "no-data" && (
+          <Link href="/load" className="dashboard-note card-hover block mt-5 animate-in">
+            <div className="relative z-[1] flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="eyebrow">{assessment.taper ? "Taper week" : "Training calendar"}</p>
+                <p className="font-display text-[23px] leading-tight font-bold text-navy mt-1.5">{assessment.message}</p>
+              </div>
+              <span className="w-10 h-10 rounded-full border border-line bg-white/55 flex items-center justify-center text-teal shrink-0">→</span>
+            </div>
+          </Link>
+        )}
+
         {today.principle && (
-          <div className="card mt-3 p-4 border-l-2 border-teal animate-in">
+          <div className="principle-panel animate-in">
             <p className="eyebrow">The principle</p>
-            <p className="text-navy text-sm mt-2 leading-relaxed">{today.principle}</p>
+            <p className="font-display text-[25px] sm:text-[29px] text-navy mt-2 max-w-4xl leading-[1.08] font-bold">{today.principle}</p>
           </div>
         )}
 
-        {isManual && (
-          <DaySelector
-            dayCount={today.dayCount}
-            selected={today.dayIndex}
-            titles={Array.from({ length: today.dayCount }, (_, i) => i)}
-          />
-        )}
+        {isManual && <DaySelector dayCount={today.dayCount} selected={today.dayIndex} titles={Array.from({ length: today.dayCount }, (_, i) => i)} />}
 
         {totalEx > 0 && (
           <>
-            <p id="today-exercises" className="eyebrow mt-6 mb-3 scroll-mt-16">Warm-up first</p>
+            <div className="dashboard-section-head" id="today-exercises">
+              <div>
+                <p className="eyebrow">Prepare</p>
+                <h2 className="dashboard-section-title mt-1">Before you begin.</h2>
+              </div>
+              <Link href="/warmups" className="text-[12px] font-bold text-teal hover:text-tealdark">All warm-ups →</Link>
+            </div>
             <div data-tour="warmup"><WarmUp /></div>
             <EquipmentNeeded names={today.exercises.map((ex) => ex.name)} className="mb-4" />
-            <p className="eyebrow mb-3">Today&apos;s exercises</p>
+
+            <div className="dashboard-section-head">
+              <div>
+                <p className="eyebrow">Your practice</p>
+                <h2 className="dashboard-section-title mt-1">Today&apos;s exercises.</h2>
+              </div>
+              <p className="hidden sm:block text-[12px] text-grey">Quality over quantity.</p>
+            </div>
           </>
         )}
 
-        <div data-tour="log" className="grid md:grid-cols-2 gap-4">
+        <div data-tour="log" className="grid xl:grid-cols-2 gap-4 stagger">
           {today.exercises.map((ex, i) => {
             const g = today.supersetGroups?.[i] ?? null;
             const firstOfGroup = g != null && (i === 0 || (today.supersetGroups?.[i - 1] ?? null) !== g);
             return (
-              <div key={i} style={g != null ? { boxShadow: "inset 3px 0 0 var(--c-teal)", borderRadius: "18px" } : undefined}>
-                {firstOfGroup && <p className="text-[11px] font-bold uppercase tracking-wide text-tealdark mb-1 pl-2">Superset · do back to back</p>}
+              <div key={i} style={g != null ? { boxShadow: "inset 2px 0 0 var(--c-teal)", borderRadius: "26px" } : undefined}>
+                {firstOfGroup && <p className="eyebrow mb-2 pl-3">Superset · back to back</p>}
                 <ExerciseCard
                   exercise={ex}
                   rx={today.rx}
@@ -205,18 +198,13 @@ export default async function Dashboard() {
         </div>
 
         {today.exercises.length === 0 && (
-          <p className="text-grey mt-8 text-center">
-            No exercises loaded. Make sure you ran <code>schema.sql</code> and <code>seed.sql</code> in Supabase.
-          </p>
+          <div className="dashboard-note mt-8 text-center">
+            <p className="font-display text-2xl font-bold text-navy">Nothing is loaded for today.</p>
+            <p className="text-grey text-sm mt-2">Check that <code>schema.sql</code> and <code>seed.sql</code> have been run in Supabase.</p>
+          </div>
         )}
 
-        {totalEx > 0 && (
-          <CompleteWorkout
-            levelIndex={ach.level.index}
-            levelName={ach.level.name}
-            nextLevelName={ach.nextLevel?.name}
-          />
-        )}
+        {totalEx > 0 && <CompleteWorkout levelIndex={ach.level.index} levelName={ach.level.name} nextLevelName={ach.nextLevel?.name} />}
       </main>
     </div>
   );

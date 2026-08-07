@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Montserrat } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import "./globals.css";
 
-// Brand type: DM Sans (body/UI) + Montserrat (geometric display for headings).
+// Editorial serif + clean UI sans: ballet publication, not generic fitness SaaS.
 const sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-sans", display: "swap" });
-const display = Montserrat({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-display", display: "swap" });
+const display = Cormorant_Garamond({ subsets: ["latin"], weight: ["600", "700"], style: ["normal", "italic"], variable: "--font-display", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://athletistry.app"),
   title: "Athletistry",
-  description: "Train smarter — programs, workouts, and progress tracking for dancers.",
+  description: "Ballet training that finally makes sense.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Athletistry",
-    description: "Train smarter — programs, workouts, and progress tracking for dancers.",
+    description: "Ballet training that finally makes sense.",
     url: "https://athletistry.app",
     siteName: "Athletistry",
     images: [{ url: "/og-image.png", width: 1200, height: 1200, alt: "Athletistry" }],
@@ -34,19 +34,18 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Athletistry",
-    description: "Train smarter — programs, workouts, and progress tracking for dancers.",
+    description: "Ballet training that finally makes sense.",
     images: ["/og-image.png"],
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2A2F36",
+  themeColor: "#f4f4f2",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
 };
 
-// iOS PWA launch screens (branded navy) so an installed app never launches white.
 const SPLASH: { media: string; href: string }[] = [
   { media: "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)", href: "/splash/splash-640x1136.png" },
   { media: "(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)", href: "/splash/splash-750x1334.png" },

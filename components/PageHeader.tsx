@@ -1,7 +1,5 @@
 import Icon, { type IconName } from "@/components/Icon";
 
-// Consistent page header: an icon badge + eyebrow + title (+ optional subtitle).
-// Gives every screen the same premium, visual top section.
 export default function PageHeader({
   icon,
   eyebrow,
@@ -14,14 +12,12 @@ export default function PageHeader({
   subtitle?: string;
 }) {
   return (
-    <div className="flex items-start gap-3.5 animate-in">
-      <span className="w-12 h-12 rounded-2xl grad-navy text-white flex items-center justify-center shrink-0 shadow-sm">
-        <Icon name={icon} className="w-6 h-6" />
-      </span>
-      <div className="min-w-0">
+    <div className="flex items-start gap-4 animate-in">
+      <span className="page-icon shrink-0"><Icon name={icon} className="w-5 h-5" /></span>
+      <div className="min-w-0 pt-0.5">
         <p className="eyebrow">{eyebrow}</p>
-        <h1 className="text-2xl font-extrabold text-navy mt-0.5 leading-tight">{title}</h1>
-        {subtitle && <p className="text-grey text-sm mt-1">{subtitle}</p>}
+        <h1 className="text-[34px] sm:text-[40px] font-bold text-navy mt-1 leading-[.96]">{title}</h1>
+        {subtitle && <p className="text-grey text-sm mt-2 max-w-2xl leading-relaxed">{subtitle}</p>}
       </div>
     </div>
   );
