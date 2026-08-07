@@ -18,7 +18,7 @@ export default async function AdminPage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-5xl mx-auto px-4 py-6">
+      <main className="app-page">
         <p className="eyebrow">Coach view</p>
         <h1 className="text-2xl font-extrabold text-navy mt-1">Admin — Members</h1>
         <p className="text-grey text-sm mt-1">

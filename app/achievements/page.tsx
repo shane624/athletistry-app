@@ -1,5 +1,6 @@
 import NavBar from "@/components/NavBar";
-import PageHeader from "@/components/PageHeader";
+import ProgressRing from "@/components/ProgressRing";
+import Icon from "@/components/Icon";
 import { getAchievements } from "@/lib/achievements-data";
 import { LEVELS } from "@/lib/achievements";
 
@@ -9,122 +10,95 @@ export default async function AchievementsPage() {
   const a = await getAchievements();
   const earned = a.badges.filter((b) => b.earned);
   const locked = a.badges.filter((b) => !b.earned);
-
-  // ring geometry
-  const R = 52, C = 2 * Math.PI * R;
-  const ringDash = C * a.weeklyRing;
+  const nextBadge = locked.find((b) => b.progress > 0) ?? locked[0];
 
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        <PageHeader icon="trophy" eyebrow="Your journey" title="Achievements"
-          subtitle="Ranks, streaks and badges for showing up." />
+      <main className="app-page">
+        <header className="page-lead animate-in">
+          <div>
+            <h1>Achievements</h1>
+            <p className="mt-3">Proof that consistency compounds. The goal is not collecting badges. It is becoming the dancer who earns them.</p>
+          </div>
+        </header>
 
-        {/* top: level + streak + ring */}
-        <div className="grid md:grid-cols-3 gap-4 mt-5">
-          {/* LEVEL */}
-          <div data-tour="rank" className="card p-5 md:col-span-2 animate-in">
-            <p className="eyebrow">Current rank</p>
-            <div className="flex items-baseline gap-2 mt-1">
-              <h2 className="text-2xl font-extrabold text-navy">{a.level.name}</h2>
-              <span className="text-grey text-sm">· {a.totalWorkouts} workouts</span>
+        <div className="editorial-tabs mb-4 animate-in">
+          <span className="editorial-tab editorial-tab-active">Overview</span>
+          <a href="#milestones" className="editorial-tab">Milestones</a>
+          <a href="#ranks" className="editorial-tab">Ranks</a>
+        </div>
+
+        <section className="progress-layout">
+          <div className="panel panel-pad animate-in" id="ranks">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div>
+                <p className="panel-title">Current rank</p>
+                <h2 className="font-display text-[38px] leading-none font-bold text-ink mt-2">{a.level.name}</h2>
+                <p className="text-grey text-[11px] mt-2">{a.totalWorkouts} training days recorded</p>
+              </div>
+              <span className="medal medal-dark !w-[82px] !h-[82px]"><Icon name="trophy" className="w-8 h-8" /></span>
             </div>
-            {a.nextLevel ? (
-              <>
-                <div className="mt-4 h-2 rounded-full bg-light overflow-hidden">
-                  <div className="h-full grad-brand rounded-full transition-all duration-700"
-                       style={{ width: `${Math.round(a.levelProgress * 100)}%` }} />
-                </div>
-                <p className="text-grey text-sm mt-2">
-                  {a.toNextLevel} more {a.toNextLevel === 1 ? "workout" : "workouts"} to{" "}
-                  <span className="text-navy font-semibold">{a.nextLevel.name}</span>
-                </p>
-              </>
-            ) : (
-              <p className="text-teal text-sm mt-3 font-semibold">Top rank reached — Étoile. Bravo.</p>
-            )}
+            {a.nextLevel ? <>
+              <div className="progress-bar-thin mt-7"><span style={{ width: `${Math.round(a.levelProgress * 100)}%` }} /></div>
+              <div className="flex items-center justify-between gap-3 mt-2 text-[10px] text-grey"><span>{a.toNextLevel} more to {a.nextLevel.name}</span><span>{Math.round(a.levelProgress * 100)}%</span></div>
+            </> : <p className="text-teal text-xs font-semibold mt-6">Top rank reached. Étoile.</p>}
 
-            {/* rank ladder */}
-            <div className="flex flex-wrap gap-1.5 mt-4">
-              {LEVELS.map((l) => (
-                <span key={l.index}
-                  className={`text-[11px] px-2 py-1 rounded-full border ${
-                    a.totalWorkouts >= l.minWorkouts
-                      ? "bg-navy text-white border-navy"
-                      : "bg-white text-grey border-line"
-                  }`}>
-                  {l.name}
-                </span>
-              ))}
+            <div className="mt-7 grid grid-cols-4 md:grid-cols-8 gap-2">
+              {LEVELS.map((l) => {
+                const reached = a.totalWorkouts >= l.minWorkouts;
+                return <div key={l.index} className="text-center"><span className={`mx-auto w-7 h-7 rounded-full grid place-items-center text-[9px] font-bold border ${reached ? "bg-navy text-white border-navy" : "bg-transparent text-grey border-line"}`}>{l.index + 1}</span><p className="text-[7px] leading-tight text-grey mt-1.5 truncate">{l.name}</p></div>;
+              })}
             </div>
           </div>
 
-          {/* WEEKLY RING */}
-          <div className="card p-5 flex flex-col items-center justify-center animate-in">
-            <p className="eyebrow self-start">This week</p>
-            <div className="relative mt-2" style={{ width: 132, height: 132 }}>
-              <svg width="132" height="132" viewBox="0 0 132 132" className="-rotate-90">
-                <circle cx="66" cy="66" r={R} fill="none" stroke="var(--c-line)" strokeWidth="12" />
-                <circle cx="66" cy="66" r={R} fill="none" stroke="var(--c-teal)" strokeWidth="12"
-                  strokeLinecap="round" strokeDasharray={`${ringDash} ${C}`}
-                  style={{ transition: "stroke-dasharray .8s ease" }} />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-extrabold text-navy">{a.weekCount}<span className="text-grey text-base font-semibold">/{a.weeklyGoal}</span></span>
-                <span className="text-grey text-xs">workouts</span>
+          <div className="panel panel-pad animate-in">
+            <p className="panel-title">This week</p>
+            <div className="flex items-center justify-between gap-4 mt-3">
+              <ProgressRing value={Math.round(a.weeklyRing * 100)} size={118} label="weekly goal" />
+              <div className="flex-1">
+                <p className="font-display text-[32px] leading-none font-bold text-ink">{a.weekCount} / {a.weeklyGoal}</p>
+                <p className="text-grey text-[10px] mt-1">workouts completed</p>
+                <div className="grid grid-cols-2 gap-3 mt-5">
+                  <div><p className="font-display text-2xl font-bold text-ink">{a.currentStreak}</p><p className="text-[8px] uppercase tracking-[.11em] text-grey">Current streak</p></div>
+                  <div><p className="font-display text-2xl font-bold text-ink">{a.bestStreak}</p><p className="text-[8px] uppercase tracking-[.11em] text-grey">Best streak</p></div>
+                </div>
               </div>
             </div>
-            <div className="flex gap-4 mt-4 text-center">
-              <div><div className="text-xl font-extrabold text-navy">{a.currentStreak}</div><div className="text-grey text-xs">week streak</div></div>
-              <div><div className="text-xl font-extrabold text-navy">{a.bestStreak}</div><div className="text-grey text-xs">best</div></div>
+          </div>
+        </section>
+
+        <section id="milestones" className="mt-8 scroll-mt-24">
+          <div className="flex items-end justify-between gap-4 flex-wrap mb-3">
+            <div><p className="eyebrow">Recent achievements</p><h2 className="font-display text-[34px] leading-none font-bold text-ink mt-1">Milestones earned.</h2></div>
+            <p className="text-grey text-[10px]">{earned.length} of {a.badges.length} unlocked</p>
+          </div>
+          <div className="achievement-grid stagger">
+            {earned.slice(0, 8).map((b, i) => <MedalCard key={b.id} badge={b} dark={i % 3 === 0} />)}
+            {!earned.length && <div className="panel panel-pad col-span-full"><p className="font-display text-2xl font-bold text-ink">Your first milestone is waiting.</p><p className="text-grey text-xs mt-2">Complete a training day and the collection begins.</p></div>}
+          </div>
+        </section>
+
+        <section className="grid md:grid-cols-[minmax(0,1.35fr)_minmax(280px,.65fr)] gap-3 mt-3">
+          <div className="panel panel-pad animate-in">
+            <p className="panel-title">Milestone progress</p>
+            <div className="flex items-center justify-between gap-4 mt-4">
+              <div><p className="font-display text-[36px] leading-none font-bold text-ink">{earned.length} / {a.badges.length}</p><p className="text-grey text-[10px] mt-2">Achievements earned</p></div>
+              <div className="w-1/2"><div className="progress-bar-thin"><span style={{ width: `${Math.round((earned.length / Math.max(a.badges.length, 1)) * 100)}%` }} /></div></div>
             </div>
           </div>
-        </div>
+          <div className="panel panel-pad animate-in">
+            <p className="panel-title">Next milestone</p>
+            {nextBadge ? <><p className="font-display text-[24px] leading-none font-bold text-ink mt-3">{nextBadge.name}</p><p className="text-grey text-[10px] leading-relaxed mt-2">{nextBadge.desc}</p><div className="progress-bar-thin mt-4"><span style={{ width: `${Math.round(nextBadge.progress * 100)}%` }} /></div></> : <p className="text-grey text-xs mt-3">Every current badge has been earned.</p>}
+          </div>
+        </section>
 
-        {/* badges */}
-        <p data-tour="badges" className="eyebrow mt-8 scroll-mt-20">Earned · {earned.length} of {a.badges.length}</p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
-          {earned.map((b) => <BadgeCard key={b.id} b={b} />)}
-          {earned.length === 0 && (
-            <p className="text-grey text-sm col-span-full">No badges yet — log your first workout to get started.</p>
-          )}
-        </div>
-
-        {locked.length > 0 && (
-          <>
-            <p className="eyebrow mt-8">Locked</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
-              {locked.map((b) => <BadgeCard key={b.id} b={b} />)}
-            </div>
-          </>
-        )}
+        {locked.length > 0 && <section className="mt-8"><p className="eyebrow mb-3">Still ahead</p><div className="achievement-grid">{locked.slice(0, 8).map((b) => <MedalCard key={b.id} badge={b} locked />)}</div></section>}
       </main>
     </div>
   );
 }
 
-function BadgeCard({ b }: { b: { id: string; name: string; desc: string; earned: boolean; progress: number } }) {
-  return (
-    <div className={`card p-4 animate-in ${b.earned ? "card-hover" : "opacity-80"}`}>
-      <div className="flex items-center gap-3">
-        <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${b.earned ? "grad-brand" : "bg-light"}`}>
-          {b.earned ? (
-            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
-          ) : (
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="var(--c-grey)" strokeWidth="2"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
-          )}
-        </div>
-        <div className="min-w-0">
-          <div className={`font-bold text-sm ${b.earned ? "text-navy" : "text-grey"}`}>{b.name}</div>
-        </div>
-      </div>
-      <p className="text-grey text-xs mt-2 leading-snug">{b.desc}</p>
-      {!b.earned && b.progress > 0 && (
-        <div className="mt-2 h-1.5 rounded-full bg-light overflow-hidden">
-          <div className="h-full bg-teal rounded-full" style={{ width: `${Math.round(b.progress * 100)}%` }} />
-        </div>
-      )}
-    </div>
-  );
+function MedalCard({ badge: b, dark = false, locked = false }: { badge: { name: string; desc: string; earned: boolean; progress: number }; dark?: boolean; locked?: boolean }) {
+  return <div className="achievement-medal-card animate-in"><span className={`medal ${dark ? "medal-dark" : ""} ${locked ? "medal-locked" : ""}`}><Icon name={b.earned ? "trophy" : "sparkle"} className="w-7 h-7" /></span><p className="text-[11px] font-semibold text-ink">{b.name}</p><p className="text-[9px] leading-relaxed text-grey mt-1.5">{b.desc}</p>{!b.earned && b.progress > 0 && <div className="progress-bar-thin mt-3"><span style={{ width: `${Math.round(b.progress * 100)}%` }} /></div>}</div>;
 }

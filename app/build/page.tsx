@@ -11,7 +11,7 @@ export default async function BuildPage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className="app-page app-page-narrow">
         <h1 className="text-2xl font-bold text-navy">Build your own program</h1>
         <p className="text-grey text-sm mt-1">
           Pick exercises from the library into your own days. Save, then make it active to train and

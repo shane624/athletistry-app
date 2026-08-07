@@ -1,50 +1,33 @@
 import NavBar from "@/components/NavBar";
-import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
+import Icon from "@/components/Icon";
 
 export const dynamic = "force-dynamic";
 
 const WARMUPS = [
-  { slug: "gentle", title: "Gentle Warm-Up", desc: "An easier warm-up to prepare the body before training, class, or rehearsal.", yid: "nftG1M2IJPA", advanced: false },
-  { slug: "winning", title: "Winning Warm-Up", desc: "A harder warm-up for stronger dancers. Work up to it as your conditioning improves.", yid: "Nt_zXCLKYc8", advanced: true },
+  { slug: "gentle", title: "Gentle Warm-Up", desc: "An easier sequence to prepare the body before training, class, rehearsal, or a long day of dancing.", yid: "nftG1M2IJPA", level: "Foundation" },
+  { slug: "winning", title: "Winning Warm-Up", desc: "A more demanding preparation for stronger dancers who are ready for a higher conditioning load.", yid: "Nt_zXCLKYc8", level: "Advanced" },
 ];
 
 export default function WarmupsPage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-3xl mx-auto px-4 py-6">
-        <PageHeader icon="warmup" eyebrow="Prepare your body" title="Warm-Ups"
-          subtitle="Before training, class, a performance or an exam. Pick the level that suits you." />
-        <div data-tour="warmup-pick" className="grid sm:grid-cols-2 gap-4 mt-5">
+      <main className="app-page app-page-narrow">
+        <header className="page-lead animate-in"><div><h1>Warm-Ups</h1><p className="mt-3">Prepare the body to move well before you ask it to move hard.</p></div></header>
+        <section data-tour="warmup-pick" className="workout-grid stagger">
           {WARMUPS.map((w) => (
-            <Link key={w.slug} href={`/warmups/${w.slug}`}
-              className="card card-hover overflow-hidden block border-2 border-line hover:border-teal transition animate-in">
-              <div className="relative aspect-video w-full bg-black">
-                <img src={`https://i.ytimg.com/vi/${w.yid}/hqdefault.jpg`} alt="" className="w-full h-full object-cover" />
-                {w.advanced && (
-                  <span className="absolute top-2 right-2 badge bg-navy text-white text-[11px]">Advanced</span>
-                )}
-                <span className="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-teal text-white shadow-lg">
-                  <svg viewBox="0 0 24 24" className="ml-0.5 h-5 w-5" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-                </span>
+            <Link key={w.slug} href={`/warmups/${w.slug}`} className="workout-cover card-hover block">
+              <div className="workout-cover-media">
+                <img src={`https://i.ytimg.com/vi/${w.yid}/hqdefault.jpg`} alt="" />
+                <span className="workout-play"><Icon name="play" className="w-5 h-5 ml-0.5" /></span>
+                <span className="absolute z-[2] left-4 bottom-3 text-[8px] uppercase tracking-[.16em] text-white/60">{w.level} · follow along</span>
               </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-navy">{w.title}</h3>
-                <p className="text-grey text-sm mt-1">{w.desc}</p>
-                <p className="text-teal text-sm mt-2 font-medium">Play ▸</p>
-              </div>
+              <div className="p-5"><h2 className="font-display text-[31px] leading-none font-bold text-white">{w.title}</h2><p className="text-white/50 text-[10px] leading-relaxed mt-3">{w.desc}</p><span className="text-[#7ea8eb] text-[9px] font-bold mt-5 inline-flex items-center gap-1">Start warm-up <Icon name="chevron" className="w-3.5 h-3.5" /></span></div>
             </Link>
           ))}
-        </div>
-
-        <div className="card mt-6 p-4 animate-in">
-          <p className="eyebrow">When to use these</p>
-          <p className="text-grey text-sm mt-2">
-            Before a training session, before class or rehearsal, and before a performance or exam.
-            A few minutes of warming up improves how you move and lowers injury risk.
-          </p>
-        </div>
+        </section>
+        <section className="panel panel-pad mt-6 animate-in"><p className="panel-title">When to use these</p><h2 className="font-display text-[26px] leading-none font-bold text-ink mt-3">Before class. Before training. Before it matters.</h2><p className="text-grey text-[10px] leading-relaxed mt-3 max-w-2xl">Use a warm-up before strength work, ballet class, rehearsal, performance, or an exam. The point is not to exhaust yourself. It is to arrive at the first real task ready to move.</p></section>
       </main>
     </div>
   );

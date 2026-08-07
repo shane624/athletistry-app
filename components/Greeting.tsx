@@ -14,9 +14,8 @@ export default function Greeting({ name, programName }: { name?: string; program
 
   return (
     <div>
-      <p className="eyebrow">{greeting}{first ? `, ${first}` : ""}</p>
-      <h1 className="dashboard-intro-title">Ready to dance?</h1>
-      {programName && <p className="dashboard-program-name">Current program · <span className="text-ink font-medium">{programName}</span></p>}
+      <h1 className="dashboard-intro-title">{greeting}{first ? `, ${first}` : ""}.</h1>
+      <p className="dashboard-program-name">Discipline today. Artistry forever.{programName ? <> <span className="text-ink/60">· {programName}</span></> : null}</p>
     </div>
   );
 }

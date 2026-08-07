@@ -17,7 +17,7 @@ export default async function BalletLabPage({ searchParams }: { searchParams: { 
     return (
       <div className="min-h-screen">
         <NavBar />
-        <main className="max-w-2xl mx-auto px-4 py-6">
+        <main className="app-page app-page-compact">
           <PageHeader icon="target" eyebrow="Ballet Movement Lab" title={active.name}
             subtitle={active.view === "side" ? "Side-on to the camera." : "Facing the camera."} />
           <BalletMoveCoach moveId={active.id} />
@@ -33,7 +33,7 @@ export default async function BalletLabPage({ searchParams }: { searchParams: { 
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-2xl mx-auto px-4 py-6">
+      <main className="app-page app-page-compact">
         <PageHeader icon="target" eyebrow="Ballet Movement Lab" title="Ballet Movement Lab"
           subtitle="Live camera coaching for the movements that reveal your pattern." />
 

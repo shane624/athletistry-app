@@ -10,7 +10,7 @@ export default async function MyWorkoutsPage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-3xl mx-auto px-4 py-6">
+      <main className="app-page app-page-compact">
         <PageHeader icon="stack" eyebrow="Saved by you" title="My Workouts"
           subtitle="Your saved routines — load one to train today, or rename and delete." />
         <MyWorkoutsClient workouts={workouts} />

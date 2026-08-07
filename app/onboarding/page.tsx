@@ -7,7 +7,7 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-2xl mx-auto px-4 py-6">
+      <main className="app-page app-page-compact">
         <OnboardingClient />
       </main>
     </div>

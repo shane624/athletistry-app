@@ -90,6 +90,16 @@ export default async function Dashboard() {
 
         <div className="grid lg:grid-cols-[minmax(0,1.75fr)_minmax(285px,.72fr)] gap-4 lg:gap-5 items-stretch">
           <section data-tour="today-session" className="dashboard-hero animate-in flex flex-col justify-between">
+            {today.exercises[0]?.youtube_id && (
+              <>
+                <img
+                  src={`https://i.ytimg.com/vi/${today.exercises[0].youtube_id}/maxresdefault.jpg`}
+                  alt=""
+                  className="absolute inset-y-0 right-0 h-full w-[48%] object-cover object-center opacity-[.48] grayscale-[.15] hidden md:block"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#15181d] via-[#15181d]/95 to-[#15181d]/20 hidden md:block" />
+              </>
+            )}
             <div className="relative z-[1]">
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div>

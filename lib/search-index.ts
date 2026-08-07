@@ -17,7 +17,7 @@ export interface SearchItem {
 
 // ---- app pages / features ----
 const PAGES: SearchItem[] = [
-  { kind: "page", title: "Today", subtitle: "Your daily workout", href: "/dashboard", keywords: "home dashboard session workout warm up" },
+  { kind: "page", title: "Dashboard", subtitle: "Your daily practice", href: "/dashboard", keywords: "home today dashboard session workout warm up practice" },
   { kind: "page", title: "Programs", subtitle: "Choose a guided plan", href: "/programs", keywords: "the practice 24 week periodised ballet return kids build your own" },
   { kind: "page", title: "Practice Generator", subtitle: "Balanced session on demand", href: "/generate", keywords: "generate quick legs push pull core random practice" },
   { kind: "page", title: "Circuit Training", subtitle: "Intervals, Tabata, EMOM & AMRAP", href: "/circuit", keywords: "circuit conditioning intervals tabata emom amrap superset triset grandset timer rounds hiit" },
@@ -33,7 +33,8 @@ const PAGES: SearchItem[] = [
   { kind: "page", title: "How to Use the App", subtitle: "Beginner guide", href: "/guide", keywords: "help guide getting started beginner how to" },
   { kind: "page", title: "Training Science", subtitle: "The why behind the programs", href: "/training-science", keywords: "great 8 hypertrophy strength endurance phases trimp deload rpe science deeper" },
   { kind: "page", title: "Understand Anatomy", subtitle: "The Dancer's Body course", href: "/anatomy", keywords: "anatomy biomechanics hip knee foot ankle shoulder core turnout dancer body regions plie develop arabesque" },
-  { kind: "page", title: "Settings", subtitle: "Name, reminders, start date", href: "/settings", keywords: "account profile reminders" },
+  { kind: "page", title: "Profile", subtitle: "Your training identity", href: "/profile", keywords: "profile account member program preferences" },
+  { kind: "page", title: "Settings", subtitle: "Account, training & reminders", href: "/settings", keywords: "account settings reminders preferences notifications" },
   { kind: "page", title: "Menu", subtitle: "Everything in one place", href: "/menu", keywords: "menu all sections more home navigation" },
 ];
 

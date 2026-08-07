@@ -23,6 +23,10 @@ const config: Config = {
         grey: "var(--c-grey, #6B7280)",
         surface: "var(--c-surface, #FFFFFF)",
         marble: "var(--c-page, #F5F6F8)",
+        bluewash: "var(--c-bluewash, #EAF1FB)",
+      },
+      opacity: {
+        28: ".28", 35: ".35", 42: ".42", 45: ".45", 48: ".48", 55: ".55", 58: ".58", 66: ".66", 85: ".85",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],

@@ -9,7 +9,7 @@ export default function CircuitPage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-3xl mx-auto px-4 py-6">
+      <main className="app-page app-page-compact">
         <PageHeader icon="circuit" eyebrow="Conditioning" title="Circuit Training"
           subtitle="Pick a format — the app builds a timed circuit and runs the clock for you." />
         <Suspense fallback={<p className="text-grey text-sm mt-5">Loading…</p>}>

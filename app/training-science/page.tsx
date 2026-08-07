@@ -7,7 +7,7 @@ export default function TrainingSciencePage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-3xl mx-auto px-4 py-6">
+      <main className="app-page app-page-compact">
         <a href="/guide" className="text-teal text-sm">← Back to How to Use the App</a>
         <div className="mt-3">
           <PageHeader icon="flask" eyebrow="Go deeper" title="Training Science"

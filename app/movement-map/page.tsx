@@ -24,7 +24,7 @@ export default async function MovementMapPage({ searchParams }: { searchParams: 
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-2xl mx-auto px-4 py-6">
+      <main className="app-page app-page-compact">
         <PageHeader icon="target" eyebrow="Find the pattern" title="The Movement Map"
           subtitle="Stop collecting corrections. Find the pattern causing them." />
 

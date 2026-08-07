@@ -14,7 +14,7 @@ export default async function StudioDetailPage({ params }: { params: { id: strin
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-3xl mx-auto px-4 py-6">
+      <main className="app-page app-page-compact">
         <StudioRoster studio={studio} students={students} />
       </main>
     </div>

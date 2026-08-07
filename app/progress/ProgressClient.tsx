@@ -12,6 +12,7 @@ export default function ProgressClient({ exercises, programId }: { exercises: Ex
 
   async function pick(id: number) {
     setSelected(id);
+    if (!id) { setData(null); return; }
     setLoading(true);
     const series = await getProgress(programId, id);
     setData(series);
@@ -19,20 +20,21 @@ export default function ProgressClient({ exercises, programId }: { exercises: Ex
   }
 
   return (
-    <div className="mt-4">
-      <select
-        className="input max-w-sm"
-        value={selected}
-        onChange={(e) => pick(Number(e.target.value))}
-      >
-        <option value="">Choose an exercise…</option>
-        {exercises.map((e) => (
-          <option key={e.id} value={e.id}>{e.name}</option>
-        ))}
-      </select>
-
-      <div className="card p-4 mt-4">
-        {loading ? <p className="text-grey">Loading…</p> : data ? <ProgressChart data={data} /> : <p className="text-grey">Select an exercise above.</p>}
+    <div className="mt-4 grid lg:grid-cols-[290px_minmax(0,1fr)] gap-3 items-start">
+      <div className="panel panel-pad">
+        <p className="panel-title">Exercise</p>
+        <select className="input mt-3" value={selected} onChange={(e) => pick(Number(e.target.value))}>
+          <option value="">Choose an exercise…</option>
+          {exercises.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
+        </select>
+        <p className="text-grey text-[10px] leading-relaxed mt-3">Progress is shown from sets logged inside your current program.</p>
+      </div>
+      <div className="panel panel-pad min-h-[330px]">
+        {loading ? <p className="text-grey text-sm">Loading…</p> : data ? <ProgressChart data={data} /> : (
+          <div className="min-h-[280px] grid place-items-center text-center px-6">
+            <div><p className="font-display text-2xl font-bold text-ink">Your strength has a story.</p><p className="text-grey text-xs mt-2 max-w-sm">Choose an exercise and the app will plot your top load and total volume week by week.</p></div>
+          </div>
+        )}
       </div>
     </div>
   );

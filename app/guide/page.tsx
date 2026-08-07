@@ -7,7 +7,7 @@ export default function GuidePage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-3xl mx-auto px-4 py-6">
+      <main className="app-page app-page-compact">
         <PageHeader icon="book" eyebrow="Welcome" title="How to Use the App"
           subtitle="A plain-English guide — no fitness background needed." />
 

@@ -10,7 +10,7 @@ export default async function ExercisesPage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className="app-page app-page-narrow">
         <PageHeader icon="library" eyebrow="Reference" title="Exercise Library"
           subtitle={`All ${exercises.length} exercises — search, filter by level, watch any video.`} />
         <LibraryClient exercises={exercises} />

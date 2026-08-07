@@ -20,7 +20,7 @@ export default async function PlanPage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-3xl mx-auto px-4 py-6">
+      <main className="app-page app-page-compact">
         <PageHeader icon="target" eyebrow="Plan around your dancing" title="Training Plan Builder"
           subtitle="Tell us your event and your classes — we build a dated, day-by-day plan that climbs, then tapers." />
 

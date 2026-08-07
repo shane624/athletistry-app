@@ -1,5 +1,4 @@
 import NavBar from "@/components/NavBar";
-import PageHeader from "@/components/PageHeader";
 import Icon, { type IconName } from "@/components/Icon";
 import SaveButton from "@/components/SaveButton";
 import Link from "next/link";
@@ -8,110 +7,37 @@ import { getSaved, getSavedKeys } from "@/lib/saved-data";
 
 export const dynamic = "force-dynamic";
 
-// Goal tiles — the main entry points, browsable at a glance.
-const TILES: { href: string; label: string; icon: IconName; grad: string }[] = [
-  { href: "/movement-map", label: "Movement Map", icon: "target", grad: "linear-gradient(135deg,#2A2F36,#1E50A0)" },
-  { href: "/programs", label: "Programs", icon: "stack", grad: "linear-gradient(135deg,#2A2F36,#3A414A)" },
-  { href: "/plan", label: "Plan for an event", icon: "target", grad: "linear-gradient(135deg,#2A2F36,#1E50A0)" },
-  { href: "/generate", label: "Practice Generator", icon: "bolt", grad: "linear-gradient(135deg,#3A414A,#1E50A0)" },
-  { href: "/circuit", label: "Circuit Training", icon: "circuit", grad: "linear-gradient(135deg,#1E50A0,#163C7A)" },
-  { href: "/ballet", label: "Train for Ballet", icon: "ballet", grad: "linear-gradient(135deg,#3A414A,#1E50A0)" },
-  { href: "/warmups", label: "Warm-Ups", icon: "warmup", grad: "linear-gradient(135deg,#163C7A,#1E50A0)" },
+const TILES: { href: string; label: string; note: string; icon: IconName }[] = [
+  { href: "/movement-map", label: "Movement Map", note: "Find the pattern behind your corrections.", icon: "target" },
+  { href: "/programs", label: "Programs", note: "Follow a structured path long enough to change.", icon: "stack" },
+  { href: "/plan", label: "Plan for an event", note: "Build toward a performance without guessing the load.", icon: "calendar" },
+  { href: "/generate", label: "Practice Generator", note: "Create a balanced session for today.", icon: "bolt" },
+  { href: "/circuit", label: "Circuit Training", note: "Conditioning with clear work and rest.", icon: "circuit" },
+  { href: "/ballet", label: "Train for Ballet", note: "Start with the movement you want to improve.", icon: "ballet" },
+  { href: "/warmups", label: "Warm-Ups", note: "Prepare the body before the real work begins.", icon: "warmup" },
+  { href: "/anatomy", label: "Anatomy", note: "Understand the body behind the technique.", icon: "body" },
 ];
 
-function programLook(id: string): { grad: string; icon: IconName } {
-  if (id.includes("practice")) return { grad: "linear-gradient(135deg,#2A2F36,#1E50A0)", icon: "sparkle" };
-  if (id.includes("ballet")) return { grad: "linear-gradient(135deg,#3A414A,#1E50A0)", icon: "ballet" };
-  if (id.includes("kids")) return { grad: "linear-gradient(135deg,#1E50A0,#163C7A)", icon: "heart" };
-  return { grad: "linear-gradient(135deg,#2A2F36,#3A414A)", icon: "stack" };
-}
-
 export default async function ExplorePage() {
-  const savedKeys = await getSavedKeys();
-  const saved = await getSaved();
-
+  const [savedKeys, saved] = await Promise.all([getSavedKeys(), getSaved()]);
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        <PageHeader icon="grid" eyebrow="Discover" title="Explore"
-          subtitle="Browse everything Athletistry can do — and save anything to come back to." />
+      <main className="app-page">
+        <header className="page-lead animate-in"><div><h1>Explore</h1><p className="mt-3">Everything in Athletistry, organized around the question that brought you here.</p></div></header>
 
-        {/* where do I start — a clear default path for anyone unsure */}
-        <Link href="/programs" className="card card-hover block p-4 mt-5 border-l-2 border-teal">
-          <p className="eyebrow">New here?</p>
-          <p className="text-navy text-sm font-semibold mt-0.5">Not sure where to start? Begin with a program.</p>
-          <p className="text-grey text-xs mt-1">Pick a ready-made plan and the app guides you day by day. You can switch any time.</p>
-          <span className="text-teal text-sm mt-2 font-semibold inline-flex items-center gap-1">Choose a program<Icon name="chevron" className="w-4 h-4" /></span>
+        <Link href="/programs" className="program-feature !min-h-[280px] block animate-in">
+          <div className="relative z-[1] max-w-[720px]"><p className="text-[9px] font-bold uppercase tracking-[.2em] text-white/48">Not sure where to begin?</p><h2 className="font-display text-[clamp(3rem,7vw,5.7rem)] leading-[.88] font-bold mt-3">Start with a path,<br />not another correction.</h2><p className="text-white/58 text-[11px] leading-relaxed max-w-lg mt-5">Choose a program and let the app tell you what comes next. You can still explore everything else without losing the thread.</p><span className="hero-cta !min-h-[44px] !text-[11px] mt-6">Choose a program <Icon name="chevron" className="w-4 h-4" /></span></div>
         </Link>
 
-        {/* goal tiles */}
-        <div className="grid grid-cols-2 gap-3 mt-5">
-          {TILES.map((t) => (
-            <Link key={t.href} href={t.href}
-              className="relative h-28 rounded-2xl overflow-hidden flex items-end p-4 active:scale-[.98] transition"
-              style={{ background: t.grad }}>
-              <span className="absolute top-3 left-3 w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-white">
-                <Icon name={t.icon} className="w-5 h-5" />
-              </span>
-              <span className="text-white font-bold leading-tight">{t.label}</span>
-            </Link>
-          ))}
-        </div>
+        <div className="flex items-end justify-between gap-4 flex-wrap mt-9 mb-3"><div><p className="eyebrow">What do you need?</p><h2 className="font-display text-[34px] leading-none font-bold text-ink mt-1">Choose the question.</h2></div></div>
+        <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 stagger">
+          {TILES.map((t, i) => <Link key={t.href} href={t.href} className={`program-tool-card card-hover block ${i === 0 ? "lg:col-span-2" : ""}`}><span className="w-9 h-9 rounded-full grid place-items-center bg-bluewash text-teal"><Icon name={t.icon} className="w-4 h-4" /></span><h3 className="font-display text-[24px] leading-none font-bold text-ink mt-5">{t.label}</h3><p className="text-grey text-[10px] leading-relaxed mt-2">{t.note}</p><span className="text-teal text-[9px] font-bold inline-flex items-center gap-1 mt-4">Open <Icon name="chevron" className="w-3 h-3" /></span></Link>)}
+        </section>
 
-        {/* saved */}
-        {saved.length === 0 && (
-          <div className="card p-4 mt-8 bg-light">
-            <p className="eyebrow">Saved</p>
-            <p className="text-grey text-sm mt-1">Tap the bookmark on any program to save it here for quick access later.</p>
-          </div>
-        )}
-        {saved.length > 0 && (
-          <>
-            <p className="eyebrow mt-8 mb-3">Saved</p>
-            <div className="card divide-y divide-line overflow-hidden">
-              {saved.map((s) => (
-                <div key={s.itemKey} className="flex items-center gap-3 px-4 py-3">
-                  <Link href={s.href} className="flex-1 min-w-0">
-                    <span className="block text-navy text-sm font-semibold truncate">{s.title}</span>
-                    {s.subtitle && <span className="block text-grey text-xs truncate">{s.subtitle}</span>}
-                  </Link>
-                  <SaveButton itemKey={s.itemKey} title={s.title} subtitle={s.subtitle ?? undefined}
-                    href={s.href} kind={s.kind} initialSaved className="!bg-teal !text-white shrink-0" />
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+        {saved.length > 0 && <section className="mt-9"><div className="flex items-end justify-between gap-4 mb-3"><div><p className="eyebrow">Saved</p><h2 className="font-display text-[31px] leading-none font-bold text-ink mt-1">Come back to these.</h2></div></div><div className="panel overflow-hidden">{saved.map((s) => <div key={s.itemKey} className="flex items-center gap-3 px-4 py-3 border-b border-line last:border-0"><Link href={s.href} className="flex-1 min-w-0"><span className="block text-ink text-[11px] font-semibold truncate">{s.title}</span>{s.subtitle && <span className="block text-grey text-[9px] truncate mt-0.5">{s.subtitle}</span>}</Link><SaveButton itemKey={s.itemKey} title={s.title} subtitle={s.subtitle ?? undefined} href={s.href} kind={s.kind} initialSaved className="!bg-teal !text-white shrink-0" /></div>)}</div></section>}
 
-        {/* browse programs */}
-        <p className="eyebrow mt-8 mb-3">Browse programs</p>
-        <div className="grid md:grid-cols-2 gap-4">
-          {PROGRAMS.map((p) => {
-            const look = programLook(p.id);
-            const key = `program:${p.id}`;
-            return (
-              <div key={p.id} className="card overflow-hidden p-0">
-                <div className="relative h-24 flex items-center px-5" style={{ background: look.grad }}>
-                  <span className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center text-white">
-                    <Icon name={look.icon} className="w-6 h-6" />
-                  </span>
-                  <h3 className="text-white font-bold text-lg ml-3">{p.name}</h3>
-                  <div className="absolute top-3 right-3">
-                    <SaveButton itemKey={key} title={p.name} subtitle="Program" href="/programs"
-                      kind="program" initialSaved={savedKeys.has(key)} />
-                  </div>
-                </div>
-                <div className="p-4">
-                  <p className="text-grey text-sm">{p.tagline}</p>
-                  <Link href="/programs" className="text-teal text-sm mt-3 font-semibold inline-flex items-center gap-1">
-                    Open<Icon name="chevron" className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <section className="mt-9"><div className="flex items-end justify-between gap-4 mb-3"><div><p className="eyebrow">Program library</p><h2 className="font-display text-[31px] leading-none font-bold text-ink mt-1">Browse every program.</h2></div></div><div className="program-cover-grid">{PROGRAMS.map((p) => { const key=`program:${p.id}`; return <div key={p.id} className="program-cover"><div className="relative z-[2] flex justify-end"><SaveButton itemKey={key} title={p.name} subtitle="Program" href="/programs" kind="program" initialSaved={savedKeys.has(key)} /></div><div className="program-cover-bottom"><p className="text-[8px] uppercase tracking-[.14em] text-white/45">Program</p><h3 className="font-display text-[27px] leading-none font-bold text-white mt-2">{p.name}</h3><p className="text-white/48 text-[9px] leading-relaxed mt-2 line-clamp-2">{p.tagline}</p><Link href="/programs" className="text-[#82abea] text-[9px] font-bold inline-flex items-center gap-1 mt-3">Open <Icon name="chevron" className="w-3 h-3" /></Link></div></div>; })}</div></section>
       </main>
     </div>
   );

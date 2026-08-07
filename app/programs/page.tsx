@@ -17,12 +17,17 @@ export default async function ProgramsPage({ searchParams }: { searchParams?: { 
     id: p.id, name: p.name, tagline: p.tagline,
     dayCount: p.days.length, exerciseCount: p.days.reduce((a, d) => a + d.exerciseNames.length, 0),
   }));
+
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-navy">Choose your program</h1>
-        <p className="text-grey text-sm mt-1">Each program keeps its own logs and weights. Switch anytime.</p>
+      <main className="app-page">
+        <header className="page-lead animate-in">
+          <div>
+            <h1>Programs</h1>
+            <p className="mt-3">Choose a path that matches the dancer you are now, then give it enough time to work.</p>
+          </div>
+        </header>
         <ProgramPicker programs={programs} active={active} first={searchParams?.first === "1"} customActive={active === "custom"} />
       </main>
     </div>

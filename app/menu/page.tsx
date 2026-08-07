@@ -8,7 +8,7 @@ const GROUPS: { title: string; items: { href: string; label: string }[] }[] = [
   {
     title: "Train",
     items: [
-      { href: "/dashboard", label: "Today" },
+      { href: "/dashboard", label: "Dashboard" },
       { href: "/programs", label: "Programs" },
       { href: "/plan", label: "Training Plan Builder" },
       { href: "/generate", label: "Practice Generator" },
@@ -39,6 +39,7 @@ const GROUPS: { title: string; items: { href: string; label: string }[] }[] = [
     title: "More",
     items: [
       { href: "/exercises", label: "Library" },
+      { href: "/profile", label: "Profile" },
       { href: "/settings", label: "Settings" },
     ],
   },
@@ -48,7 +49,7 @@ export default function MenuPage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-3xl mx-auto px-4 py-6">
+      <main className="app-page app-page-compact">
         <h1 className="text-2xl font-extrabold text-navy">Menu</h1>
         <p className="text-grey text-sm mt-1">Everything in the app, in one place.</p>
 

@@ -6,7 +6,7 @@ export default function TrainingStylesPage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-3xl mx-auto px-4 py-6">
+      <main className="app-page app-page-compact">
         <p className="text-teal font-semibold tracking-widest text-sm">ATHLETISTRY</p>
         <h1 className="text-2xl font-bold text-navy mt-1">Hypertrophy, Strength &amp; Endurance</h1>
         <p className="text-ink text-sm leading-relaxed mt-3">

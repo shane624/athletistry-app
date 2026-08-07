@@ -15,7 +15,7 @@ export default async function LoadPage() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <main className="max-w-3xl mx-auto px-4 py-6">
+      <main className="app-page app-page-compact">
         <PageHeader icon="calendar" eyebrow="Train like an athlete" title="Training Calendar"
           subtitle="Log every session as time + how hard it felt. The app tracks your weekly load and eases you off before an event." />
         <LoadClient

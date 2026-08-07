@@ -9,7 +9,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     title: "Train",
     items: [
-      { href: "/dashboard", label: "Today", icon: "home" },
+      { href: "/dashboard", label: "Dashboard", icon: "home" },
       { href: "/explore", label: "Explore", icon: "sparkle" },
       { href: "/movement-map", label: "Movement Map", icon: "target" },
       { href: "/movement-map/ballet", label: "Ballet Movement Lab", icon: "ballet" },
@@ -44,6 +44,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/studio", label: "Studios", icon: "users" },
       { href: "/exercises", label: "Library", icon: "library" },
+      { href: "/profile", label: "Profile", icon: "user" },
       { href: "/settings", label: "Settings", icon: "settings" },
     ],
   },
