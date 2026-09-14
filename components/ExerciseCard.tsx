@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { logSet } from "@/lib/data";
+import { useToast } from "@/components/Toast";
 import type { ResolvedRx } from "@/lib/program";
 import { isHoldExercise, holdSeconds } from "@/lib/program";
 import ExerciseVideo from "@/components/ExerciseVideo";
@@ -54,6 +55,7 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
     setVals((v) => ({ ...v, [n]: { weight: v[1]?.weight ?? preW, reps: v[1]?.reps ?? preR } }));
     setExtra((e) => e + 1);
   }
+  const toast = useToast();
   const [saved, setSaved] = useState<Record<number, "idle" | "saving" | "ok">>({});
   const [restKey, setRestKey] = useState(0); // bump to auto-start the rest timer
 
@@ -65,6 +67,11 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
       reps: parseInt(vals[setNumber].reps || "0"),
     });
     setSaved((s) => ({ ...s, [setNumber]: res.ok ? "ok" : "idle" }));
+    // A failed save used to drop silently back to "Save", which looks exactly
+    // like nothing having happened. Say so instead.
+    if (!res.ok) {
+      toast({ title: "Set didn't save", message: "Check your connection and tap Save again.", variant: "error" });
+    }
     if (res.ok) {
       setRestKey((k) => k + 1); // auto-start rest between sets
       setTimeout(() => setSaved((s) => ({ ...s, [setNumber]: "idle" })), 1200);
@@ -92,6 +99,7 @@ export default function ExerciseCard({ exercise, rx, programId, week, dayIndex, 
     }
     setVals(next);          // reflect the filled-in values in the inputs
     setAllBusy(false);
+    toast({ title: `${sets.length} sets logged`, message: exercise.name, variant: "success" });
     setRestKey((k) => k + 1);
   }
   const canLogAll = (vals[1]?.reps || "").trim() !== ""; // need at least set-1 reps
@@ -235,6 +243,7 @@ function HoldCard({ exercise, rx, programId, week, dayIndex, initialLogs }: any)
     for (const s of sets) init[s] = initialLogs[s]?.reps != null ? String(initialLogs[s].reps) : "";
     return init;
   });
+  const toast = useToast();
   const [saved, setSaved] = useState<Record<number, "idle" | "saving" | "ok">>({});
   const [activeSet, setActiveSet] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
@@ -269,6 +278,9 @@ function HoldCard({ exercise, rx, programId, week, dayIndex, initialLogs }: any)
       weight: 0, reps: value,
     });
     setSaved((s) => ({ ...s, [setNumber]: res.ok ? "ok" : "idle" }));
+    if (!res.ok) {
+      toast({ title: "Hold didn't save", message: "Check your connection and try again.", variant: "error" });
+    }
     if (res.ok) {
       setRestKey((k) => k + 1);
       setTimeout(() => setSaved((s) => ({ ...s, [setNumber]: "idle" })), 1200);

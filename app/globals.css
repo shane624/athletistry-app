@@ -725,3 +725,14 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
   .tab-press:active { transform: none; }
   .skeleton::after { animation: none; opacity: .35; }
 }
+
+/* Toast surface. Same glass treatment as .card, tightened radius and a heavier
+   shadow so it reads as floating above the page rather than part of it. */
+.toast-card {
+  background: var(--c-surface);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(20, 24, 30, .16), 0 2px 6px rgba(20, 24, 30, .06);
+  backdrop-filter: blur(20px) saturate(125%);
+  -webkit-backdrop-filter: blur(20px) saturate(125%);
+}

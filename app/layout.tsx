@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import "./globals.css";
+import { ToastProvider } from "@/components/Toast";
 
 // Editorial serif + clean UI sans: ballet publication, not generic fitness SaaS.
 const sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-sans", display: "swap" });
@@ -66,7 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {SPLASH.map((s) => (
           <link key={s.href} rel="apple-touch-startup-image" media={s.media} href={s.href} />
         ))}
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );

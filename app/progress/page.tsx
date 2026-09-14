@@ -5,6 +5,7 @@ import ActivityTrend from "@/components/ActivityTrend";
 import ProgressRing from "@/components/ProgressRing";
 import Icon from "@/components/Icon";
 import SectionTabs from "@/components/SectionTabs";
+import CountUp from "@/components/ui/count-up";
 import { PROGRESS_TOOLS } from "@/lib/nav-items";
 import { listExercises } from "@/lib/data";
 import { createClient } from "@/lib/supabase-server";
@@ -102,6 +103,19 @@ export default async function ProgressPage() {
   );
 }
 
+// Values arrive as strings like "12 wk" or "48 min". Split the leading number
+// off so it can roll up on the odometer while the unit stays put; anything
+// without a leading number (an em-dash placeholder, say) renders as-is.
 function Metric({ label, value, note }: { label: string; value: string | number; note: string }) {
-  return <div className="metric-card animate-in"><p className="metric-label">{label}</p><p className="metric-value">{value}</p><p className="metric-note">{note}</p></div>;
+  const raw = String(value);
+  const m = raw.match(/^(\d[\d,]*)(.*)$/);
+  return (
+    <div className="metric-card animate-in">
+      <p className="metric-label">{label}</p>
+      <p className="metric-value">
+        {m ? <CountUp to={Number(m[1].replace(/,/g, ""))} separator="," suffix={m[2]} /> : raw}
+      </p>
+      <p className="metric-note">{note}</p>
+    </div>
+  );
 }
