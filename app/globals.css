@@ -867,3 +867,131 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .plan-step-current .plan-step-dot { transform: none; }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Dashboard rhythm                                                           */
+/* -------------------------------------------------------------------------- */
+.quick-start { margin-top: 26px; }
+.quick-start-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.quick-start-row::-webkit-scrollbar { display: none; }
+.quick-start-row > li { flex: 1 1 0; min-width: 64px; }
+
+.quick-start-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  text-align: center;
+}
+.quick-start-dot {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--c-ink);
+  background: var(--c-surface);
+  box-shadow: inset 0 0 0 1px var(--card-border), 0 6px 16px rgba(20, 24, 30, .05);
+  transition: color .2s ease, box-shadow .2s ease, transform .2s cubic-bezier(.2,.7,.2,1);
+}
+.quick-start-item:hover .quick-start-dot {
+  color: var(--c-teal);
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 1px rgba(37, 95, 189, .22), 0 10px 22px rgba(20, 24, 30, .08);
+}
+.quick-start-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--c-grey);
+}
+
+/* This week list */
+.rhythm-day {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(28, 33, 40, .07);
+}
+.rhythm-day:last-child { border-bottom: 0; }
+
+.rhythm-daymark {
+  flex: 0 0 auto;
+  width: 38px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 0;
+  border-radius: 10px;
+}
+.rhythm-daymark-today { background: var(--c-bluewash); }
+.rhythm-daymark-dow {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--c-grey);
+}
+.rhythm-daymark-today .rhythm-daymark-dow { color: var(--c-teal); }
+.rhythm-daymark-num {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--c-ink);
+}
+
+.rhythm-session { display: flex; align-items: center; gap: 8px; min-height: 22px; }
+.rhythm-swatch { width: 3px; height: 15px; border-radius: 99px; flex: 0 0 auto; }
+.rhythm-session-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rhythm-session-meta { font-size: 9px; color: var(--c-grey); flex: 0 0 auto; margin-left: auto; padding-left: 10px; }
+
+/* Comparison bars */
+.rhythm-bar-track {
+  position: relative;
+  height: 5px;
+  border-radius: 99px;
+  background: rgba(28, 33, 40, .08);
+  overflow: visible;
+}
+.rhythm-bar-track > span {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--c-teal);
+  transition: width .5s cubic-bezier(.2,.7,.2,1);
+}
+/* Where the dancer's own average sits, so the fill has something to mean. */
+.rhythm-bar-mark {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 1.5px;
+  border-radius: 99px;
+  background: var(--c-ink);
+  opacity: .32;
+}
+
+@media (prefers-color-scheme: dark) {
+  .rhythm-bar-track { background: rgba(255, 255, 255, .09); }
+  .rhythm-day { border-bottom-color: rgba(255, 255, 255, .07); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rhythm-bar-track > span { transition: none; }
+  .quick-start-item:hover .quick-start-dot { transform: none; }
+}

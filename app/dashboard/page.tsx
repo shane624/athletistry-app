@@ -7,6 +7,8 @@ import DailyQuote from "@/components/DailyQuote";
 import AchievementStrip from "@/components/AchievementStrip";
 import WarmUp from "@/components/WarmUp";
 import Greeting from "@/components/Greeting";
+import QuickStart from "@/components/QuickStart";
+import WeekRhythm from "@/components/WeekRhythm";
 import CompleteWorkout from "@/components/CompleteWorkout";
 import EventPlanDay from "@/components/EventPlanDay";
 import TourButton from "@/components/TourButton";
@@ -18,6 +20,7 @@ import RejoinEventPlan from "@/components/RejoinEventPlan";
 import { getDisplayName } from "@/lib/profile-data";
 import { getAchievements } from "@/lib/achievements-data";
 import { getAssessment } from "@/lib/load-data";
+import { getWeekRhythm } from "@/lib/week-rhythm";
 import { BLOCK_LABEL, BLOCK_WEEKS } from "@/lib/programs";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -32,7 +35,7 @@ export default async function Dashboard() {
 
   const [eventPlan, displayName] = await Promise.all([getEventPlanToday(), getDisplayName()]);
   if (eventPlan.active) {
-    const [upcoming, planAch] = await Promise.all([getEventPlanUpcoming(5), getAchievements()]);
+    const [upcoming, planAch, planRhythm] = await Promise.all([getEventPlanUpcoming(5), getAchievements(), getWeekRhythm()]);
     return (
       <div className="min-h-screen">
         <NavBar />
@@ -50,6 +53,9 @@ export default async function Dashboard() {
             levelName={planAch.level.name}
             nextLevelName={planAch.nextLevel?.name}
           />
+          {/* The week list belongs here too, but not QuickStart: someone on a
+              tapering event plan should not be offered six ways to deviate. */}
+          <WeekRhythm rhythm={planRhythm} />
         </main>
       </div>
     );
@@ -59,6 +65,7 @@ export default async function Dashboard() {
     getToday(), getAchievements(), getAssessment(), getPausedEventPlan(),
   ]);
   const { assessment } = assessmentRes;
+  const rhythm = await getWeekRhythm();
   const isPeriodized = today.programType === "periodized";
   const isManual = today.scheduling === "manual";
   const totalEx = today.exercises.length;
@@ -142,6 +149,8 @@ export default async function Dashboard() {
           </aside>
         </div>
 
+        <QuickStart />
+
         {assessment.status !== "no-data" && (
           <Link href="/load" className="dashboard-note card-hover block mt-5 animate-in">
             <div className="relative z-[1] flex items-center justify-between gap-4">
@@ -215,6 +224,8 @@ export default async function Dashboard() {
         )}
 
         {totalEx > 0 && <CompleteWorkout levelIndex={ach.level.index} levelName={ach.level.name} nextLevelName={ach.nextLevel?.name} />}
+
+        <WeekRhythm rhythm={rhythm} />
       </main>
     </div>
   );
