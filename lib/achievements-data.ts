@@ -17,9 +17,13 @@ export async function getAchievements(): Promise<AchievementsResult> {
   // Count ANY logged training as an active day — both logged sets AND logged
   // sessions (classes / rehearsals / cardio from the calendar). Otherwise a
   // week where the dancer only logged a class (no sets) breaks the streak.
-  const [{ data: rows }, { data: sessions }] = await Promise.all([
+  const [{ data: rows }, { data: sessions }, { data: profile }] = await Promise.all([
     supabase.from("set_logs").select("logged_at, weight, reps").eq("user_id", user.id),
     supabase.from("training_sessions").select("session_date").eq("user_id", user.id),
+    // weekly_goal is what the dancer said in onboarding. Selected on its own so
+    // a missing column (migration not yet run) degrades to the default rather
+    // than failing the whole read.
+    supabase.from("profiles").select("weekly_goal").eq("id", user.id).single(),
   ]);
 
   const logs = rows ?? [];
@@ -38,11 +42,14 @@ export async function getAchievements(): Promise<AchievementsResult> {
 
   const quizzesPassed = await getAnatomyQuizCount();
 
+  const weeklyGoal = Number(profile?.weekly_goal) || undefined;
+
   return computeAchievements({
     workoutDays: [...daySet].sort(),
     totalSets: logs.length,
     totalVolume,
     quizzesPassed,
     quizzesTotal: ANATOMY_MODULES.length,
+    weeklyGoal,
   });
 }

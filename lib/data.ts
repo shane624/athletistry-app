@@ -493,3 +493,36 @@ export async function loadSavedWorkout(id: number) {
   return { ok: true };
 }
 
+
+/** Save what the dancer told us in onboarding: their goal, and how often they
+ *  can realistically train. The weekly figure drives the weekly ring, the
+ *  Perfect Week badge and the Profile training-days line, all of which were
+ *  previously measured against a hardcoded 3. */
+export async function saveTrainingGoal({ goal, weeklyGoal }: { goal?: string; weeklyGoal?: number }) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not signed in" };
+  const patch: Record<string, unknown> = {};
+  if (goal) patch.training_goal = goal;
+  if (weeklyGoal && weeklyGoal > 0) patch.weekly_goal = weeklyGoal;
+  if (Object.keys(patch).length === 0) return { ok: true };
+  const { error } = await supabase.from("profiles").update(patch).eq("id", user.id);
+  // Columns may not exist until migration_training_goal.sql has been run.
+  // Onboarding must not fail because of that, so this is best-effort.
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+/** The dancer's stated goal and weekly target. Falls back cleanly when the
+ *  migration has not been run yet. */
+export async function getTrainingGoal(): Promise<{ goal: string | null; weeklyGoal: number | null }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { goal: null, weeklyGoal: null };
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("training_goal, weekly_goal")
+    .eq("id", user.id)
+    .single();
+  if (error) return { goal: null, weeklyGoal: null };
+  return { goal: (data?.training_goal as string) ?? null, weeklyGoal: (data?.weekly_goal as number) ?? null };
+}
