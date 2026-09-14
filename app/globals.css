@@ -483,13 +483,11 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 .splash-bar { animation: splashBar linear forwards; }
 
 .hero-bg { background: radial-gradient(1100px 560px at 72% -12%, #313842 0%, #15181d 58%); }
-.hero-glow { position:absolute; width:480px; height:480px; right:-130px; top:40px; background:radial-gradient(circle,rgba(37,95,189,.30),transparent 65%); filter:blur(18px); animation:heroFloat 9s ease-in-out infinite; z-index:0; }
-@keyframes heroFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-24px)} }
+.hero-glow { position:absolute; width:480px; height:480px; right:-130px; top:40px; background:radial-gradient(circle,rgba(37,95,189,.30),transparent 65%); filter:blur(18px); z-index:0; }
 
-.phone-shell { width:270px; border-radius:36px; background:#15181d; padding:10px; box-shadow:0 34px 70px rgba(0,0,0,.42); position:relative; animation:phoneFloat 6s ease-in-out infinite; }
+.phone-shell { width:270px; border-radius:36px; background:#15181d; padding:10px; box-shadow:0 34px 70px rgba(0,0,0,.42); position:relative; }
 .phone-shell::before { content:""; position:absolute; top:18px; left:50%; transform:translateX(-50%); width:108px; height:22px; background:#15181d; border-radius:0 0 14px 14px; z-index:5; }
 .phone-screen { background:#f4f4f2; border-radius:27px; overflow:hidden; }
-@keyframes phoneFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
 
 .dot-pulse { width:7px; height:7px; border-radius:50%; background:currentColor; display:inline-block; animation:dotPulse .9s ease-in-out infinite; }
 @keyframes dotPulse { 0%,80%,100%{opacity:.3;transform:scale(.8)} 40%{opacity:1;transform:scale(1.1)} }
@@ -685,3 +683,45 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 }
 .app-page > h1 + p { margin-top: 10px; max-width: 62ch; color: var(--c-grey); font-size: 12px; line-height: 1.65; }
 .dashboard-side-stack > .card { border-radius: 17px; }
+
+/* -------------------------------------------------------------------------- */
+/* Responsive motion                                                          */
+/* -------------------------------------------------------------------------- */
+/* Motion that answers an input rather than idling. Every tappable nav surface
+   dips under the finger and springs back, which is what makes a native app feel
+   attached to your hand. */
+.tab-press {
+  transition: transform .16s cubic-bezier(.2,.7,.2,1), opacity .16s ease;
+}
+.tab-press:active {
+  transform: scale(.94);
+}
+
+/* Skeletons. Previously every route change threw up the full branded splash,
+   quote and all. These hold the page's shape instead, so a navigation reads as
+   the same screen filling in rather than the app restarting. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(28,33,40,.055);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  animation: skeletonSweep 1.35s ease-in-out infinite;
+}
+@keyframes skeletonSweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+@media (prefers-color-scheme: dark) {
+  .skeleton { background: rgba(255,255,255,.06); }
+  .skeleton::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-press { transition: none; }
+  .tab-press:active { transform: none; }
+  .skeleton::after { animation: none; opacity: .35; }
+}

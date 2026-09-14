@@ -5,6 +5,8 @@ import Icon from "@/components/Icon";
 import Link from "next/link";
 import { ANATOMY_MODULES } from "@/lib/anatomy";
 import { getAnatomyProgress } from "@/lib/anatomy-data";
+import SectionTabs from "@/components/SectionTabs";
+import { LEARN_TOOLS } from "@/lib/nav-items";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,9 @@ export default async function AnatomyPage() {
         <header className="page-lead animate-in">
           <div><h1>Understand Anatomy</h1><p className="mt-3">Learn what the body is doing, why the movement works, and how to train it without forcing.</p></div>
         </header>
+
+        <SectionTabs items={LEARN_TOOLS} label="Learn sections" />
+
 
         <section className="anatomy-hero animate-in">
           <div className="relative z-[1]">

@@ -5,7 +5,36 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import Icon from "@/components/Icon";
-import { NAV_GROUPS, ADMIN_EMAIL, type NavGroup } from "@/lib/nav-items";
+import { PRIMARY_NAV, STUDIO_ITEM, ADMIN_ITEM, ADMIN_EMAIL, type NavItem } from "@/lib/nav-items";
+
+// Routes that belong to a primary destination but live at their own path. The
+// sidebar highlights the destination they sit under, so someone deep in the
+// Practice Generator can still see that they are inside Train.
+const SECTION_OF: Record<string, string> = {
+  "/programs": "/explore",
+  "/workouts": "/explore",
+  "/warmups": "/explore",
+  "/circuit": "/explore",
+  "/ballet": "/explore",
+  "/movement-map": "/explore",
+  "/plan": "/explore",
+  "/generate": "/explore",
+  "/my-workouts": "/explore",
+  "/exercises": "/explore",
+  "/session": "/explore",
+  "/build": "/explore",
+  "/load": "/progress",
+  "/achievements": "/progress",
+  "/anatomy": "/guide",
+  "/training-science": "/guide",
+  "/training-styles": "/guide",
+  "/settings": "/profile",
+};
+
+function sectionFor(pathname: string): string {
+  const hit = Object.keys(SECTION_OF).find((p) => pathname === p || pathname.startsWith(p + "/"));
+  return hit ? SECTION_OF[hit] : pathname;
+}
 
 export default function SideNav() {
   const pathname = usePathname();
@@ -24,13 +53,31 @@ export default function SideNav() {
     supabase.from("studios").select("id").limit(1).then(({ data }) => setShowStudio(!!data?.length));
   }, [supabase]);
 
-  const base: NavGroup[] = showStudio ? NAV_GROUPS : NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((it) => it.href !== "/studio") }));
-  const groups: NavGroup[] = showAdmin ? [...base, { title: "Admin", items: [{ href: "/admin", label: "Members", icon: "user" }] }] : base;
+  const section = sectionFor(pathname);
+  const secondary: NavItem[] = [
+    ...(showStudio ? [STUDIO_ITEM] : []),
+    ...(showAdmin ? [ADMIN_ITEM] : []),
+  ];
 
   async function signOut() {
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
+  }
+
+  function renderLink(it: NavItem, quiet = false) {
+    const active = section === it.href;
+    return (
+      <Link
+        key={it.href}
+        href={it.href}
+        aria-current={active ? "page" : undefined}
+        className={`sidebar-link flex items-center gap-3 px-3 ${quiet ? "py-1.5 text-[11px]" : "py-2.5 text-[13px]"} ${active ? "sidebar-link-active font-semibold" : ""}`}
+      >
+        <Icon name={it.icon} className="w-[18px] h-[18px] shrink-0" strokeWidth={active ? 1.9 : 1.45} />
+        <span className="truncate">{it.label}</span>
+      </Link>
+    );
   }
 
   return (
@@ -41,23 +88,15 @@ export default function SideNav() {
         <span className="sidebar-mantra">Discipline. Artistry. Forever.</span>
       </Link>
 
-      <nav className="px-3 pt-3 pb-5 flex-1">
-        {groups.map((g) => (
-          <div key={g.title} className="mb-4">
-            <p className="sidebar-group-title">{g.title}</p>
-            <div className="space-y-0.5">
-              {g.items.map((it) => {
-                const active = it.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(it.href);
-                return (
-                  <Link key={it.href} href={it.href} className={`sidebar-link flex items-center gap-3 px-3 py-2 text-[12px] ${active ? "sidebar-link-active font-semibold" : ""}`}>
-                    <Icon name={it.icon} className="w-[17px] h-[17px] shrink-0" strokeWidth={active ? 1.9 : 1.45} />
-                    <span className="truncate">{it.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
+      <nav className="px-3 pt-4 pb-5 flex-1">
+        <div className="space-y-1">{PRIMARY_NAV.map((it) => renderLink(it))}</div>
+
+        {secondary.length > 0 && (
+          <div className="mt-6">
+            <div className="hairline mx-3 mb-3" />
+            <div className="space-y-0.5">{secondary.map((it) => renderLink(it, true))}</div>
           </div>
-        ))}
+        )}
       </nav>
 
       <Link href="/profile" className="sidebar-footer mx-3 mb-2 p-3.5 flex items-center gap-3 hover:bg-white/[.04] transition">

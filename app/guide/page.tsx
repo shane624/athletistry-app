@@ -1,5 +1,7 @@
 import NavBar from "@/components/NavBar";
 import PageHeader from "@/components/PageHeader";
+import SectionTabs from "@/components/SectionTabs";
+import { LEARN_TOOLS } from "@/lib/nav-items";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +12,8 @@ export default function GuidePage() {
       <main className="app-page app-page-compact">
         <PageHeader icon="book" eyebrow="Welcome" title="How to Use the App"
           subtitle="A plain-English guide — no fitness background needed." />
+        <SectionTabs items={LEARN_TOOLS} label="Learn sections" />
+
 
         {/* reassurance */}
         <div className="card mt-4 p-5 border-l-2 border-teal animate-in">

@@ -4,6 +4,8 @@ import MuscleBalance from "@/components/MuscleBalance";
 import ActivityTrend from "@/components/ActivityTrend";
 import ProgressRing from "@/components/ProgressRing";
 import Icon from "@/components/Icon";
+import SectionTabs from "@/components/SectionTabs";
+import { PROGRESS_TOOLS } from "@/lib/nav-items";
 import { listExercises } from "@/lib/data";
 import { createClient } from "@/lib/supabase-server";
 import { getProgressOverview } from "@/lib/progress-overview";
@@ -26,17 +28,12 @@ export default async function ProgressPage() {
       <main className="app-page">
         <header className="page-lead animate-in">
           <div>
-            <h1>Progress &amp; Profile</h1>
+            <h1>Progress.</h1>
             <p className="mt-3">Track your practice. Notice what is changing. Keep moving forward.</p>
           </div>
         </header>
 
-        <div className="editorial-tabs mb-4 animate-in" aria-label="Progress sections">
-          <span className="editorial-tab editorial-tab-active">Overview</span>
-          <a href="#lift-progress" className="editorial-tab">Workouts</a>
-          <a href="#muscle-focus" className="editorial-tab">Strength</a>
-          <a href="#activity" className="editorial-tab">Consistency</a>
-        </div>
+        <SectionTabs items={PROGRESS_TOOLS} label="Progress sections" />
 
         <section className="metric-grid stagger">
           <Metric label="Total workouts" value={overview.totalWorkouts} note={`${overview.thisMonth} this month`} />

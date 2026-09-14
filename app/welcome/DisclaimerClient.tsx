@@ -20,12 +20,12 @@ export default function DisclaimerClient() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-5">
-      <div className="card w-full max-w-xl p-6">
-        <p className="text-teal font-semibold tracking-widest text-center">ATHLETISTRY</p>
-        <h1 className="text-2xl font-bold text-navy text-center mt-1">Before you begin</h1>
+      <div className="card w-full max-w-xl p-7 sm:p-8 animate-in">
+        <p className="eyebrow text-center">Athletistry</p>
+        <h1 className="font-display text-[clamp(1.9rem,4.4vw,2.6rem)] leading-[1.02] font-bold text-ink tracking-[-.035em] mt-2 text-center">Before you begin</h1>
         <p className="text-grey text-sm text-center mb-3">Please read and accept the disclaimer below.</p>
 
-        <div className="max-h-[46vh] overflow-y-auto border border-line rounded-xl p-4 text-sm leading-relaxed text-ink space-y-3">
+        <div className="max-h-[46vh] overflow-y-auto panel panel-pad text-[13px] leading-relaxed text-ink space-y-3 mt-5">
           <p><b>Not medical advice.</b> Athletistry and this app provide general fitness and movement information for educational purposes only. It is not medical advice and is not a substitute for guidance from a qualified physician, physiotherapist, or other licensed health professional.</p>
           <p><b>Consult a professional first.</b> Consult your doctor before starting this or any exercise program, especially if you are pregnant, recovering from injury or surgery, have a heart condition, high blood pressure, joint problems, or any other medical condition, or have been inactive for some time. Do not begin if a health professional has advised you not to exercise.</p>
           <p><b>Exercise carries risk.</b> Physical exercise involves inherent risks, including muscle strains, sprains, falls, and in rare cases serious injury or other health events. You voluntarily assume all risks associated with performing any exercise shown in this app.</p>

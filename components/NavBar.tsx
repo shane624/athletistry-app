@@ -9,7 +9,7 @@ import BottomTabBar from "@/components/BottomTabBar";
 import SideNav from "@/components/SideNav";
 import PageTour from "@/components/PageTour";
 import Icon from "@/components/Icon";
-import { NAV_GROUPS, ADMIN_EMAIL, type NavGroup } from "@/lib/nav-items";
+import { NAV_GROUPS, PRIMARY_NAV, STUDIO_ITEM, ADMIN_ITEM, ADMIN_EMAIL, type NavGroup } from "@/lib/nav-items";
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -25,9 +25,13 @@ export default function NavBar() {
     supabase.from("studios").select("id").limit(1).then(({ data }) => setShowStudio(!!data?.length));
   }, [supabase]);
 
-  const base: NavGroup[] = showStudio ? NAV_GROUPS : NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((it) => it.href !== "/studio") }));
-  const groups: NavGroup[] = showAdmin ? [...base, { title: "Admin", items: [{ href: "/admin", label: "Members", icon: "user" }] }] : base;
-  const current = groups.flatMap((g) => g.items).find((l) => l.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(l.href))?.label ?? "Athletistry";
+  // Studios only exists for owners/members, so it is appended under Account
+  // rather than filtered out of a list that no longer carries it.
+  const base: NavGroup[] = showStudio
+    ? NAV_GROUPS.map((g) => (g.title === "Account" ? { ...g, items: [...g.items, STUDIO_ITEM] } : g))
+    : NAV_GROUPS;
+  const groups: NavGroup[] = showAdmin ? [...base, { title: "Admin", items: [ADMIN_ITEM] }] : base;
+  const current = [...PRIMARY_NAV, ...groups.flatMap((g) => g.items)].find((l) => l.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(l.href))?.label ?? "Athletistry";
 
   async function signOut() {
     await supabase.auth.signOut();
