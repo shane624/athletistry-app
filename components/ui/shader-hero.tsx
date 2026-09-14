@@ -223,8 +223,13 @@ export function ShaderHero({ className }: { className?: string }) {
 
   useEffect(() => {
     if (reduced !== false || failed) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    // Both of these are bound to their own non-null const after the guard.
+    // render() and requestRender() are hoisted function declarations, and
+    // TypeScript will not carry a null-narrowing into one, since in principle
+    // it could be called before the check runs.
+    const maybeCanvas = canvasRef.current;
+    if (!maybeCanvas) return;
+    const canvas: HTMLCanvasElement = maybeCanvas;
     const maybeGl = canvas.getContext("webgl", { antialias: false });
     if (!maybeGl) {
       setFailed(true);
