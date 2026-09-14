@@ -1,17 +1,19 @@
 import Link from "next/link";
+import ShaderHero from "@/components/ui/shader-hero";
 
 export default function Home() {
   return (
     <main className="min-h-screen overflow-hidden">
       {/* HERO */}
-      <section className="hero-bg relative text-white">
-        <div className="hero-glow" aria-hidden />
+      <section className="hero-bg relative text-white overflow-hidden">
+        <ShaderHero className="absolute inset-0 w-full h-full" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#15181d]/35 to-[#15181d]/85" aria-hidden />
         <div className="relative z-10 max-w-5xl mx-auto px-6 pt-16 pb-20 md:pt-24 md:pb-28
                         grid md:grid-cols-2 gap-10 items-center">
           {/* copy */}
           <div className="text-center md:text-left">
             <p className="eyebrow animate-in">Ballet &amp; Anatomy · Training App</p>
-            <h1 className="text-4xl md:text-5xl font-extrabold leading-[1.08] tracking-tight mt-4 animate-in">
+            <h1 className="font-display text-[clamp(2.6rem,6vw,4.4rem)] font-bold leading-[.95] tracking-[-.045em] mt-4 animate-in">
               Train the body<br />that <span className="text-teal">actually dances.</span>
             </h1>
             <p className="text-[#c9d2e2] text-lg leading-relaxed mt-5 max-w-md mx-auto md:mx-0 animate-in">
@@ -25,9 +27,9 @@ export default function Home() {
               </Link>
             </div>
             <div className="mt-9 flex gap-7 justify-center md:justify-start text-sm text-[#aab4c8] animate-in">
-              <div><span className="block text-white text-2xl font-extrabold">58+</span>demo videos</div>
-              <div><span className="block text-white text-2xl font-extrabold">5+</span>programs</div>
-              <div><span className="block text-white text-2xl font-extrabold">90-day</span>anatomy plan</div>
+              <div><span className="block text-white font-display text-[28px] font-bold leading-none mb-1">58+</span>demo videos</div>
+              <div><span className="block text-white font-display text-[28px] font-bold leading-none mb-1">5+</span>programs</div>
+              <div><span className="block text-white font-display text-[28px] font-bold leading-none mb-1">90-day</span>anatomy plan</div>
             </div>
           </div>
 
@@ -41,7 +43,7 @@ export default function Home() {
       {/* FEATURE CARDS */}
       <section className="max-w-5xl mx-auto px-6 py-16">
         <p className="eyebrow text-center">Everything in one place</p>
-        <h2 className="text-2xl md:text-3xl font-extrabold text-navy text-center mt-3">
+        <h2 className="font-display text-[clamp(1.9rem,4vw,2.8rem)] font-bold text-ink text-center leading-[1.02] tracking-[-.035em] mt-3">
           Built for how dancers train
         </h2>
 
@@ -86,7 +88,7 @@ export default function Home() {
 function Feature({ title, desc }: { title: string; desc: string }) {
   return (
     <div className="card card-hover p-5">
-      <div className="font-bold text-navy">{title}</div>
+      <div className="font-bold text-ink">{title}</div>
       <div className="text-grey text-sm mt-1">{desc}</div>
     </div>
   );
@@ -110,7 +112,7 @@ function PhoneMockup() {
           {/* daily inspiration */}
           <div className="bg-white border border-line rounded-xl p-3.5">
             <div className="eyebrow !text-[10px]">Daily Inspiration</div>
-            <p className="text-navy font-bold text-[14px] leading-snug mt-2">
+            <p className="text-ink font-bold text-[14px] leading-snug mt-2">
               &ldquo;No one can arrive from being talented alone. Work transforms talent into genius.&rdquo;
             </p>
             <p className="text-grey text-[11px] mt-2">— Anna Pavlova</p>
@@ -144,7 +146,7 @@ function ExerciseRow({ id, name, sub }: { id: string; name: string; sub: string 
                          drop-shadow">▶</span>
       </div>
       <div>
-        <div className="font-bold text-navy text-[13px]">{name}</div>
+        <div className="font-bold text-ink text-[13px]">{name}</div>
         <div className="text-grey text-[11px]">{sub}</div>
       </div>
     </div>
