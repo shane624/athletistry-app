@@ -51,8 +51,8 @@ const SESSION_ICON: Record<SessionType, IconName> = {
 };
 const SESSION_TONE: Record<SessionType, string> = {
   strength: "bg-light text-tealdark", hypertrophy: "bg-light text-tealdark",
-  endurance: "bg-light text-tealdark", cardio: "bg-light text-navy",
-  tabata: "bg-light text-navy", rest: "bg-rowalt text-grey",
+  endurance: "bg-light text-tealdark", cardio: "bg-light text-ink",
+  tabata: "bg-light text-ink", rest: "bg-rowalt text-grey",
 };
 
 const STEPS = [
@@ -219,23 +219,28 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
       <form onSubmit={go} className="card p-5 space-y-5">
         {/* wizard header + progress */}
         <div>
-          <p className="eyebrow">Step {step + 1} of {STEPS.length}</p>
-          <div className="flex items-center gap-1.5 mt-1">
-            {STEPS.map((_, i) => (
-              <span key={i} className={`h-1.5 rounded-full flex-1 transition-colors ${i <= step ? "bg-teal" : "bg-line"}`} />
+          {/* Numbered stepper: four identical bars showed progress but never
+              said what the remaining steps were, so every step felt open-ended. */}
+          <ol className="plan-stepper">
+            {STEPS.map((st, i) => (
+              <li key={st.title} className={`plan-step ${i === step ? "plan-step-current" : i < step ? "plan-step-done" : ""}`}>
+                <span className="plan-step-dot">{i < step ? "\u2713" : i + 1}</span>
+                <span className="plan-step-label">{st.title}</span>
+              </li>
             ))}
-          </div>
-          <h2 className="text-lg font-bold text-navy mt-3">{STEPS[step].title}</h2>
-          <p className="text-grey text-sm">{STEPS[step].subtitle}</p>
+          </ol>
+          <h2 className="font-display text-[28px] leading-[1.04] font-bold text-ink tracking-[-.03em] mt-5">{STEPS[step].title}</h2>
+          <p className="text-grey text-[12px] leading-relaxed mt-1.5">{STEPS[step].subtitle}</p>
         </div>
 
+        <div key={step} className="animate-in space-y-5">
         {step === 0 && (<>
         {/* event */}
         <div data-tour="event">
           {!noEvent && (
             <div className="flex flex-wrap gap-4 items-end">
               <div>
-                <p className="text-sm font-medium text-navy">Event type</p>
+                <p className="text-sm font-medium text-ink">Event type</p>
                 <div className="flex gap-1.5 mt-1 flex-wrap">
                   {["Performance", "Competition", "Exam"].map((t) => (
                     <button key={t} type="button" onClick={() => setType(t)}
@@ -246,7 +251,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                 </div>
               </div>
               <div>
-                <p className="text-sm font-medium text-navy">Event date</p>
+                <p className="text-sm font-medium text-ink">Event date</p>
                 <input type="date" className="input mt-1" value={date} onChange={(e) => setDate(e.target.value)} />
               </div>
             </div>
@@ -256,14 +261,14 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           <label className="flex items-start gap-2.5 mt-4 cursor-pointer">
             <input type="checkbox" className="mt-1 accent-teal w-4 h-4" checked={noEvent} onChange={(e) => setNoEvent(e.target.checked)} />
             <span>
-              <span className="block text-sm font-medium text-navy">I don&apos;t have an event yet</span>
+              <span className="block text-sm font-medium text-ink">I don&apos;t have an event yet</span>
               <span className="block text-grey text-xs">Build me a general training block instead — steady progress, no taper or countdown.</span>
             </span>
           </label>
 
           {noEvent && (
             <div className="mt-3">
-              <p className="text-sm font-medium text-navy">How many weeks?</p>
+              <p className="text-sm font-medium text-ink">How many weeks?</p>
               <div className="flex gap-1.5 mt-1 flex-wrap">
                 {[4, 6, 8, 12].map((w) => (
                   <button key={w} type="button" onClick={() => setHorizon(w)}
@@ -292,7 +297,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
             {DAYS.map((day) => (
               <div key={day} className="rounded-xl border border-line p-3">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-bold text-navy text-sm w-12 shrink-0">{day}</span>
+                  <span className="font-bold text-ink text-sm w-12 shrink-0">{day}</span>
                   <select
                     value=""
                     onChange={(e) => { addClassByKind(day, e.target.value); e.currentTarget.value = ""; }}
@@ -331,7 +336,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                             Effort
                             <input type="range" min={4} max={8} value={c.rpe}
                               onChange={(e) => updateClass(day, c.id, { rpe: Number(e.target.value) })} className="accent-teal w-24" />
-                            <span className="text-navy font-semibold">{c.rpe} · {RPE_LABEL[c.rpe] ?? ""}</span>
+                            <span className="text-ink font-semibold">{c.rpe} · {RPE_LABEL[c.rpe] ?? ""}</span>
                           </label>
                           <span className="text-grey text-xs ml-auto">{(c.mins * c.rpe).toLocaleString()} load</span>
                         </div>
@@ -344,7 +349,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
           </div>
           <p className="text-grey text-xs mt-2">
             {classCount > 0
-              ? <>That&apos;s <b className="text-navy">{classCount} {classCount === 1 ? "class" : "classes"}</b> a week · about <b className="text-navy">{classLoad.toLocaleString()} load</b> from class.</>
+              ? <>That&apos;s <b className="text-ink">{classCount} {classCount === 1 ? "class" : "classes"}</b> a week · about <b className="text-ink">{classLoad.toLocaleString()} load</b> from class.</>
               : "Add at least one class to build your plan."}
           </p>
         </div>
@@ -376,7 +381,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
               className={`w-full text-left rounded-xl border p-3 flex items-start gap-3 ${stamina ? "border-teal bg-light" : "border-line"}`}>
               <Icon name="heart" className={`w-5 h-5 mt-0.5 shrink-0 ${stamina ? "text-teal" : "text-grey"}`} />
               <span>
-                <span className="block font-semibold text-navy text-sm">Stamina for a long / full-length show</span>
+                <span className="block font-semibold text-ink text-sm">Stamina for a long / full-length show</span>
                 <span className="block text-grey text-xs">We&apos;ll add some steady-state cardio to build the endurance to last.</span>
               </span>
             </button>
@@ -384,13 +389,13 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
               className={`w-full text-left rounded-xl border p-3 flex items-start gap-3 ${explosive ? "border-teal bg-light" : "border-line"}`}>
               <Icon name="bolt" className={`w-5 h-5 mt-0.5 shrink-0 ${explosive ? "text-teal" : "text-grey"}`} />
               <span>
-                <span className="block font-semibold text-navy text-sm">Short, explosive efforts — jumps, allegro, quick variations</span>
+                <span className="block font-semibold text-ink text-sm">Short, explosive efforts — jumps, allegro, quick variations</span>
                 <span className="block text-grey text-xs">We&apos;ll add Tabata-style bursts to build quick-burst power.</span>
               </span>
             </button>
           </div>
 
-          <p className="text-sm font-medium text-navy mt-4">Areas to prioritise</p>
+          <p className="text-sm font-medium text-ink mt-4">Areas to prioritise</p>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {FOCUS_OPTS.map((f) => (
               <button key={f.id} type="button" onClick={() => toggleFocus(f.id)}
@@ -407,7 +412,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
         {/* exercise preferences */}
         <div>
           <p className="eyebrow mb-2">Exercise options</p>
-          <p className="text-sm font-medium text-navy">Difficulty</p>
+          <p className="text-sm font-medium text-ink">Difficulty</p>
           <div className="flex gap-1.5 mt-1 flex-wrap">
             {LEVELS.map((l) => (
               <button key={l.v} type="button" onClick={() => setMaxLevel(l.v)}
@@ -439,13 +444,14 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
         {(date || noEvent || classCount > 0) && (
           <div className="card p-3 bg-light flex flex-wrap gap-x-5 gap-y-1 text-sm">
             {noEvent
-              ? <span className="text-navy"><b>{horizon}</b>-week general block</span>
-              : weeksToEvent != null && <span className="text-navy"><b>{weeksToEvent}</b> week{weeksToEvent === 1 ? "" : "s"} until your {type.toLowerCase()}</span>}
-            <span className="text-grey"><b className="text-navy">{classCount}</b> class{classCount === 1 ? "" : "es"} a week</span>
-            <span className="text-grey"><b className="text-navy">{gymDays}</b> gym day{gymDays === 1 ? "" : "s"}</span>
+              ? <span className="text-ink"><b>{horizon}</b>-week general block</span>
+              : weeksToEvent != null && <span className="text-ink"><b>{weeksToEvent}</b> week{weeksToEvent === 1 ? "" : "s"} until your {type.toLowerCase()}</span>}
+            <span className="text-grey"><b className="text-ink">{classCount}</b> class{classCount === 1 ? "" : "es"} a week</span>
+            <span className="text-grey"><b className="text-ink">{gymDays}</b> gym day{gymDays === 1 ? "" : "s"}</span>
           </div>
         )}
         </>)}
+        </div>
 
         {/* wizard nav */}
         <div className="flex items-center gap-3 pt-1">
@@ -481,7 +487,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                 : `${planStats?.weeks} weeks that build you up gently, then ease off just before the day so you arrive fresh and strong. Press activate and I'll guide you through it one day at a time — no guesswork, nothing scary.`}
             </p>
             <button onClick={activate} disabled={saving}
-              className="mt-4 bg-white text-navy font-bold rounded-xl px-5 py-3 text-sm inline-flex items-center gap-2 active:scale-[.98] transition">
+              className="mt-4 bg-white text-ink font-bold rounded-xl px-5 py-3 text-sm inline-flex items-center gap-2 active:scale-[.98] transition">
               {saving ? <Dots /> : <><Icon name="check" className="w-4 h-4" /> Activate this plan</>}
             </button>
             {savedMsg && <p className="text-white/90 text-sm mt-2">{savedMsg}</p>}
@@ -547,13 +553,13 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                         <div key={d.iso} className={`flex items-start gap-3 rounded-xl border border-line p-2.5 ${rest ? "bg-light/40" : ""}`}>
                           <span className="w-12 text-center shrink-0">
                             <span className="block text-[11px] text-grey uppercase">{DAYS[d.weekday]}</span>
-                            <span className="block text-sm font-bold text-navy">{d.iso.slice(8)}</span>
+                            <span className="block text-sm font-bold text-ink">{d.iso.slice(8)}</span>
                           </span>
                           <span className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${SESSION_TONE[d.type]}`}>
                             <Icon name={SESSION_ICON[d.type]} className="w-4 h-4" />
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block text-sm font-semibold text-navy">{d.title}</span>
+                            <span className="block text-sm font-semibold text-ink">{d.title}</span>
                             <span className="block text-grey text-xs leading-snug">{d.detail}</span>
                             {/* real exercise thumbnails for workout days */}
                             {(styleExercises[d.type]?.length ?? 0) > 0 && (
@@ -614,7 +620,7 @@ function MinsField({ value, onCommit }: { value: number; onCommit: (n: number) =
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="card p-3 text-center">
-      <div className="text-2xl font-extrabold text-navy">{value}</div>
+      <div className="text-2xl font-extrabold text-ink">{value}</div>
       <div className="text-grey text-xs mt-0.5">{label}</div>
     </div>
   );
