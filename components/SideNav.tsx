@@ -23,7 +23,6 @@ const SECTION_OF: Record<string, string> = {
   "/exercises": "/explore",
   "/session": "/explore",
   "/build": "/explore",
-  "/load": "/progress",
   "/achievements": "/progress",
   "/anatomy": "/guide",
   "/training-science": "/guide",

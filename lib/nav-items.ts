@@ -14,6 +14,10 @@ export type NavGroup = { title: string; items: NavItem[] };
 export const PRIMARY_NAV: NavItem[] = [
   { href: "/dashboard", label: "Today", icon: "home" },
   { href: "/explore", label: "Train", icon: "sparkle" },
+  // The calendar is a capture tool, not a review screen: you log a class
+  // right after class. Collapsing it under Progress taxed the most frequent
+  // action in the app, so it stays a destination in its own right.
+  { href: "/load", label: "Calendar", icon: "calendar" },
   { href: "/progress", label: "Progress", icon: "chart" },
   { href: "/guide", label: "Learn", icon: "book" },
   { href: "/profile", label: "Profile", icon: "user" },
@@ -37,7 +41,6 @@ export const TRAIN_TOOLS: NavItem[] = [
 
 export const PROGRESS_TOOLS: NavItem[] = [
   { href: "/progress", label: "Trend", icon: "chart" },
-  { href: "/load", label: "Training Calendar", icon: "calendar" },
   { href: "/achievements", label: "Achievements", icon: "trophy" },
 ];
 
@@ -58,7 +61,9 @@ export const ADMIN_ITEM: NavItem = { href: "/admin", label: "Members", icon: "us
 // Grouped view, used by the mobile menu hub so every route stays addressable.
 export const NAV_GROUPS: NavGroup[] = [
   { title: "Train", items: TRAIN_TOOLS },
-  { title: "Progress", items: PROGRESS_TOOLS },
+  // The calendar is a primary destination rather than a Progress tab, but the
+  // menu lists every route, so it is named here too.
+  { title: "Progress", items: [{ href: "/load", label: "Training Calendar", icon: "calendar" }, ...PROGRESS_TOOLS] },
   { title: "Learn", items: LEARN_TOOLS },
   { title: "Account", items: PROFILE_TOOLS },
 ];

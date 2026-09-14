@@ -4,8 +4,6 @@ import { getAssessment, getLoadData } from "@/lib/load-data";
 import { getEventPlanDays } from "@/lib/event-plan-data";
 import LoadClient from "./LoadClient";
 import Calendar from "./Calendar";
-import SectionTabs from "@/components/SectionTabs";
-import { PROGRESS_TOOLS } from "@/lib/nav-items";
 
 export const dynamic = "force-dynamic";
 
@@ -20,8 +18,6 @@ export default async function LoadPage() {
       <main className="app-page app-page-compact">
         <PageHeader icon="calendar" eyebrow="Train like an athlete" title="Training Calendar"
           subtitle="Log every session as time + how hard it felt. The app tracks your weekly load and eases you off before an event." />
-
-        <SectionTabs items={PROGRESS_TOOLS} label="Progress sections" />
         <LoadClient
           assessment={assessment}
           weeks={weeks}
