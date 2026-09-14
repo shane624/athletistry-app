@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { setActiveProgram, markOnboarded } from "@/lib/data";
+import { setActiveProgram, markOnboarded, saveTrainingGoal } from "@/lib/data";
 import Icon, { type IconName } from "@/components/Icon";
 import Dots from "@/components/Dots";
 
@@ -64,9 +64,14 @@ export default function OnboardingClient() {
     setStep((s) => s + 1);
   }
 
+  // "4" is the id for "4+ days a week", so it is a floor rather than an exact
+  // figure; the ring closing at 4 for someone training 5 is the right failure.
+  const weeklyGoalFromAnswers = Number(answers.days) || undefined;
+
   async function start() {
     setBusy(true);
     await setActiveProgram(rec.id);
+    await saveTrainingGoal({ goal: answers.goal, weeklyGoal: weeklyGoalFromAnswers });
     await markOnboarded();
     router.push(answers.event === "yes" ? "/plan" : "/dashboard");
     router.refresh();
@@ -74,6 +79,7 @@ export default function OnboardingClient() {
 
   async function browse() {
     setBusy(true);
+    await saveTrainingGoal({ goal: answers.goal, weeklyGoal: weeklyGoalFromAnswers });
     await markOnboarded();
     router.push("/programs");
     router.refresh();
