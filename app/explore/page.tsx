@@ -8,14 +8,16 @@ import { getSaved, getSavedKeys } from "@/lib/saved-data";
 export const dynamic = "force-dynamic";
 
 const TILES: { href: string; label: string; note: string; icon: IconName }[] = [
-  { href: "/movement-map", label: "Movement Map", note: "Find the pattern behind your corrections.", icon: "target" },
-  { href: "/programs", label: "Programs", note: "Follow a structured path long enough to change.", icon: "stack" },
-  { href: "/plan", label: "Plan for an event", note: "Build toward a performance without guessing the load.", icon: "calendar" },
-  { href: "/generate", label: "Practice Generator", note: "Create a balanced session for today.", icon: "bolt" },
-  { href: "/circuit", label: "Circuit Training", note: "Conditioning with clear work and rest.", icon: "circuit" },
-  { href: "/ballet", label: "Train for Ballet", note: "Start with the movement you want to improve.", icon: "ballet" },
-  { href: "/warmups", label: "Warm-Ups", note: "Prepare the body before the real work begins.", icon: "warmup" },
-  { href: "/anatomy", label: "Anatomy", note: "Understand the body behind the technique.", icon: "body" },
+  { href: "/programs", label: "Programs", note: "A structured path with a next session already chosen for you.", icon: "stack" },
+  { href: "/workouts", label: "Guided Workouts", note: "Press play and follow a full session start to finish.", icon: "play" },
+  { href: "/warmups", label: "Warm-Ups", note: "Ten minutes before class, targeted at what you are about to do.", icon: "warmup" },
+  { href: "/circuit", label: "Circuit Training", note: "Timed work and rest when conditioning is the point.", icon: "circuit" },
+  { href: "/ballet", label: "Train for Ballet", note: "Pick the step you want to improve and work backwards from it.", icon: "ballet" },
+  { href: "/movement-map", label: "Movement Map", note: "Find the pattern behind the correction you keep getting.", icon: "target" },
+  { href: "/plan", label: "Training Plan Builder", note: "Dated plan that climbs to your performance, then tapers.", icon: "calendar" },
+  { href: "/generate", label: "Practice Generator", note: "A balanced legs, push, pull and core session for today.", icon: "bolt" },
+  { href: "/my-workouts", label: "My Workouts", note: "The sessions you built and saved yourself.", icon: "grid" },
+  { href: "/exercises", label: "Exercise Library", note: "Every exercise with video, searchable by level and category.", icon: "library" },
 ];
 
 export default async function ExplorePage() {
@@ -24,7 +26,7 @@ export default async function ExplorePage() {
     <div className="min-h-screen">
       <NavBar />
       <main className="app-page">
-        <header className="page-lead animate-in"><div><h1>Explore</h1><p className="mt-3">Everything in Athletistry, organized around the question that brought you here.</p></div></header>
+        <header className="page-lead animate-in"><div><h1>Train</h1><p className="mt-3">Everything that gives you something to do today, in one place.</p></div></header>
 
         <Link href="/programs" className="program-feature !min-h-[280px] block animate-in">
           <div className="relative z-[1] max-w-[720px]"><p className="text-[9px] font-bold uppercase tracking-[.2em] text-white/48">Not sure where to begin?</p><h2 className="font-display text-[clamp(3rem,7vw,5.7rem)] leading-[.88] font-bold mt-3">Start with a path,<br />not another correction.</h2><p className="text-white/58 text-[11px] leading-relaxed max-w-lg mt-5">Choose a program and let the app tell you what comes next. You can still explore everything else without losing the thread.</p><span className="hero-cta !min-h-[44px] !text-[11px] mt-6">Choose a program <Icon name="chevron" className="w-4 h-4" /></span></div>

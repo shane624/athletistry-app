@@ -1,5 +1,7 @@
 import NavBar from "@/components/NavBar";
 import PageHeader from "@/components/PageHeader";
+import SectionTabs from "@/components/SectionTabs";
+import { LEARN_TOOLS } from "@/lib/nav-items";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,8 @@ export default function TrainingSciencePage() {
         <div className="mt-3">
           <PageHeader icon="flask" eyebrow="Go deeper" title="Training Science"
             subtitle="The principles behind every program — the why, for when you want it. The app handles it for you." />
+        <SectionTabs items={LEARN_TOOLS} label="Learn sections" />
+
         </div>
 
         <nav className="card mt-6 p-4 animate-in">

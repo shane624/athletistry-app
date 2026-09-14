@@ -1,6 +1,8 @@
 import NavBar from "@/components/NavBar";
 import ProgressRing from "@/components/ProgressRing";
 import Icon from "@/components/Icon";
+import SectionTabs from "@/components/SectionTabs";
+import { PROGRESS_TOOLS } from "@/lib/nav-items";
 import { getAchievements } from "@/lib/achievements-data";
 import { LEVELS } from "@/lib/achievements";
 
@@ -22,6 +24,8 @@ export default async function AchievementsPage() {
             <p className="mt-3">Proof that consistency compounds. The goal is not collecting badges. It is becoming the dancer who earns them.</p>
           </div>
         </header>
+
+        <SectionTabs items={PROGRESS_TOOLS} label="Progress sections" />
 
         <div className="editorial-tabs mb-4 animate-in">
           <span className="editorial-tab editorial-tab-active">Overview</span>

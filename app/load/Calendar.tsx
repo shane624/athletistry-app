@@ -99,23 +99,28 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
     .filter((g) => g.items.length > 0);
 
   const todayISO = ymd(today);
+  // Roughly a hard session (90 min at RPE 7); days at or above this saturate.
+  const HEAT_CEILING = 630;
 
   return (
     <div className="card p-4 animate-in">
       {/* month nav */}
       <div className="flex items-center justify-between">
-        <button className="btn-ghost py-1.5 px-3 text-sm" onClick={() => setCursor(new Date(year, month - 1, 1))}>←</button>
-        <p className="font-extrabold text-navy">{MONTHS[month]} {year}</p>
-        <button className="btn-ghost py-1.5 px-3 text-sm" onClick={() => setCursor(new Date(year, month + 1, 1))}>→</button>
+        <button aria-label="Previous month" className="cal-nav tab-press" onClick={() => setCursor(new Date(year, month - 1, 1))}>&#8592;</button>
+        <div className="text-center">
+          <p className="eyebrow">{year}</p>
+          <p className="font-display text-[26px] leading-none font-bold text-ink mt-1">{MONTHS[month]}</p>
+        </div>
+        <button aria-label="Next month" className="cal-nav tab-press" onClick={() => setCursor(new Date(year, month + 1, 1))}>&#8594;</button>
       </div>
 
       {/* dow header */}
-      <div className="grid grid-cols-7 gap-1 mt-3 text-center">
-        {DOW.map((d) => <div key={d} className="text-[11px] text-grey font-semibold">{d}</div>)}
+      <div className="grid grid-cols-7 gap-1 mt-4 text-center">
+        {DOW.map((d) => <div key={d} className="text-[9px] text-grey font-bold uppercase tracking-[.1em]">{d}</div>)}
       </div>
 
       {/* grid */}
-      <div className="grid grid-cols-7 gap-1 mt-1">
+      <div className="grid grid-cols-7 gap-1 mt-1.5">
         {cells.map((date, i) => {
           if (!date) return <div key={i} />;
           const iso = ymd(date);
@@ -123,41 +128,53 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
           const dayEvents = evByDay.get(iso) ?? [];
           const planDay = planByDay.get(iso);
           const isToday = iso === todayISO;
+          // Tint the cell by the day's actual training load rather than just
+          // listing labels, so a month reads as a pattern at a glance: where
+          // the heavy weeks were, and where the gaps are.
+          const dayLoad = daySessions.reduce((sum, s) => sum + sessionTrimp(s.duration_min, s.rpe), 0);
+          const heat = dayLoad > 0 ? Math.min(1, dayLoad / HEAT_CEILING) : 0;
           return (
             <button
               key={i}
               onClick={() => { if (planDay && planDay.sessionType !== "rest") { setOpenVid(null); setViewPlan(planDay); } else { openAdd(iso); } }}
-              className={`min-h-[58px] rounded-lg border p-1 text-left align-top transition hover:border-teal ${
-                isToday ? "border-teal bg-light" : "border-line bg-white"
-              }`}
+              title={dayLoad > 0 ? `${Math.round(dayLoad)} TRIMP` : undefined}
+              className={`cal-day tab-press ${isToday ? "cal-day-today" : ""}`}
+              style={heat > 0 ? { background: `color-mix(in srgb, var(--c-teal) ${(6 + heat * 26).toFixed(1)}%, var(--c-surface))` } : undefined}
             >
-              <div className={`text-[11px] font-semibold ${isToday ? "text-teal" : "text-grey"}`}>{date.getDate()}</div>
-              <div className="mt-0.5 space-y-0.5">
+              <span className={`block text-[11px] font-semibold ${isToday ? "text-teal" : "text-grey"}`}>{date.getDate()}</span>
+
+              <span className="cal-marks">
                 {planDay && planDay.sessionType !== "rest" && (
-                  <div className="text-[10px] font-bold text-white rounded px-1 py-0.5 truncate"
-                    style={{ background: PLAN_COLOR[planDay.sessionType] ?? "#1E50A0" }}
-                    title={`Plan: ${planDay.title}`}>
-                    ◆ {PLAN_LABEL[planDay.sessionType] ?? "Session"}
-                  </div>
+                  <span className="cal-bar" style={{ background: PLAN_COLOR[planDay.sessionType] ?? "#1E50A0" }}
+                    title={`Plan: ${planDay.title}`} />
                 )}
                 {dayEvents.map((e) => (
-                  <div key={"e" + e.id} className="text-[10px] font-bold text-white rounded px-1 py-0.5 truncate" style={{ background: "#2A2F36" }} title={e.name || e.kind}>
-                    ★ {e.name || e.kind}
-                  </div>
+                  <span key={"e" + e.id} className="cal-star" title={e.name || e.kind}>&#9733;</span>
                 ))}
-                {daySessions.slice(0, 3).map((s) => (
-                  <div key={s.id} className="text-[10px] text-white rounded px-1 py-0.5 truncate" style={{ background: classColor(s.kind) }} title={`${classLabel(s.kind)} · ${s.duration_min}min · ${effortWord(s.rpe)}`}>
-                    {classLabel(s.kind)}
-                  </div>
+                {daySessions.slice(0, 4).map((s) => (
+                  <span key={s.id} className="cal-bar" style={{ background: classColor(s.kind) }}
+                    title={`${classLabel(s.kind)} \u00b7 ${s.duration_min}min \u00b7 ${effortWord(s.rpe)}`} />
                 ))}
-                {daySessions.length > 3 && <div className="text-[10px] text-grey">+{daySessions.length - 3}</div>}
-              </div>
+                {daySessions.length > 4 && <span className="cal-more">+{daySessions.length - 4}</span>}
+              </span>
             </button>
           );
         })}
       </div>
 
-      <p className="text-grey text-xs mt-3">Tap any day to add a class{planDays.length ? ", or a ◆ plan day to see its workout" : ""}. ★ = event (taper plans around it).</p>
+      <div className="flex items-center justify-between gap-4 flex-wrap mt-4">
+        <p className="text-grey text-[10px] leading-relaxed max-w-[40ch]">
+          Tap any day to add a class{planDays.length ? ", or a \u25c6 plan day to see its workout" : ""}. \u2605 marks an event, and plans taper into it.
+        </p>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-[9px] text-grey font-bold uppercase tracking-[.1em]">Lighter</span>
+          {[0, .25, .5, .75, 1].map((h) => (
+            <span key={h} className="w-4 h-4 rounded-[5px]"
+              style={{ background: h === 0 ? "var(--c-surface)" : `color-mix(in srgb, var(--c-teal) ${(6 + h * 26).toFixed(1)}%, var(--c-surface))`, boxShadow: "inset 0 0 0 1px rgba(28,33,40,.06)" }} />
+          ))}
+          <span className="text-[9px] text-grey font-bold uppercase tracking-[.1em]">Heavier</span>
+        </div>
+      </div>
 
       {/* plan-day view modal — shows the prescribed session + exercises + videos */}
       {viewPlan && (

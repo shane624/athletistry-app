@@ -83,13 +83,13 @@ export default function OnboardingClient() {
     return (
       <div className="animate-in">
         <p className="eyebrow">Your match</p>
-        <h1 className="text-2xl font-extrabold text-navy mt-1">We&apos;d start you on…</h1>
+        <h1 className="font-display text-[clamp(1.9rem,4.4vw,2.6rem)] leading-[1.02] font-bold text-ink tracking-[-.035em] mt-2">We&apos;d start you on…</h1>
         <div className="card p-5 mt-4 ring-2 ring-teal">
           <div className="flex items-center gap-3">
             <span className="w-11 h-11 rounded-2xl grad-navy text-white flex items-center justify-center shrink-0">
               <Icon name="sparkle" className="w-6 h-6" />
             </span>
-            <h2 className="text-lg font-bold text-navy">{rec.name}</h2>
+            <h2 className="font-display text-[21px] leading-tight font-bold text-ink">{rec.name}</h2>
           </div>
           <p className="text-grey text-sm mt-3">{rec.why}</p>
         </div>
@@ -122,7 +122,7 @@ export default function OnboardingClient() {
       </div>
 
       <p className="eyebrow">Step {step + 1} of {steps.length}</p>
-      <h1 className="text-2xl font-extrabold text-navy mt-1">{cur.title}</h1>
+      <h1 className="font-display text-[clamp(1.9rem,4.4vw,2.6rem)] leading-[1.02] font-bold text-ink tracking-[-.035em] mt-2">{cur.title}</h1>
       <p className="text-grey text-sm mt-1">{cur.sub}</p>
 
       <div className="grid gap-3 mt-5">
@@ -138,7 +138,7 @@ export default function OnboardingClient() {
               </span>
             )}
             <span>
-              <span className="block font-bold text-navy">{c.label}</span>
+              <span className="block font-semibold text-ink text-[13px]">{c.label}</span>
               {c.sub && <span className="block text-grey text-sm">{c.sub}</span>}
             </span>
             <Icon name="chevron" className="w-5 h-5 text-teal ml-auto shrink-0" />
