@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Celebrate from "@/components/Celebrate";
 import Dots from "@/components/Dots";
+import Link from "next/link";
 import { logSession } from "@/lib/load-actions";
 import { sessionTrimp, effortWord } from "@/lib/load";
 
@@ -12,9 +13,15 @@ import { sessionTrimp, effortWord } from "@/lib/load";
 // then shows done — and fires the rank-up celebration if the member just
 // reached a new ballet rank.
 export default function CompleteWorkout({
-  levelIndex, levelName, nextLevelName,
+  levelIndex, levelName, nextLevelName, sessionTitle, exercisesLogged, exercisesTotal, weekLoadBefore, weekSessionsBefore,
 }: {
   levelIndex: number; levelName: string; nextLevelName?: string;
+  sessionTitle?: string;
+  exercisesLogged?: number;
+  exercisesTotal?: number;
+  /** Week-to-date figures from before this session, so the summary can show what it added. */
+  weekLoadBefore?: number;
+  weekSessionsBefore?: number;
 }) {
   const router = useRouter();
   const [stage, setStage] = useState<"idle" | "logging" | "done">("idle");
@@ -80,12 +87,64 @@ export default function CompleteWorkout({
           </div>
         )}
 
-        {stage === "done" && (
-          <div className="card p-4 text-center">
-            <p className="text-navy font-semibold">Workout complete — nice work.</p>
-            <p className="text-grey text-sm mt-1">Progress, streak and training load updated.</p>
-          </div>
-        )}
+        {stage === "done" && (() => {
+          // The end of a session is the moment a dancer is most receptive to
+          // what they just did. It used to be two lines of grey text.
+          const added = dur ? sessionTrimp(Number(dur) || 0, rpe) : 0;
+          const weekLoad = (weekLoadBefore ?? 0) + added;
+          const weekSessions = (weekSessionsBefore ?? 0) + (dur ? 1 : 0);
+          return (
+            <div className="session-summary">
+              <p className="hero-kicker">Session complete</p>
+              <h3 className="font-display text-[clamp(1.8rem,5vw,2.5rem)] leading-[1.02] font-bold tracking-[-.035em] mt-2">
+                {sessionTitle || "Well done."}
+              </h3>
+
+              <div className="session-summary-figures">
+                {dur && (
+                  <span>
+                    <b>{dur}</b>
+                    <small>minutes</small>
+                  </span>
+                )}
+                {dur && (
+                  <span>
+                    <b>{added}</b>
+                    <small>load added</small>
+                  </span>
+                )}
+                {exercisesTotal ? (
+                  <span>
+                    <b>{exercisesLogged ?? 0}/{exercisesTotal}</b>
+                    <small>exercises logged</small>
+                  </span>
+                ) : null}
+                {dur && (
+                  <span>
+                    <b>{effortWord(rpe)}</b>
+                    <small>effort</small>
+                  </span>
+                )}
+              </div>
+
+              {dur && (
+                <p className="session-summary-note">
+                  That is {weekSessions} session{weekSessions === 1 ? "" : "s"} and {weekLoad} load this week.
+                </p>
+              )}
+              {!dur && (
+                <p className="session-summary-note">
+                  Logged without numbers, so it will not count toward your training load.
+                </p>
+              )}
+
+              <div className="flex flex-wrap gap-2 mt-5">
+                <Link href="/progress" className="btn-ghost !min-h-[40px] !text-[12px]">See your progress</Link>
+                <Link href="/load" className="btn-ghost !min-h-[40px] !text-[12px]">Training calendar</Link>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </>
   );

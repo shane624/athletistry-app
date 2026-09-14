@@ -995,3 +995,68 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
   .rhythm-bar-track > span { transition: none; }
   .quick-start-item:hover .quick-start-dot { transform: none; }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Session summary                                                            */
+/* -------------------------------------------------------------------------- */
+.session-summary {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(22px, 4vw, 34px);
+  border-radius: 26px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(63,122,216,.5), transparent 26%),
+    linear-gradient(122deg, #252a31 0%, #15181d 62%, #102b56 124%);
+  box-shadow: 0 26px 62px rgba(18, 22, 28, .2), inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.session-summary::before {
+  content: "A";
+  position: absolute;
+  right: -1%;
+  bottom: -34%;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(12rem, 24vw, 19rem);
+  line-height: .78;
+  font-weight: 700;
+  font-style: italic;
+  color: rgba(255, 255, 255, .035);
+  transform: rotate(-4deg);
+  pointer-events: none;
+}
+.session-summary > * { position: relative; z-index: 1; }
+
+.session-summary-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 30px;
+  margin-top: 22px;
+}
+.session-summary-figures > span { display: flex; flex-direction: column; gap: 3px; }
+.session-summary-figures b {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 30px;
+  line-height: .95;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+.session-summary-figures small {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .5);
+}
+.session-summary-note {
+  margin-top: 18px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, .7);
+  max-width: 48ch;
+}
+.session-summary .btn-ghost {
+  background: rgba(255, 255, 255, .1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, .18);
+}
+.session-summary .btn-ghost:hover { background: rgba(255, 255, 255, .16); border-color: rgba(255, 255, 255, .3); }

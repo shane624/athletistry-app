@@ -223,7 +223,18 @@ export default async function Dashboard() {
           </div>
         )}
 
-        {totalEx > 0 && <CompleteWorkout levelIndex={ach.level.index} levelName={ach.level.name} nextLevelName={ach.nextLevel?.name} />}
+        {totalEx > 0 && (
+          <CompleteWorkout
+            levelIndex={ach.level.index}
+            levelName={ach.level.name}
+            nextLevelName={ach.nextLevel?.name}
+            sessionTitle={sessionTitle}
+            exercisesLogged={startedEx}
+            exercisesTotal={totalEx}
+            weekLoadBefore={rhythm.load}
+            weekSessionsBefore={rhythm.sessionCount}
+          />
+        )}
 
         <WeekRhythm rhythm={rhythm} />
       </main>
