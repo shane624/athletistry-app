@@ -225,11 +225,15 @@ export function ShaderHero({ className }: { className?: string }) {
     if (reduced !== false || failed) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const gl = canvas.getContext("webgl", { antialias: false });
-    if (!gl) {
+    const maybeGl = canvas.getContext("webgl", { antialias: false });
+    if (!maybeGl) {
       setFailed(true);
       return;
     }
+    // Bind the narrowed context to its own const. `render` is a hoisted
+    // function declaration, and TypeScript won't carry a null-narrowing into
+    // one, since in principle it could be called before the check runs.
+    const gl: WebGLRenderingContext = maybeGl;
 
     const compile = (type: number, src: string) => {
       const sh = gl.createShader(type)!;
