@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pirouette Axis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#131C26;
+  --panel:#1A2733;
+  --panel-2:#22313F;
+  --line:#33475A;
+  --paper:#E8ECEF;
+  --mute:#8EA3B5;
+  --brass:#C9A961;
+  --plumb:#6FD6C4;
+  --warn:#E0796B;
+  --r:10px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--ink);color:var(--paper);
+  font-family:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:15px;line-height:1.55;font-weight:300;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 18px 80px}
+h1{
+  font-family:"Cormorant Garamond",Georgia,serif;
+  font-weight:400;font-size:clamp(30px,6vw,46px);line-height:1.05;
+  margin:0 0 6px;letter-spacing:.005em;
+}
+h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;font-size:22px;margin:0 0 10px;letter-spacing:.01em}
+.lede{color:var(--mute);max-width:58ch;margin:0 0 26px}
+a{color:var(--brass)}
+
+/* setup */
+.setup{
+  border:1px solid var(--line);border-radius:var(--r);
+  background:var(--panel);padding:20px;margin-bottom:22px;
+}
+.drop{
+  border:1px dashed var(--line);border-radius:var(--r);
+  padding:26px 18px;text-align:center;transition:border-color .18s,background .18s;
+}
+.drop.over{border-color:var(--brass);background:var(--panel-2)}
+.drop p{margin:0 0 14px;color:var(--mute)}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+button,.btn{
+  font-family:inherit;font-size:14px;font-weight:400;
+  background:var(--brass);color:#16202B;border:none;
+  padding:11px 20px;border-radius:6px;cursor:pointer;
+  transition:filter .15s;
+}
+button:hover,.btn:hover{filter:brightness(1.08)}
+button:focus-visible,.btn:focus-visible,select:focus-visible{outline:2px solid var(--plumb);outline-offset:2px}
+button.ghost,.btn.ghost{background:transparent;color:var(--paper);border:1px solid var(--line)}
+button:disabled{opacity:.45;cursor:default}
+input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.opts{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-top:16px;font-size:13px;color:var(--mute)}
+select{
+  font-family:inherit;font-size:13px;background:var(--panel-2);color:var(--paper);
+  border:1px solid var(--line);border-radius:6px;padding:7px 9px;
+}
+.filming{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+.filming ul{margin:8px 0 0;padding-left:18px;color:var(--mute);font-size:13.5px}
+.filming li{margin-bottom:4px}
+details summary{cursor:pointer;color:var(--paper);font-size:14px}
+
+/* progress */
+#progress{display:none;margin-bottom:22px}
+.bar{height:3px;background:var(--panel-2);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--brass);transition:width .12s linear}
+#progressText{font-size:13px;color:var(--mute);margin-top:8px}
+
+/* results */
+#results{display:none}
+.stage-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;align-items:start}
+@media(max-width:860px){.stage-grid{grid-template-columns:1fr}}
+.stage{background:#000;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+canvas#view{display:block;width:100%;height:auto;max-width:100%}
+.scrub{padding:12px 14px;background:var(--panel);border-top:1px solid var(--line)}
+input[type=range]{width:100%;accent-color:var(--brass)}
+.scrub-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);margin-top:6px}
+.phasebar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:10px;background:var(--panel-2)}
+.phasebar span{display:block;height:100%}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:10px}
+.swatch{display:inline-block;width:18px;height:2px;vertical-align:middle;margin-right:6px}
+
+/* readings */
+.readings{display:grid;gap:14px}
+.reading{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:14px 16px}
+.reading .k{font-size:12.5px;color:var(--mute);margin-bottom:2px}
+.reading .v{font-family:"Cormorant Garamond",Georgia,serif;font-size:34px;line-height:1.05;font-weight:400}
+.reading .v small{font-size:15px;color:var(--mute);font-family:"DM Sans",sans-serif;font-weight:300;margin-left:3px}
+.reading .n{font-size:12.5px;color:var(--mute);margin-top:4px}
+.v.flag{color:var(--warn)}
+.v.good{color:var(--plumb)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+.charts{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:860px){.charts{grid-template-columns:1fr}}
+.chart{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:16px}
+.chart canvas{width:100%;height:auto;display:block}
+.chart p{font-size:12.5px;color:var(--mute);margin:10px 0 0}
+
+.read{margin-top:26px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:20px}
+.read ul{margin:0;padding-left:18px}
+.read li{margin-bottom:9px}
+.read li b{font-weight:500;color:var(--brass)}
+.conf{font-size:12.5px;color:var(--mute);margin-top:16px}
+.err{border:1px solid var(--warn);border-radius:var(--r);padding:16px;background:rgba(224,121,107,.08);margin-bottom:20px;display:none}
+.actions{margin-top:24px;display:flex;gap:10px;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Pirouette Axis</h1>
+  <p class="lede">Film a turn, get the numbers. This reads your vertical axis, hip level, relevé height, rotation and spotting frame by frame, then shows you where the turn actually went.</p>
+
+  <div class="err" id="err"></div>
+
+  <section class="setup" id="setup">
+    <div class="drop" id="drop">
+      <p>Drop a video here, or choose one.</p>
+      <div class="btnrow">
+        <label class="btn" for="file">Choose video</label>
+        <label class="btn ghost" for="cam">Record now</label>
+      </div>
+      <input type="file" id="file" accept="video/*">
+      <input type="file" id="cam" accept="video/*" capture="environment">
+    </div>
+
+    <div class="opts">
+      <label>Sample rate
+        <select id="fps">
+          <option value="30">30 per second</option>
+          <option value="60" selected>60 per second</option>
+          <option value="90">90 per second</option>
+        </select>
+      </label>
+      <label>Model
+        <select id="model">
+          <option value="lite">Lite, faster</option>
+          <option value="full" selected>Full, more accurate</option>
+          <option value="heavy">Heavy, slowest</option>
+        </select>
+      </label>
+      <span id="fileName"></span>
+    </div>
+
+    <div class="filming">
+      <details>
+        <summary>How to film it so the numbers mean something</summary>
+        <ul>
+          <li>Front on, camera at hip height, roughly three metres back. Full body in frame with headroom.</li>
+          <li>Shoot at 60fps or higher. At 30fps a single turn is about fifteen frames, which is not enough to see the axis move.</li>
+          <li>Plain wall behind, even light, no other dancers in shot.</li>
+          <li>Start recording in the preparation and keep rolling two seconds past the landing.</li>
+          <li>Fitted clothing. Loose skirts and baggy tops confuse the hip and shoulder points.</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+
+  <section id="progress">
+    <div class="bar"><i id="barFill"></i></div>
+    <div id="progressText">Loading the pose model</div>
+  </section>
+
+  <section id="results">
+    <div class="stage-grid">
+      <div>
+        <div class="stage">
+          <canvas id="view"></canvas>
+          <div class="scrub">
+            <input type="range" id="scrub" min="0" max="100" value="0" step="1" aria-label="Scrub through frames">
+            <div class="scrub-meta"><span id="tLabel">0.00s</span><span id="phaseLabel"></span></div>
+            <div class="phasebar" id="phasebar"></div>
+          </div>
+        </div>
+        <div class="legend">
+          <span><i class="swatch" style="background:var(--plumb)"></i>Plumb line from the supporting foot</span>
+          <span><i class="swatch" style="background:var(--brass)"></i>Your axis, hip centre to shoulder centre</span>
+        </div>
+      </div>
+
+      <div class="readings" id="readings"></div>
+    </div>
+
+    <div class="charts">
+      <div class="chart">
+        <h2>Axis against vertical</h2>
+        <canvas id="chartAxis"></canvas>
+        <p>Degrees off plumb through the clip. Left of centre is a lean to your right on screen. The shaded band is the turn itself.</p>
+      </div>
+      <div class="chart">
+        <h2>Height and rotation</h2>
+        <canvas id="chartHeight"></canvas>
+        <p>Hip centre height in brass, cumulative rotation in teal. A brass line that sags mid turn is a relevé giving way.</p>
+      </div>
+    </div>
+
+    <div class="read">
+      <h2>What the turn is telling you</h2>
+      <ul id="verdict"></ul>
+      <div class="conf" id="confNote"></div>
+    </div>
+
+    <div class="actions">
+      <button class="ghost" id="again">Analyse another turn</button>
+      <button class="ghost" id="dl">Download the numbers</button>
+    </div>
+  </section>
+</div>
+
+<video id="src" playsinline muted style="display:none"></video>
+
+<script type="module">
+import { FilesetResolver, PoseLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22";
+
+const MODELS = {
+  lite:  "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
+  full:  "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task",
+  heavy: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/1/pose_landmarker_heavy.task"
+};
+const WASM = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm";
+
+const L = { nose:0, lEar:7, rEar:8, lSh:11, rSh:12, lEl:13, rEl:14, lWr:15, rWr:16,
+            lHip:23, rHip:24, lKn:25, rKn:26, lAnk:27, rAnk:28, lHeel:29, rHeel:30,
+            lToe:31, rToe:32 };
+const BONES = [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],
+               [23,25],[25,27],[24,26],[26,28],[27,29],[29,31],[28,30],[30,32]];
+
+const $ = id => document.getElementById(id);
+const el = {
+  drop:$('drop'), file:$('file'), cam:$('cam'), fps:$('fps'), model:$('model'),
+  fileName:$('fileName'), setup:$('setup'), progress:$('progress'), barFill:$('barFill'),
+  progressText:$('progressText'), results:$('results'), view:$('view'), scrub:$('scrub'),
+  tLabel:$('tLabel'), phaseLabel:$('phaseLabel'), phasebar:$('phasebar'),
+  readings:$('readings'), verdict:$('verdict'), confNote:$('confNote'),
+  chartAxis:$('chartAxis'), chartHeight:$('chartHeight'), src:$('src'),
+  err:$('err'), again:$('again'), dl:$('dl')
+};
+
+let landmarker=null, loadedModel=null, frames=[], analysis=null, videoURL=null;
+
+/* ---------- input ---------- */
+['dragenter','dragover'].forEach(e=>el.drop.addEventListener(e,ev=>{ev.preventDefault();el.drop.classList.add('over')}));
+['dragleave','drop'].forEach(e=>el.drop.addEventListener(e,ev=>{ev.preventDefault();el.drop.classList.remove('over')}));
+el.drop.addEventListener('drop',ev=>{ const f=ev.dataTransfer.files[0]; if(f) start(f); });
+el.file.addEventListener('change',e=>{ if(e.target.files[0]) start(e.target.files[0]); });
+el.cam.addEventListener('change',e=>{ if(e.target.files[0]) start(e.target.files[0]); });
+el.again.addEventListener('click',()=>{
+  el.results.style.display='none'; el.setup.style.display='block';
+  el.file.value=''; el.cam.value=''; el.fileName.textContent='';
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+el.dl.addEventListener('click',downloadCSV);
+
+function fail(msg){
+  el.err.style.display='block';
+  el.err.textContent=msg;
+  el.progress.style.display='none';
+  el.setup.style.display='block';
+}
+
+async function loadModel(){
+  const want=el.model.value;
+  if(landmarker && loadedModel===want) return landmarker;
+  if(landmarker){ landmarker.close(); landmarker=null; }
+  const fileset=await FilesetResolver.forVisionTasks(WASM);
+  landmarker=await PoseLandmarker.createFromOptions(fileset,{
+    baseOptions:{ modelAssetPath:MODELS[want], delegate:"GPU" },
+    runningMode:"VIDEO", numPoses:1,
+    minPoseDetectionConfidence:.5, minPosePresenceConfidence:.5, minTrackingConfidence:.5
+  });
+  loadedModel=want;
+  return landmarker;
+}
+
+/* ---------- pipeline ---------- */
+async function start(file){
+  el.err.style.display='none';
+  el.fileName.textContent=file.name;
+  el.setup.style.display='none';
+  el.results.style.display='none';
+  el.progress.style.display='block';
+  el.barFill.style.width='0%';
+  el.progressText.textContent='Loading the pose model';
+
+  try{
+    const lm=await loadModel();
+    if(videoURL) URL.revokeObjectURL(videoURL);
+    videoURL=URL.createObjectURL(file);
+    const v=el.src;
+    v.src=videoURL;
+    await new Promise((res,rej)=>{
+      v.onloadedmetadata=()=>res();
+      v.onerror=()=>rej(new Error('That file could not be decoded. Try an MP4 recorded on the device.'));
+    });
+    if(!v.duration || !isFinite(v.duration)) throw new Error('The clip has no readable duration. Re-export it as MP4 and try again.');
+    if(v.duration>20) throw new Error('Clip is longer than 20 seconds. Trim it to the preparation, the turn and the landing.');
+
+    frames=await extract(v,lm);
+    const usable=frames.filter(f=>f.ok).length;
+    if(usable<12) throw new Error('Not enough clean frames. Check the whole body is in shot and the light is even, then film it again.');
+
+    el.progressText.textContent='Working out the axis';
+    analysis=analyse(frames);
+    render();
+    el.progress.style.display='none';
+    el.results.style.display='block';
+  }catch(e){
+    console.error(e);
+    fail(e.message || 'Something went wrong reading that clip.');
+  }
+}
+
+function seek(v,t){
+  return new Promise(res=>{
+    let done=false;
+    const h=()=>{ if(done)return; done=true; v.removeEventListener('seeked',h); res(); };
+    v.addEventListener('seeked',h);
+    v.currentTime=t;
+    setTimeout(h,400);
+  });
+}
+
+async function extract(v,lm){
+  const step=1/parseFloat(el.fps.value);
+  const total=Math.min(Math.floor(v.duration/step), 900);
+  const out=[];
+  let ts=0;
+  for(let i=0;i<total;i++){
+    const t=i*step;
+    await seek(v,t);
+    ts+=16;
+    let r=null;
+    try{ r=lm.detectForVideo(v,ts); }catch(_){}
+    const pts=r && r.landmarks && r.landmarks[0] ? r.landmarks[0] : null;
+    const vis = pts ? Math.min(pts[L.lHip].visibility??1, pts[L.rHip].visibility??1,
+                               pts[L.lSh].visibility??1, pts[L.rSh].visibility??1) : 0;
+    out.push({ t, pts, ok: !!pts && vis>0.35, vis });
+    if(i%4===0){
+      el.barFill.style.width=(100*i/total)+'%';
+      el.progressText.textContent=`Reading frame ${i+1} of ${total}`;
+      await new Promise(r=>setTimeout(r,0));
+    }
+  }
+  el.barFill.style.width='100%';
+  return out;
+}
+
+/* ---------- maths ---------- */
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function smooth(arr,w){
+  const out=arr.slice();
+  for(let i=0;i<arr.length;i++){
+    let s=0,n=0;
+    for(let j=Math.max(0,i-w);j<=Math.min(arr.length-1,i+w);j++){
+      if(arr[j]!=null && isFinite(arr[j])){s+=arr[j];n++;}
+    }
+    out[i]=n?s/n:null;
+  }
+  return out;
+}
+function fillGaps(arr){
+  const out=arr.slice();
+  let last=null;
+  for(let i=0;i<out.length;i++){ if(out[i]==null) out[i]=last; else last=out[i]; }
+  last=null;
+  for(let i=out.length-1;i>=0;i--){ if(out[i]==null) out[i]=last; else last=out[i]; }
+  return out;
+}
+function unwrapFromCos(cosArr){
+  const out=new Array(cosArr.length).fill(0);
+  let theta=Math.acos(clamp(cosArr[0]??1,-1,1));
+  out[0]=theta;
+  for(let i=1;i<cosArr.length;i++){
+    const raw=Math.acos(clamp(cosArr[i]??cosArr[i-1]??1,-1,1));
+    let best=theta,bd=Infinity;
+    for(const s of [1,-1]){
+      const k0=Math.round((theta-s*raw)/(2*Math.PI));
+      for(let k=k0-1;k<=k0+1;k++){
+        const cand=s*raw+2*Math.PI*k;
+        const d=Math.abs(cand-theta);
+        if(d<bd){bd=d;best=cand;}
+      }
+    }
+    if(Math.abs(best-theta)>2.6) best=theta+Math.sign(best-theta)*2.6;
+    theta=best; out[i]=theta;
+  }
+  return out;
+}
+
+function analyse(fr){
+  const n=fr.length;
+  const torsoRaw=[],axis=[],hipHike=[],shTilt=[],hipY=[],hipCos=[],headCos=[],footY=[];
+  let torsoRef=0, hipW=0, headW=0;
+
+  for(const f of fr){
+    if(!f.ok){ torsoRaw.push(null);axis.push(null);hipHike.push(null);shTilt.push(null);
+               hipY.push(null);hipCos.push(null);headCos.push(null);footY.push(null); continue; }
+    const p=f.pts;
+    const hm=mid(p[L.lHip],p[L.rHip]), sm=mid(p[L.lSh],p[L.rSh]);
+    const torso=dist(hm,sm);
+    torsoRef=Math.max(torsoRef,torso);
+    torsoRaw.push(torso);
+    axis.push(Math.atan2(sm.x-hm.x, hm.y-sm.y)*180/Math.PI);
+    hipHike.push(p[L.lHip].y-p[L.rHip].y);
+    shTilt.push(p[L.lSh].y-p[L.rSh].y);
+    hipY.push(hm.y);
+    const dh=p[L.rHip].x-p[L.lHip].x; hipW=Math.max(hipW,Math.abs(dh)); hipCos.push(dh);
+    const de=p[L.rEar].x-p[L.lEar].x; headW=Math.max(headW,Math.abs(de)); headCos.push(de);
+    footY.push(Math.max(p[L.lHeel].y,p[L.rHeel].y));
+  }
+
+  const T=torsoRef||0.25;
+  const axisS=smooth(fillGaps(axis),2);
+  const hikeS=smooth(fillGaps(hipHike).map(v=>v==null?null:v/T*100),2);
+  const tiltS=smooth(fillGaps(shTilt).map(v=>v==null?null:v/T*100),2);
+  const hipYS=smooth(fillGaps(hipY),2);
+  const footS=smooth(fillGaps(footY),2);
+
+  const bodyTheta=unwrapFromCos(smooth(fillGaps(hipCos).map(v=>v==null?null:clamp(v/(hipW||1),-1,1)),1));
+  const headTheta=unwrapFromCos(smooth(fillGaps(headCos).map(v=>v==null?null:clamp(v/(headW||1),-1,1)),1));
+
+  const dt=fr.length>1?(fr[1].t-fr[0].t):1/60;
+  const bodyVel=bodyTheta.map((v,i)=> i? Math.abs(v-bodyTheta[i-1])/dt : 0);
+  const headVel=headTheta.map((v,i)=> i? Math.abs(v-headTheta[i-1])/dt : 0);
+  const bodyVelS=smooth(bodyVel,2), headVelS=smooth(headVel,1);
+
+  // phases
+  const peakVel=Math.max(...bodyVelS);
+  const turnGate=Math.max(peakVel*0.30, 1.2);
+  let ts=-1,te=-1;
+  for(let i=0;i<n;i++) if(bodyVelS[i]>turnGate){ if(ts<0)ts=i; te=i; }
+  if(ts<0){ ts=Math.floor(n*0.3); te=Math.floor(n*0.7); }
+
+  const baseHip=median(hipYS.slice(0,Math.max(3,Math.floor(ts*0.6))));
+  const topHip=Math.min(...hipYS.slice(ts,te+1));
+  const riseFrac=(baseHip-topHip)/T;
+  let rs=ts;
+  for(let i=Math.max(0,ts-1);i>=0;i--){ if(baseHip-hipYS[i] < (baseHip-topHip)*0.15){ rs=i; break; } }
+  let releveTopIdx=ts;
+  { let best=Infinity; for(let i=rs;i<=te;i++) if(hipYS[i]<best){best=hipYS[i];releveTopIdx=i;} }
+
+  // landing recovery: axis settles within 2.5 deg and stays for 0.2s
+  let recover=null;
+  const need=Math.max(2,Math.round(0.2/dt));
+  for(let i=te;i<n-need;i++){
+    let ok=true;
+    for(let j=i;j<i+need;j++) if(Math.abs(axisS[j])>2.5){ok=false;break;}
+    if(ok){ recover=fr[i].t-fr[te].t; break; }
+  }
+
+  const turnIdx=[]; for(let i=ts;i<=te;i++) turnIdx.push(i);
+  const pick=a=>turnIdx.map(i=>a[i]).filter(v=>v!=null&&isFinite(v));
+  const axTurn=pick(axisS), hikeTurn=pick(hikeS), tiltTurn=pick(tiltS);
+
+  const revs=Math.abs(bodyTheta[te]-bodyTheta[ts])/(2*Math.PI);
+  const turnTime=fr[te].t-fr[ts].t;
+
+  // spotting: head holding still while the body rotates
+  const bodyMean=mean(turnIdx.map(i=>bodyVelS[i]));
+  let hold=0, flicks=0, armed=false;
+  for(const i of turnIdx){
+    if(headVelS[i] < bodyMean*0.35) { hold++; armed=true; }
+    if(armed && headVelS[i] > bodyMean*1.6){ flicks++; armed=false; }
+  }
+  const holdRatio=turnIdx.length?hold/turnIdx.length:0;
+
+  // sinking during the turn
+  const hipsAtTop=hipYS[releveTopIdx];
+  const hipsAtEnd=hipYS[te];
+  const sinkFrac=(hipsAtEnd-hipsAtTop)/T;
+
+  // supporting side: the foot that stays lowest on screen through the turn
+  let lSum=0,rSum=0,cnt=0;
+  for(const i of turnIdx){ const f=fr[i]; if(!f.ok)continue; lSum+=f.pts[L.lToe].y; rSum+=f.pts[L.rToe].y; cnt++; }
+  const support = cnt ? (lSum>rSum ? 'left' : 'right') : 'right';
+
+  const conf=fr.filter(f=>f.ok).length/n;
+
+  return {
+    fr,n,dt,T,ts,te,rs,releveTopIdx,support,conf,
+    axisS,hikeS,tiltS,hipYS,footS,bodyTheta,bodyVelS,headVelS,
+    baseHip,topHip,riseFrac,sinkFrac,revs,turnTime,recover,
+    releveTime:fr[releveTopIdx].t-fr[rs].t,
+    axisMean:mean(axTurn.map(Math.abs)), axisMax:Math.max(...axTurn.map(Math.abs)),
+    axisBias:mean(axTurn),
+    hikeMean:mean(hikeTurn), hikeMax:maxAbs(hikeTurn),
+    tiltMax:maxAbs(tiltTurn),
+    spots:flicks, holdRatio,
+    revsPerSec: turnTime>0 ? revs/turnTime : 0
+  };
+}
+function mean(a){ return a.length? a.reduce((s,v)=>s+v,0)/a.length : 0; }
+function median(a){ const b=a.filter(v=>v!=null&&isFinite(v)).sort((x,y)=>x-y); return b.length? b[Math.floor(b.length/2)] : 0; }
+function maxAbs(a){ return a.length? a.reduce((m,v)=>Math.abs(v)>Math.abs(m)?v:m,0) : 0; }
+
+/* ---------- render ---------- */
+function render(){
+  const A=analysis;
+  el.scrub.max=A.n-1;
+  el.scrub.value=A.releveTopIdx;
+  el.scrub.oninput=()=>drawFrame(+el.scrub.value);
+  buildPhasebar();
+  buildReadings();
+  buildVerdict();
+  drawFrame(A.releveTopIdx);
+  drawCharts();
+  window.addEventListener('resize',()=>{ drawFrame(+el.scrub.value); drawCharts(); },{passive:true});
+}
+
+function buildPhasebar(){
+  const A=analysis;
+  const seg=[[0,A.rs,'var(--panel-2)'],[A.rs,A.ts,'var(--line)'],[A.ts,A.te,'var(--brass)'],[A.te,A.n-1,'var(--line)']];
+  el.phasebar.innerHTML=seg.map(([a,b,c])=>
+    `<span style="flex:${Math.max(0.001,(b-a))};background:${c}"></span>`).join('');
+}
+
+function phaseAt(i){
+  const A=analysis;
+  if(i<A.rs) return 'Preparation';
+  if(i<A.ts) return 'Relevé';
+  if(i<=A.te) return 'Turn';
+  return 'Landing';
+}
+
+let drawToken=0;
+function drawFrame(i){
+  const token=++drawToken;
+  const A=analysis, f=A.fr[i], v=el.src, c=el.view, ctx=c.getContext('2d');
+  const w=v.videoWidth||720, h=v.videoHeight||1280;
+  if(c.width!==w){ c.width=w; c.height=h; }
+  el.tLabel.textContent=f.t.toFixed(2)+'s';
+  el.phaseLabel.textContent=phaseAt(i);
+
+  seek(v,f.t).then(()=>{
+    if(token!==drawToken) return;
+    ctx.drawImage(v,0,0,w,h);
+    ctx.fillStyle='rgba(19,28,38,.35)'; ctx.fillRect(0,0,w,h);
+    if(!f.ok) return;
+    const p=f.pts, X=pt=>pt.x*w, Y=pt=>pt.y*h;
+    const s=Math.max(2,w/320);
+
+    ctx.strokeStyle='rgba(232,236,239,.55)'; ctx.lineWidth=s*0.7;
+    for(const [a,b] of BONES){
+      ctx.beginPath(); ctx.moveTo(X(p[a]),Y(p[a])); ctx.lineTo(X(p[b]),Y(p[b])); ctx.stroke();
+    }
+    ctx.fillStyle='rgba(232,236,239,.85)';
+    for(const idx of Object.values(L)){
+      ctx.beginPath(); ctx.arc(X(p[idx]),Y(p[idx]),s*0.9,0,Math.PI*2); ctx.fill();
+    }
+
+    const foot=A.support==='left'?p[L.lToe]:p[L.rToe];
+    ctx.setLineDash([s*2,s*2]);
+    ctx.strokeStyle='#6FD6C4'; ctx.lineWidth=s*0.9;
+    ctx.beginPath(); ctx.moveTo(X(foot),Y(foot)); ctx.lineTo(X(foot),Y(foot)-h*0.62); ctx.stroke();
+    ctx.setLineDash([]);
+
+    const hm=mid(p[L.lHip],p[L.rHip]), sm=mid(p[L.lSh],p[L.rSh]);
+    const dx=sm.x-hm.x, dy=sm.y-hm.y, k=2.1;
+    ctx.strokeStyle='#C9A961'; ctx.lineWidth=s*1.5; ctx.lineCap='round';
+    ctx.beginPath();
+    ctx.moveTo(X(hm),Y(hm));
+    ctx.lineTo((hm.x+dx*k)*w,(hm.y+dy*k)*h);
+    ctx.stroke();
+
+    const ang=A.axisS[i];
+    if(ang!=null){
+      ctx.font=`${Math.round(s*9)}px "DM Sans", sans-serif`;
+      ctx.fillStyle='#C9A961';
+      ctx.fillText(`${ang>=0?'+':''}${ang.toFixed(1)}°`, X(sm)+s*4, Y(sm)-s*4);
+    }
+  });
+}
+
+function reading(k,v,unit,note,cls){
+  return `<div class="reading"><div class="k">${k}</div>
+    <div class="v ${cls||''}">${v}${unit?`<small>${unit}</small>`:''}</div>
+    ${note?`<div class="n">${note}</div>`:''}</div>`;
+}
+
+function buildReadings(){
+  const A=analysis;
+  const leanSide = A.axisBias>0 ? 'towards screen right' : 'towards screen left';
+  const axisCls = A.axisMean<2 ? 'good' : A.axisMean>4 ? 'flag' : '';
+  const hikeCls = Math.abs(A.hikeMean)<3 ? 'good' : Math.abs(A.hikeMean)>7 ? 'flag' : '';
+  const spotCls = A.holdRatio>0.45 ? 'good' : A.holdRatio<0.2 ? 'flag' : '';
+  el.readings.innerHTML =
+    reading('Average axis off plumb', A.axisMean.toFixed(1),'°',
+      `Peaks at ${A.axisMax.toFixed(1)}°, biased ${leanSide}`, axisCls) +
+    `<div class="pair">
+      ${reading('Revolutions', A.revs.toFixed(2),'', A.revsPerSec.toFixed(1)+' per second')}
+      ${reading('Turn time', A.turnTime.toFixed(2),'s', A.recover!=null?`Settled ${A.recover.toFixed(2)}s after`:'Never fully settled')}
+    </div>` +
+    reading('Hip level through the turn', Math.abs(A.hikeMean).toFixed(1),'%',
+      `Of torso length. ${A.hikeMean>0?'Right hip carried higher':'Left hip carried higher'}, peak ${Math.abs(A.hikeMax).toFixed(1)}%`, hikeCls) +
+    `<div class="pair">
+      ${reading('Relevé rise', (A.riseFrac*100).toFixed(0),'%', `Of torso, in ${A.releveTime.toFixed(2)}s`)}
+      ${reading('Sink during turn', (A.sinkFrac*100).toFixed(0),'%', A.sinkFrac>0.06?'Losing the platform':'Height held', A.sinkFrac>0.06?'flag':'good')}
+    </div>` +
+    reading('Spotting', A.spots,' spots',
+      `Head still for ${(A.holdRatio*100).toFixed(0)}% of the turn`, spotCls);
+}
+
+function buildVerdict(){
+  const A=analysis, out=[];
+  if(A.axisMean<2) out.push(`<b>The axis holds.</b> Average ${A.axisMean.toFixed(1)}° off plumb through the turn, which is within the range where the turn is being driven by rotation rather than by falling.`);
+  else if(A.axisMean<4) out.push(`<b>The axis wanders.</b> Average ${A.axisMean.toFixed(1)}° off plumb, peaking at ${A.axisMax.toFixed(1)}°. You are still turning on yourself, but the correction load is going somewhere, usually the supporting hip.`);
+  else out.push(`<b>You are turning around a tilted line.</b> Average ${A.axisMean.toFixed(1)}° off plumb, peaking at ${A.axisMax.toFixed(1)}°. At that angle the finish is decided before the first revolution ends.`);
+
+  if(Math.abs(A.hikeMean)>5) out.push(`<b>The pelvis is not level.</b> One hip sits ${Math.abs(A.hikeMean).toFixed(1)}% of a torso length higher than the other for most of the turn. Hip hike on the gesture side is the most common cause of the lean above.`);
+  if(Math.abs(A.tiltMax)>6) out.push(`<b>The shoulders answer the hips.</b> Peak shoulder tilt of ${Math.abs(A.tiltMax).toFixed(1)}% of torso length. The upper body is counterweighting rather than stacking.`);
+  if(A.sinkFrac>0.06) out.push(`<b>The relevé is giving way.</b> Hip height drops ${(A.sinkFrac*100).toFixed(0)}% of a torso length between the top of the relevé and the end of the turn. The turn is ending because the platform lowers, not because the rotation runs out.`);
+  if(A.releveTime>0.35) out.push(`<b>The rise is slow.</b> ${A.releveTime.toFixed(2)}s from preparation to full height. A slow rise bleeds the push into the floor instead of into rotation.`);
+  if(A.holdRatio<0.25) out.push(`<b>The head is travelling with the body.</b> It is still for only ${(A.holdRatio*100).toFixed(0)}% of the turn, across ${A.spots} spot${A.spots===1?'':'s'}. Everything above about the axis gets harder to feel without a spot.`);
+  if(A.recover===null) out.push(`<b>The landing does not settle.</b> The axis never comes back inside 2.5° before the clip ends, so the turn is being absorbed after the fact rather than finished.`);
+  else if(A.recover>0.5) out.push(`<b>The landing takes ${A.recover.toFixed(2)}s to settle.</b> That is the cost of the axis above, paid on the way out.`);
+  if(out.length===1) out.push(`<b>Nothing else flagged.</b> Hip level, relevé height, spotting and landing all sit inside range for this clip.`);
+  el.verdict.innerHTML=out.map(s=>`<li>${s}</li>`).join('');
+
+  const pct=Math.round(analysis.conf*100);
+  el.confNote.textContent = `Body tracked cleanly in ${pct}% of frames at ${el.fps.value} samples per second. `+
+    (pct<80 ? 'Below about 80% the mid turn numbers get soft, usually from loose clothing, a busy background or low light.' : '')+
+    ' Single camera tracking reads the front and back of a turn well and the middle less well, so treat the preparation, the relevé and the landing as the firm numbers.';
+}
+
+/* ---------- charts ---------- */
+function chartSetup(canvas,h){
+  const ctx=canvas.getContext('2d');
+  const w=canvas.parentElement.clientWidth-32;
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=w*dpr; canvas.height=h*dpr;
+  canvas.style.height=h+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+  return {ctx,w,h};
+}
+function shadeTurn(ctx,w,h,pad){
+  const A=analysis;
+  const x=i=>pad+ (i/(A.n-1))*(w-pad*1.4);
+  ctx.fillStyle='rgba(201,169,97,.10)';
+  ctx.fillRect(x(A.ts),0,x(A.te)-x(A.ts),h);
+}
+function drawCharts(){
+  const A=analysis, pad=30;
+  { const {ctx,w,h}=chartSetup(el.chartAxis,170);
+    shadeTurn(ctx,w,h,pad);
+    const vals=A.axisS.map(v=>v==null?0:v);
+    const m=Math.max(6,Math.max(...vals.map(Math.abs))*1.15);
+    const x=i=>pad+(i/(A.n-1))*(w-pad*1.4), y=v=>h/2-(v/m)*(h/2-10);
+    ctx.strokeStyle='rgba(143,163,181,.35)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad,y(0)); ctx.lineTo(w-pad*0.4,y(0)); ctx.stroke();
+    ctx.setLineDash([3,4]); ctx.strokeStyle='rgba(111,214,196,.4)';
+    [2.5,-2.5].forEach(g=>{ ctx.beginPath(); ctx.moveTo(pad,y(g)); ctx.lineTo(w-pad*0.4,y(g)); ctx.stroke(); });
+    ctx.setLineDash([]);
+    ctx.strokeStyle='#C9A961'; ctx.lineWidth=1.8; ctx.beginPath();
+    vals.forEach((v,i)=> i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)));
+    ctx.stroke();
+    ctx.fillStyle='#8EA3B5'; ctx.font='11px "DM Sans",sans-serif';
+    ctx.fillText(`+${m.toFixed(0)}°`,2,14); ctx.fillText('0°',2,y(0)+4); ctx.fillText(`-${m.toFixed(0)}°`,2,h-4);
+  }
+  { const {ctx,w,h}=chartSetup(el.chartHeight,170);
+    shadeTurn(ctx,w,h,pad);
+    const x=i=>pad+(i/(A.n-1))*(w-pad*1.4);
+    const hv=A.hipYS.map(v=>v==null?0:v);
+    const lo=Math.min(...hv), hi=Math.max(...hv);
+    const yh=v=>10+((v-lo)/((hi-lo)||1))*(h-24);
+    ctx.strokeStyle='#C9A961'; ctx.lineWidth=1.8; ctx.beginPath();
+    hv.forEach((v,i)=> i?ctx.lineTo(x(i),yh(v)):ctx.moveTo(x(i),yh(v)));
+    ctx.stroke();
+    const th=A.bodyTheta.map(v=>Math.abs(v-A.bodyTheta[0]));
+    const tm=Math.max(...th)||1;
+    const yt=v=>h-10-(v/tm)*(h-24);
+    ctx.strokeStyle='#6FD6C4'; ctx.lineWidth=1.4; ctx.beginPath();
+    th.forEach((v,i)=> i?ctx.lineTo(x(i),yt(v)):ctx.moveTo(x(i),yt(v)));
+    ctx.stroke();
+    ctx.fillStyle='#8EA3B5'; ctx.font='11px "DM Sans",sans-serif';
+    ctx.fillText('high',2,16); ctx.fillText('low',2,h-4);
+  }
+}
+
+/* ---------- export ---------- */
+function downloadCSV(){
+  const A=analysis;
+  const rows=[['time_s','phase','axis_deg','hip_hike_pct_torso','shoulder_tilt_pct_torso','hip_height_norm','cumulative_rotation_deg','tracked']];
+  for(let i=0;i<A.n;i++){
+    rows.push([A.fr[i].t.toFixed(3), phaseAt(i),
+      (A.axisS[i]??'').toString().slice(0,7),
+      (A.hikeS[i]??'').toString().slice(0,7),
+      (A.tiltS[i]??'').toString().slice(0,7),
+      (A.hipYS[i]??'').toString().slice(0,7),
+      ((A.bodyTheta[i]-A.bodyTheta[0])*180/Math.PI).toFixed(1),
+      A.fr[i].ok?1:0]);
+  }
+  const blob=new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='pirouette-frames.csv'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+</script>
+</body>
+</html>

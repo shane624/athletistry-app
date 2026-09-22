@@ -65,7 +65,8 @@ body {
     radial-gradient(ellipse at 92% 18%, rgba(37,95,189,.055) 0%, rgba(37,95,189,0) 32%),
     linear-gradient(118deg, transparent 0 24%, rgba(103,110,120,.035) 25%, transparent 27% 58%, rgba(103,110,120,.028) 59%, transparent 61%),
     linear-gradient(162deg, transparent 0 42%, rgba(255,255,255,.58) 43%, transparent 45%);
-  background-attachment: fixed;
+  /* NB: no `background-attachment: fixed` — on iOS Safari it mis-positions
+     position:fixed children (floated the bottom tab bar up off the edge). */
 }
 
 body::before {

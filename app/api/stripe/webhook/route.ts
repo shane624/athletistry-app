@@ -26,27 +26,32 @@ export async function POST(req: Request): Promise<Response> {
     switch (event.type) {
       case "checkout.session.completed": {
         const s = event.data.object;
-        const studioId = s.metadata?.studioId;
-        if (studioId) {
+        if (s.metadata?.studioId) {
           await admin.from("studios").update({
             stripe_customer_id: s.customer,
             stripe_subscription_id: s.subscription,
             subscription_status: "active",
-          }).eq("id", studioId);
+          }).eq("id", s.metadata.studioId);
+        } else if (s.metadata?.kind === "member" && s.metadata?.userId) {
+          await admin.from("profiles").update({
+            stripe_customer_id: s.customer,
+            subscription_status: "active",
+            subscription_plan: s.metadata.plan ?? null,
+          }).eq("id", s.metadata.userId);
         }
         break;
       }
       case "customer.subscription.updated":
-      case "customer.subscription.created": {
-        const sub = event.data.object;
-        await admin.from("studios").update({ subscription_status: sub.status })
-          .eq("stripe_subscription_id", sub.id);
-        break;
-      }
+      case "customer.subscription.created":
       case "customer.subscription.deleted": {
         const sub = event.data.object;
-        await admin.from("studios").update({ subscription_status: "canceled" })
-          .eq("stripe_subscription_id", sub.id);
+        const status = event.type === "customer.subscription.deleted" ? "canceled" : sub.status;
+        // Newer Stripe API versions moved current_period_end onto the subscription items.
+        const endTs = sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end;
+        const periodEnd = endTs ? new Date(endTs * 1000).toISOString() : null;
+        // Studios are matched by subscription id; members by customer id.
+        await admin.from("studios").update({ subscription_status: status }).eq("stripe_subscription_id", sub.id);
+        await admin.from("profiles").update({ subscription_status: status, current_period_end: periodEnd }).eq("stripe_customer_id", sub.customer);
         break;
       }
     }

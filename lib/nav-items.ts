@@ -33,6 +33,8 @@ export const TRAIN_TOOLS: NavItem[] = [
   { href: "/circuit", label: "Circuit Training", icon: "circuit" },
   { href: "/ballet", label: "Train for Ballet", icon: "ballet" },
   { href: "/movement-map", label: "Movement Map", icon: "target" },
+  { href: "/movement-map/ballet", label: "Ballet Movement Lab", icon: "ballet" },
+  { href: "/tools/pirouette", label: "Pirouette Axis", icon: "target" },
   { href: "/plan", label: "Training Plan Builder", icon: "calendar" },
   { href: "/generate", label: "Practice Generator", icon: "bolt" },
   { href: "/my-workouts", label: "My Workouts", icon: "grid" },
@@ -52,6 +54,7 @@ export const LEARN_TOOLS: NavItem[] = [
 
 export const PROFILE_TOOLS: NavItem[] = [
   { href: "/profile", label: "Profile", icon: "user" },
+  { href: "/pricing", label: "Membership", icon: "sparkle" },
   { href: "/settings", label: "Settings", icon: "settings" },
 ];
 
