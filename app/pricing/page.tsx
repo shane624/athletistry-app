@@ -14,7 +14,7 @@ const PERKS: { icon: IconName; title: string; body: string }[] = [
   { icon: "book", title: "Anatomy & training science", body: "The why behind every correction — learn the body, not just the shape." },
 ];
 
-export default async function PricingPage({ searchParams }: { searchParams?: { required?: string; billing?: string } }) {
+export default async function PricingPage({ searchParams }: { searchParams?: { required?: string; billing?: string; plan?: string } }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const sub = await getMemberSubscription();
@@ -37,7 +37,8 @@ export default async function PricingPage({ searchParams }: { searchParams?: { r
         )}
 
         <section className="mt-8">
-          <MemberCheckout active={sub.active} plan={sub.plan} authed={!!user} configured={sub.configured} />
+          <MemberCheckout active={sub.active} plan={sub.plan} authed={!!user} configured={sub.configured}
+            initialPlan={searchParams?.plan === "monthly" ? "monthly" : "yearly"} />
         </section>
 
         <section className="grid sm:grid-cols-2 gap-3 mt-8">

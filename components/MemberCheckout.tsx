@@ -5,8 +5,8 @@ import { startMemberCheckout, openMemberPortal } from "@/lib/member-billing-acti
 import type { MemberInterval } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase-browser";
 
-export default function MemberCheckout({ active, plan, authed, configured }: { active: boolean; plan: string | null; authed: boolean; configured: boolean }) {
-  const [interval, setInterval] = useState<MemberInterval>("yearly");
+export default function MemberCheckout({ active, plan, authed, configured, initialPlan }: { active: boolean; plan: string | null; authed: boolean; configured: boolean; initialPlan?: MemberInterval }) {
+  const [interval, setInterval] = useState<MemberInterval>(initialPlan ?? "yearly");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
