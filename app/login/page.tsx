@@ -89,7 +89,10 @@ export default function LoginPage() {
             Run a dance studio? <a href="/studio/create" className="text-teal">Set up a studio</a>.
           </p>
           <p className="text-sm text-grey">
-            Not a member yet? Access is included with the{" "}
+            New to Athletistry? <a href="/pricing" className="text-teal font-semibold">Become a member</a>.
+          </p>
+          <p className="text-sm text-grey">
+            In the Skool community? Access is included with the{" "}
             <a href="https://www.skool.com/athletistryproject" className="text-teal" target="_blank" rel="noopener">
               Athletistry community
             </a>. Join there and you'll get an email to set up your login.

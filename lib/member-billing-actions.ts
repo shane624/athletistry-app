@@ -13,7 +13,7 @@ function origin(): string {
 }
 
 /** Start a membership checkout (monthly or yearly). Requires the caller be signed in. */
-export async function startMemberCheckout(interval: MemberInterval): Promise<{ ok: boolean; url?: string; error?: string }> {
+export async function startMemberCheckout(interval: MemberInterval, newAccount = false): Promise<{ ok: boolean; url?: string; error?: string }> {
   if (!memberBillingConfigured()) return { ok: false, error: "Membership billing isn't set up yet." };
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -34,8 +34,9 @@ export async function startMemberCheckout(interval: MemberInterval): Promise<{ o
     mode: "subscription",
     customer: customerId,
     line_items: [{ price: memberPrice(interval), quantity: 1 }],
-    success_url: `${origin()}/pricing?billing=success`,
-    cancel_url: `${origin()}/pricing?billing=cancel`,
+    // Brand-new accounts land on the welcome flow; existing ones back on pricing.
+    success_url: `${origin()}/api/member/confirm?session_id={CHECKOUT_SESSION_ID}${newAccount ? "&next=welcome" : ""}`,
+    cancel_url: `${origin()}/pricing?billing=cancel${newAccount ? "&required=1" : ""}`,
     metadata: { kind: "member", userId: user.id, plan: interval },
     subscription_data: { metadata: { kind: "member", userId: user.id, plan: interval } },
     allow_promotion_codes: true,

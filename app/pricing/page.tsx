@@ -14,7 +14,7 @@ const PERKS: { icon: IconName; title: string; body: string }[] = [
   { icon: "book", title: "Anatomy & training science", body: "The why behind every correction — learn the body, not just the shape." },
 ];
 
-export default async function PricingPage() {
+export default async function PricingPage({ searchParams }: { searchParams?: { required?: string; billing?: string } }) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const sub = await getMemberSubscription();
@@ -28,6 +28,13 @@ export default async function PricingPage() {
           <h1 className="font-display text-[44px] leading-[1.02] font-bold text-ink mt-2">Train smarter.<br />Dance stronger.</h1>
           <p className="text-grey mt-3 max-w-md mx-auto">Full access to Athletistry — anatomy-first ballet training, movement screening, and progress tracking.</p>
         </header>
+
+        {searchParams?.required && !sub.active && (
+          <div className="panel panel-pad mt-6 text-center border-l-2 border-teal">
+            <p className="text-ink text-sm font-semibold">Your account is ready — choose a plan to unlock training.</p>
+            {searchParams?.billing === "cancel" && <p className="text-grey text-xs mt-1">Checkout was cancelled. You can pick up where you left off.</p>}
+          </div>
+        )}
 
         <section className="mt-8">
           <MemberCheckout active={sub.active} plan={sub.plan} authed={!!user} configured={sub.configured} />
