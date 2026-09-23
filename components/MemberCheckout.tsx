@@ -4,8 +4,12 @@ import { useState } from "react";
 import { startMemberCheckout, openMemberPortal } from "@/lib/member-billing-actions";
 import type { MemberInterval } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase-browser";
+import { resumeMembership } from "@/lib/member-retention-actions";
 
-export default function MemberCheckout({ active, plan, authed, configured, initialPlan }: { active: boolean; plan: string | null; authed: boolean; configured: boolean; initialPlan?: MemberInterval }) {
+export default function MemberCheckout({ active, plan, authed, configured, initialPlan, cancelAtPeriodEnd = false, pausedUntil = null, periodEnd = null }: {
+  active: boolean; plan: string | null; authed: boolean; configured: boolean; initialPlan?: MemberInterval;
+  cancelAtPeriodEnd?: boolean; pausedUntil?: string | null; periodEnd?: string | null;
+}) {
   const [interval, setInterval] = useState<MemberInterval>(initialPlan ?? "yearly");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -64,13 +68,41 @@ export default function MemberCheckout({ active, plan, authed, configured, initi
     else setMsg(res.error || "Couldn't open billing.");
   }
 
+  async function resume() {
+    setBusy(true); setMsg(null);
+    const res = await resumeMembership();
+    setBusy(false);
+    if (res.ok) window.location.reload();
+    else setMsg(res.error || "Couldn't resume your membership.");
+  }
+
   if (active) {
+    const date = (iso?: string | null) => iso ? new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" }) : "the end of your billing period";
     return (
       <div className="panel panel-pad text-center animate-in">
         <p className="eyebrow">Membership</p>
-        <p className="font-display text-[26px] font-bold text-ink mt-2">You&apos;re a member ✓</p>
-        <p className="text-grey text-sm mt-1">Your {plan === "yearly" ? "annual" : "monthly"} membership is active. Thank you for training with us.</p>
-        <button onClick={manage} disabled={busy} className="btn-ghost mt-5 px-5">Manage billing</button>
+        {cancelAtPeriodEnd ? (
+          <>
+            <p className="font-display text-[26px] font-bold text-ink mt-2">Cancellation scheduled</p>
+            <p className="text-grey text-sm mt-1">You keep full access until {date(periodEnd)}, then your membership ends. Changed your mind?</p>
+            <button onClick={resume} disabled={busy} className="btn-primary mt-5 px-6">{busy ? "Resuming…" : "Resume my membership"}</button>
+          </>
+        ) : pausedUntil ? (
+          <>
+            <p className="font-display text-[26px] font-bold text-ink mt-2">Billing paused</p>
+            <p className="text-grey text-sm mt-1">You won&apos;t be charged until {date(pausedUntil)}. Your access continues in the meantime.</p>
+            <button onClick={resume} disabled={busy} className="btn-ghost mt-5 px-5">{busy ? "Resuming…" : "Resume billing now"}</button>
+          </>
+        ) : (
+          <>
+            <p className="font-display text-[26px] font-bold text-ink mt-2">You&apos;re a member ✓</p>
+            <p className="text-grey text-sm mt-1">Your {plan === "yearly" ? "annual" : "monthly"} membership is active. Thank you for training with us.</p>
+          </>
+        )}
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <button onClick={manage} disabled={busy} className="btn-ghost px-5">Payment details &amp; invoices</button>
+          {!cancelAtPeriodEnd && <a href="/membership/cancel" className="text-grey text-xs underline mt-1">Cancel membership</a>}
+        </div>
         {msg && <p className="text-red-600 text-sm mt-3">{msg}</p>}
       </div>
     );

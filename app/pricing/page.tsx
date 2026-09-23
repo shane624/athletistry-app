@@ -38,7 +38,8 @@ export default async function PricingPage({ searchParams }: { searchParams?: { r
 
         <section className="mt-8">
           <MemberCheckout active={sub.active} plan={sub.plan} authed={!!user} configured={sub.configured}
-            initialPlan={searchParams?.plan === "monthly" ? "monthly" : "yearly"} />
+            initialPlan={searchParams?.plan === "monthly" ? "monthly" : "yearly"}
+            cancelAtPeriodEnd={sub.cancelAtPeriodEnd} pausedUntil={sub.pausedUntil} periodEnd={sub.currentPeriodEnd} />
         </section>
 
         <section className="grid sm:grid-cols-2 gap-3 mt-8">

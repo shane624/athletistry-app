@@ -52,6 +52,13 @@ export async function POST(req: Request): Promise<Response> {
         // Studios are matched by subscription id; members by customer id.
         await admin.from("studios").update({ subscription_status: status }).eq("stripe_subscription_id", sub.id);
         await admin.from("profiles").update({ subscription_status: status, current_period_end: periodEnd }).eq("stripe_customer_id", sub.customer);
+        // Retention state (separate write so it can't break the core sync if the
+        // retention migration hasn't been run yet).
+        const resumes = sub.pause_collection?.resumes_at;
+        await admin.from("profiles").update({
+          cancel_at_period_end: event.type === "customer.subscription.deleted" ? false : !!sub.cancel_at_period_end,
+          paused_until: resumes ? new Date(resumes * 1000).toISOString() : null,
+        }).eq("stripe_customer_id", sub.customer);
         break;
       }
     }
