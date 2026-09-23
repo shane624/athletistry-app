@@ -45,7 +45,7 @@ export default function NavBar() {
       <header className="app-topbar sticky top-0 z-30 safe-top lg:hidden">
         <div className="px-4">
           <div className="h-[58px] flex items-center gap-3">
-            <Link href="/dashboard" className="mobile-brand shrink-0" aria-label="Athletistry home">A</Link>
+            <Link href="/dashboard" className="mobile-brand shrink-0" aria-label="Athletistry home">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/icon-192.png" alt="" className="w-7 h-7 rounded-lg" /></Link>
             <div className="min-w-0 flex-1 text-center">
               <span className="font-display text-[18px] font-bold text-ink leading-none">{current}</span>
             </div>

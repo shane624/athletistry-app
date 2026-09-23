@@ -82,9 +82,10 @@ export default function SideNav() {
   return (
     <aside className="app-sidebar hidden lg:flex flex-col fixed inset-y-0 left-0 w-[17rem] z-30 overflow-y-auto">
       <Link href="/dashboard" className="sidebar-brand flex flex-col items-center justify-center px-5 h-[130px] shrink-0">
-        <span className="sidebar-monogram">A</span>
-        <span className="sidebar-wordmark">ATHLETISTRY</span>
-        <span className="sidebar-mantra">Discipline. Artistry. Forever.</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/icon-192.png" alt="" className="w-12 h-12 rounded-2xl shadow-[0_10px_24px_rgba(0,0,0,.25)]" />
+        <span className="sidebar-wordmark font-display">THE ATHLETISTRY APP</span>
+        <span className="sidebar-mantra">Remember to practise… for many years.</span>
       </Link>
 
       <nav className="px-3 pt-4 pb-5 flex-1">
