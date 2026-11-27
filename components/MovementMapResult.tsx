@@ -95,7 +95,7 @@ export default function MovementMapResult({ primary, secondary }: { primary: Typ
           ))}
         </ul>
         <div className="mt-4 rounded-xl bg-light p-3">
-          <p className="text-[11px] font-bold uppercase tracking-wide text-grey">Stop obsessing over — for now</p>
+          <p className="text-2xs font-bold uppercase tracking-wide text-grey">Stop obsessing over — for now</p>
           <p className="text-navy text-sm mt-1">{t.stopObsessing}</p>
         </div>
       </div>

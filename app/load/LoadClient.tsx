@@ -127,7 +127,7 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
         <div className="flex items-end gap-2 mt-4">
           {weekDays.map((d) => (
             <div key={d.key} className="flex-1 flex flex-col items-center">
-              <span className="text-[11px] text-grey h-3.5">{d.trimp > 0 ? d.trimp : ""}</span>
+              <span className="text-2xs text-grey h-3.5">{d.trimp > 0 ? d.trimp : ""}</span>
               {/* fixed-height bar track; the fill grows from the bottom */}
               <div className="w-full h-24 flex items-end mt-1">
                 <div
@@ -136,7 +136,7 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
                   title={`${d.label}: ${d.trimp} TRIMP`}
                 />
               </div>
-              <span className={`text-[11px] mt-1.5 ${d.isToday ? "text-teal font-bold" : "text-grey"}`}>{d.label}</span>
+              <span className={`text-2xs mt-1.5 ${d.isToday ? "text-teal font-bold" : "text-grey"}`}>{d.label}</span>
             </div>
           ))}
         </div>
@@ -154,11 +154,11 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
           <div className="flex items-end gap-2 mt-4">
             {recentWeeks.map((w) => (
               <div key={w.week} className="flex-1 flex flex-col items-center">
-                <span className="text-[11px] text-grey h-3.5">{w.trimp}</span>
+                <span className="text-2xs text-grey h-3.5">{w.trimp}</span>
                 <div className="w-full h-28 flex items-end mt-1">
                   <div className="w-full bg-teal rounded-t" style={{ height: `${Math.max((w.trimp / maxTrimp) * 100, 4)}%` }} title={`${w.week}: ${w.trimp} TRIMP`} />
                 </div>
-                <span className="text-[10px] text-grey mt-1.5">{w.week.slice(5)}</span>
+                <span className="text-2xs text-grey mt-1.5">{w.week.slice(5)}</span>
               </div>
             ))}
           </div>
@@ -192,7 +192,7 @@ export default function LoadClient({ assessment, weeks, sessions, events, nextEv
           <div>
             <label className="text-xs text-grey">Effort — how hard it felt: <b className="text-navy">{rpe} · {effortWord(rpe)}</b></label>
             <input type="range" min={1} max={10} value={rpe} onChange={(e) => setRpe(Number(e.target.value))} className="w-full accent-teal mt-1" />
-            <div className="flex justify-between text-[11px] text-grey"><span>easy</span><span>all-out</span></div>
+            <div className="flex justify-between text-2xs text-grey"><span>easy</span><span>all-out</span></div>
           </div>
           {dur && <p className="text-grey text-sm">Adds <b className="text-navy">{sessionTrimp(Number(dur) || 0, rpe)} load</b> to your week</p>}
           <button className="btn-primary" disabled={busy || !dur}>{busy ? <Dots /> : "Log session"}</button>

@@ -75,7 +75,7 @@ export default function CompleteWorkout({
             <div className="mt-3">
               <label className="text-xs text-grey">Effort — how hard it felt: <b className="text-navy">{rpe} · {effortWord(rpe)}</b></label>
               <input type="range" min={1} max={10} value={rpe} onChange={(e) => setRpe(Number(e.target.value))} className="w-full accent-teal mt-1" />
-              <div className="flex justify-between text-[11px] text-grey"><span>easy</span><span>all-out</span></div>
+              <div className="flex justify-between text-2xs text-grey"><span>easy</span><span>all-out</span></div>
             </div>
             {dur && <p className="text-grey text-sm mt-1">Adds <b className="text-navy">{sessionTrimp(Number(dur) || 0, rpe)} load</b> to your week</p>}
             <div className="flex gap-2 mt-4">
@@ -139,8 +139,8 @@ export default function CompleteWorkout({
               )}
 
               <div className="flex flex-wrap gap-2 mt-5">
-                <Link href="/progress" className="btn-ghost !min-h-[40px] !text-[12px]">See your progress</Link>
-                <Link href="/load" className="btn-ghost !min-h-[40px] !text-[12px]">Training calendar</Link>
+                <Link href="/progress" className="btn-ghost !min-h-[40px] !text-xs">See your progress</Link>
+                <Link href="/load" className="btn-ghost !min-h-[40px] !text-xs">Training calendar</Link>
               </div>
             </div>
           );

@@ -246,7 +246,7 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
         </div>
         {top && (
           <div className="card p-4 mt-4 bg-light animate-in">
-            <p className="text-[11px] font-bold uppercase tracking-wide text-grey">This leans toward</p>
+            <p className="text-2xs font-bold uppercase tracking-wide text-grey">This leans toward</p>
             <p className="text-navy text-sm mt-1"><b>{MOVEMENT_TYPES[top].name}</b> — {MOVEMENT_TYPES[top].tagline}</p>
           </div>
         )}
@@ -299,7 +299,7 @@ export default function BalletMoveCoach({ moveId }: { moveId: string }) {
         {phase === "assess" && cues.length > 0 && (
           <div className="absolute top-3 left-3 right-3 flex flex-wrap gap-1.5">
             {cues.filter((c) => c.key !== "height" && c.key !== "amount").map((c) => (
-              <span key={c.key} className={`text-[11px] font-bold px-2 py-1 rounded-full backdrop-blur ${c.ok ? "bg-emerald-500/80 text-white" : "bg-red-500/80 text-white"}`}>
+              <span key={c.key} className={`text-2xs font-bold px-2 py-1 rounded-full backdrop-blur ${c.ok ? "bg-emerald-500/80 text-white" : "bg-red-500/80 text-white"}`}>
                 {c.ok ? "✓" : "✗"} {c.label}
               </span>
             ))}

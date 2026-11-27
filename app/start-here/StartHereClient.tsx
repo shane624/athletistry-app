@@ -68,13 +68,13 @@ export default function StartHereClient() {
               This app is your training home base — built for dancers. A quick tour of what&apos;s inside:
             </p>
             <ul className="mt-3 space-y-2 text-sm">
-              <li className="panel px-4 py-3 text-[13px] leading-relaxed"><b>Follow a program</b> — pick a guided plan (including The Practice and the 24-week periodised plan) and the app tells you exactly what to do each day.</li>
-              <li className="panel px-4 py-3 text-[13px] leading-relaxed"><b>Warm up first</b> — a warm-up shows at the top of every session, plus a Warm-Ups section for before class, rehearsal or a performance.</li>
-              <li className="panel px-4 py-3 text-[13px] leading-relaxed"><b>Train for a ballet move</b> — pick a move you want to improve and get a workout of the exercises that build it. Filter by level and equipment.</li>
-              <li className="panel px-4 py-3 text-[13px] leading-relaxed"><b>Random or build-your-own</b> — generate a balanced session on the spot, or make and save your own routines.</li>
-              <li className="panel px-4 py-3 text-[13px] leading-relaxed"><b>Watch &amp; track</b> — every exercise has a demo video. Log weights, reps, and hold times; watch your lifts and muscle-group balance climb.</li>
-              <li className="panel px-4 py-3 text-[13px] leading-relaxed"><b>Stay consistent</b> — earn ballet ranks, streaks and achievements as you train, with a daily warm welcome.</li>
-              <li className="panel px-4 py-3 text-[13px] leading-relaxed"><b>Plan around dancing</b> — log every class on the Training Calendar; the app tracks your weekly load and tapers you before performances.</li>
+              <li className="panel px-4 py-3 text-footnote leading-relaxed"><b>Follow a program</b> — pick a guided plan (including The Practice and the 24-week periodised plan) and the app tells you exactly what to do each day.</li>
+              <li className="panel px-4 py-3 text-footnote leading-relaxed"><b>Warm up first</b> — a warm-up shows at the top of every session, plus a Warm-Ups section for before class, rehearsal or a performance.</li>
+              <li className="panel px-4 py-3 text-footnote leading-relaxed"><b>Train for a ballet move</b> — pick a move you want to improve and get a workout of the exercises that build it. Filter by level and equipment.</li>
+              <li className="panel px-4 py-3 text-footnote leading-relaxed"><b>Random or build-your-own</b> — generate a balanced session on the spot, or make and save your own routines.</li>
+              <li className="panel px-4 py-3 text-footnote leading-relaxed"><b>Watch &amp; track</b> — every exercise has a demo video. Log weights, reps, and hold times; watch your lifts and muscle-group balance climb.</li>
+              <li className="panel px-4 py-3 text-footnote leading-relaxed"><b>Stay consistent</b> — earn ballet ranks, streaks and achievements as you train, with a daily warm welcome.</li>
+              <li className="panel px-4 py-3 text-footnote leading-relaxed"><b>Plan around dancing</b> — log every class on the Training Calendar; the app tracks your weekly load and tapers you before performances.</li>
             </ul>
           </div>
         )}
@@ -114,15 +114,15 @@ export default function StartHereClient() {
               difference helps you pick the right style for your goal.
             </p>
             <div className="space-y-3 mt-3">
-              <div className="panel px-4 py-3 text-[13px] leading-relaxed">
+              <div className="panel px-4 py-3 text-footnote leading-relaxed">
                 <p className="font-semibold text-ink">Hypertrophy <span className="text-grey font-normal text-sm">— build muscle</span></p>
                 <p className="text-sm text-ink mt-1">Moderate weight, <b>8–12 reps</b>, 3–4 sets, slow lowering, short rest. The goal is enough muscle fatigue to trigger growth.</p>
               </div>
-              <div className="panel px-4 py-3 text-[13px] leading-relaxed">
+              <div className="panel px-4 py-3 text-footnote leading-relaxed">
                 <p className="font-semibold text-ink">Strength <span className="text-grey font-normal text-sm">— lift heavier</span></p>
                 <p className="text-sm text-ink mt-1">Heavy weight, <b>3–5 reps</b>, long rest (~3 min) so you can hit full force each set. Intensity high, volume low.</p>
               </div>
-              <div className="panel px-4 py-3 text-[13px] leading-relaxed">
+              <div className="panel px-4 py-3 text-footnote leading-relaxed">
                 <p className="font-semibold text-ink">Endurance <span className="text-grey font-normal text-sm">— work longer</span></p>
                 <p className="text-sm text-ink mt-1">Lighter weight, <b>15–25+ reps</b>, minimal rest, often circuit-style. Trains your muscles to keep going.</p>
               </div>

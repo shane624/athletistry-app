@@ -24,7 +24,7 @@ export default async function Home() {
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
-    <main className="lp min-h-screen overflow-x-hidden bg-[#f7f7f5] text-[#24272c]">
+    <main className="lp min-h-screen overflow-x-hidden bg-[#f7f7f5] text-ink">
       <style>{LP_CSS}</style>
 
       {/* ── NAV ─────────────────────────────────────────── */}
@@ -33,24 +33,24 @@ export default async function Home() {
           <Link href="/" className="flex items-center gap-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/icon-192.png" alt="" className="w-9 h-9 rounded-xl" />
-            <span className={`${head.className} leading-[.9] text-[#24272c]`}>
-              <span className="block text-[9px] tracking-[.3em] text-[#70757b]">THE</span>
-              <span className="block text-[15px] font-bold tracking-[.12em]">ATHLETISTRY</span>
-              <span className="block text-[9px] tracking-[.3em] text-[#075bb4]">APP</span>
+            <span className={`${head.className} leading-[.9] text-ink`}>
+              <span className="block text-2xs tracking-[.3em] text-grey">THE</span>
+              <span className="block text-subhead font-bold tracking-[.12em]">ATHLETISTRY</span>
+              <span className="block text-2xs tracking-[.3em] text-teal">APP</span>
             </span>
           </Link>
-          <nav className="hidden md:flex items-center gap-7 text-[14px] font-semibold text-[#24272c]">
-            <a href="#inside" className="hover:text-[#075bb4]">What&apos;s Inside</a>
-            <a href="#pathway" className="hover:text-[#075bb4]">The 90 Days</a>
-            <a href="#shane" className="hover:text-[#075bb4]">About Shane</a>
-            <a href="#pricing" className="hover:text-[#075bb4]">Pricing</a>
+          <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-ink">
+            <a href="#inside" className="hover:text-teal">What&apos;s Inside</a>
+            <a href="#pathway" className="hover:text-teal">The 90 Days</a>
+            <a href="#shane" className="hover:text-teal">About Shane</a>
+            <a href="#pricing" className="hover:text-teal">Pricing</a>
           </nav>
           <div className="flex items-center gap-2">
             {user ? (
               <Link href="/dashboard" className="lp-btn">Open the app</Link>
             ) : (
               <>
-                <Link href="/login" className="hidden sm:inline-flex text-[14px] font-semibold px-3 py-2 hover:text-[#075bb4]">Log in</Link>
+                <Link href="/login" className="hidden sm:inline-flex text-sm font-semibold px-3 py-2 hover:text-teal">Log in</Link>
                 <Link href="/pricing" className="lp-btn">Sign up</Link>
               </>
             )}
@@ -66,9 +66,9 @@ export default async function Home() {
             <p className="lp-eyebrow">Where athleticism and artistry meet</p>
             <h1 className={`${head.className} lp-h1 mt-4`}>
               <span className="lp-steel">Ballet should</span><br />
-              <span className="text-[#075bb4]">make sense.</span>
+              <span className="text-teal">make sense.</span>
             </h1>
-            <p className="text-[18px] leading-relaxed text-[#4a4f56] mt-6 max-w-[520px]">
+            <p className="text-lg leading-relaxed text-navy2 mt-6 max-w-[520px]">
               Most dancers collect corrections that never hold. Athletistry puts the anatomy beneath the technique in your pocket —
               programs, camera assessments and progress tracking that turn every correction into something you can <em>train</em>.
             </p>
@@ -97,8 +97,8 @@ export default async function Home() {
               <PhoneMockup />
             </div>
             <div className="lp-glass absolute right-[46%] sm:right-[52%] top-[42%] px-4 py-3 rotate-[-2deg] hidden sm:block">
-              <p className={`${head.className} text-[20px] font-bold tracking-wide text-[#24272c] leading-none`}>TRAIN SMARTER.</p>
-              <p className={`${head.className} text-[20px] font-bold tracking-wide text-[#075bb4] leading-none mt-1`}>DANCE STRONGER.</p>
+              <p className={`${head.className} text-title3 font-bold tracking-wide text-ink leading-none`}>TRAIN SMARTER.</p>
+              <p className={`${head.className} text-title3 font-bold tracking-wide text-teal leading-none mt-1`}>DANCE STRONGER.</p>
             </div>
           </div>
         </div>
@@ -112,8 +112,8 @@ export default async function Home() {
               ["Purposeful artistry", "Movement that communicates"],
             ].map(([t, s]) => (
               <div key={t} className="py-6 text-center">
-                <p className="font-bold text-[16px]">{t}</p>
-                <p className="text-[#70757b] text-[13px] mt-0.5">{s}</p>
+                <p className="font-bold text-base">{t}</p>
+                <p className="text-grey text-footnote mt-0.5">{s}</p>
               </div>
             ))}
           </div>
@@ -125,7 +125,7 @@ export default async function Home() {
         <div className="lg:sticky lg:top-28">
           <p className="lp-eyebrow">The real challenge</p>
           <h2 className={`${head.className} lp-h2 mt-3`}><span className="lp-steel">It is not<br />motivation.</span></h2>
-          <p className="text-[17px] leading-relaxed text-[#4a4f56] mt-5 max-w-[480px]">
+          <p className="text-body leading-relaxed text-navy2 mt-5 max-w-[480px]">
             Most dancers already care deeply. The difficult part is knowing how to train properly, how to make corrections
             stick, and how to improve without sacrificing health or artistry. That&apos;s what the app is built to solve.
           </p>
@@ -139,10 +139,10 @@ export default async function Home() {
             ["∞", "Progress without burnout", "Streaks, ranks and a training calendar that keep you consistent — plus tapering for exams and performances."],
           ].map(([i, t, d], n) => (
             <Reveal key={t} index={n} className="lp-card flex gap-4 p-6">
-              <span className="shrink-0 w-11 h-11 rounded-full bg-[#073464] text-white flex items-center justify-center text-[18px]">{i}</span>
+              <span className="shrink-0 w-11 h-11 rounded-full bg-tealdark text-white flex items-center justify-center text-lg">{i}</span>
               <div>
-                <p className="font-bold text-[17px]">{t}</p>
-                <p className="text-[#5b6068] text-[15px] mt-1 leading-relaxed">{d}</p>
+                <p className="font-bold text-body">{t}</p>
+                <p className="text-[#5b6068] text-subhead mt-1 leading-relaxed">{d}</p>
               </div>
             </Reveal>
           ))}
@@ -154,38 +154,38 @@ export default async function Home() {
         <div className="max-w-[1240px] mx-auto px-5 py-20 md:py-28">
           <p className="lp-eyebrow !text-[#9cc6f5]">What&apos;s inside</p>
           <h2 className={`${head.className} lp-h2 mt-3 lp-silver`}>Your whole training<br />system. One app.</h2>
-          <p className="text-[#c8d8ec] text-[17px] leading-relaxed mt-5 max-w-[620px]">
+          <p className="text-[#c8d8ec] text-body leading-relaxed mt-5 max-w-[620px]">
             Everything Shane uses with dancers in the studio — programs, assessments, anatomy and tracking — organised so you
             always know what to do today.
           </p>
 
           {/* bento — adapted from 21st.dev "Feature Bento" */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 md:auto-rows-[250px]">
-            <Reveal className="md:col-span-2 md:row-span-2 relative rounded-[28px] overflow-hidden group min-h-[340px] flex flex-col justify-end p-8 md:p-10">
+            <Reveal className="md:col-span-2 md:row-span-2 relative rounded-3xl overflow-hidden group min-h-[340px] flex flex-col justify-end p-8 md:p-10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={frame("Extension_Developer_Side_lhzg5h", 900, 700, 3)} alt="" className="absolute inset-0 w-full h-full object-cover opacity-45 group-hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#041d38] via-[#073464]/70 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#041d38] via-tealdark/70 to-transparent" />
               <div className="relative">
-                <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur rounded-full px-3.5 py-1.5 text-[12px] font-semibold">
+                <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur rounded-full px-3.5 py-1.5 text-xs font-semibold">
                   <span className="w-2 h-2 rounded-full bg-[#4ade80] animate-pulse" /> Live camera coaching
                 </span>
                 <h3 className={`${head.className} text-[clamp(2.2rem,4.5vw,3.4rem)] font-bold uppercase leading-[.95] mt-4`}>Movement Map &amp;<br />Ballet Movement Lab</h3>
-                <p className="text-[#d7e3f1] text-[16px] leading-relaxed mt-3 max-w-[520px]">
+                <p className="text-[#d7e3f1] text-base leading-relaxed mt-3 max-w-[520px]">
                   Your camera reads posture front, side and back to find your Dancer Movement Type — then coaches développé, à la seconde,
                   turnout and port de bras live, capturing your best rep so you can re-test and see change.
                 </p>
               </div>
             </Reveal>
-            <Reveal index={1} className="rounded-[28px] p-7 flex flex-col justify-between bg-gradient-to-br from-[#0d72d8] to-[#073464] relative overflow-hidden">
+            <Reveal index={1} className="rounded-3xl p-7 flex flex-col justify-between bg-gradient-to-br from-teal to-tealdark relative overflow-hidden">
               <div className="absolute -right-10 -top-10 w-36 h-36 bg-white/20 rounded-full blur-2xl" />
-              <p className="text-[11px] font-bold tracking-[.18em] uppercase text-[#cfe3fa] relative">Demo library</p>
+              <p className="text-2xs font-bold tracking-[.18em] uppercase text-[#cfe3fa] relative">Demo library</p>
               <div className="relative">
                 <p className={`${head.className} text-[64px] font-bold leading-none`}>58+</p>
                 <p className="text-[#d7e3f1] font-medium mt-1">looping demo videos — one for every exercise</p>
               </div>
             </Reveal>
             <Reveal index={2} className="lp-glass-dark p-7 flex flex-col justify-between">
-              <p className="text-[11px] font-bold tracking-[.18em] uppercase text-[#9cc6f5]">Assess</p>
+              <p className="text-2xs font-bold tracking-[.18em] uppercase text-[#9cc6f5]">Assess</p>
               <div>
                 <p className={`${head.className} text-[64px] font-bold leading-none lp-silver`}>6</p>
                 <p className="text-[#d7e3f1] font-medium mt-1">Dancer Movement Types, each with its own training priorities</p>
@@ -193,18 +193,18 @@ export default async function Home() {
             </Reveal>
             {FEATURES.map((f, i) => (
               <Reveal key={f.t} index={i % 3} className="lp-glass-dark p-7 flex flex-col">
-                <p className="text-[11px] font-bold tracking-[.18em] uppercase text-[#9cc6f5]">{f.tag}</p>
-                <p className="font-bold text-[19px] mt-2">{f.t}</p>
-                <p className="text-[#c8d8ec] text-[15px] mt-2 leading-relaxed">{f.d}</p>
+                <p className="text-2xs font-bold tracking-[.18em] uppercase text-[#9cc6f5]">{f.tag}</p>
+                <p className="font-bold text-title3 mt-2">{f.t}</p>
+                <p className="text-[#c8d8ec] text-subhead mt-2 leading-relaxed">{f.d}</p>
               </Reveal>
             ))}
             <Reveal index={1} className="md:col-span-2">
-              <Link href="/pricing" className="group h-full min-h-[200px] rounded-[28px] p-7 bg-white text-[#073464] flex flex-col justify-between">
+              <Link href="/pricing" className="group h-full min-h-[200px] rounded-3xl p-7 bg-white text-tealdark flex flex-col justify-between">
                 <div className="flex justify-between items-start">
-                  <span className="text-[11px] font-bold uppercase tracking-[.18em] bg-[#e8f1fb] px-3 py-1.5 rounded-full">Join now</span>
-                  <span className="w-10 h-10 rounded-full bg-[#075bb4] text-white flex items-center justify-center text-[18px] group-hover:rotate-45 transition-transform">↗</span>
+                  <span className="text-2xs font-bold uppercase tracking-[.18em] bg-[#e8f1fb] px-3 py-1.5 rounded-full">Join now</span>
+                  <span className="w-10 h-10 rounded-full bg-teal text-white flex items-center justify-center text-lg group-hover:rotate-45 transition-transform">↗</span>
                 </div>
-                <p className={`${head.className} text-[34px] font-bold uppercase leading-[.95]`}>Get full<br />access</p>
+                <p className={`${head.className} text-large font-bold uppercase leading-[.95]`}>Get full<br />access</p>
               </Link>
             </Reveal>
           </div>
@@ -216,15 +216,15 @@ export default async function Home() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={frame(id, 300, 400)} alt="" className="w-full h-full object-cover" loading="lazy" />
                 <span className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <span className="absolute bottom-2 left-2.5 right-2 text-[11px] font-semibold leading-tight">{id.replace(/_[a-z0-9]{6}$/, "").replace(/_/g, " ")}</span>
-                <span className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/85 text-[#073464] text-[10px] flex items-center justify-center">▶</span>
+                <span className="absolute bottom-2 left-2.5 right-2 text-2xs font-semibold leading-tight">{id.replace(/_[a-z0-9]{6}$/, "").replace(/_/g, " ")}</span>
+                <span className="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/85 text-tealdark text-2xs flex items-center justify-center">▶</span>
               </div>
             ))}
           </div>
 
           <div className="mt-12 flex flex-wrap gap-3 items-center">
             <Link href="/pricing" className="lp-btn-white lp-btn-lg">Get full access</Link>
-            <span className="text-[#c8d8ec] text-[14px]">Cancel anytime · Works on phone, tablet and desktop</span>
+            <span className="text-[#c8d8ec] text-sm">Cancel anytime · Works on phone, tablet and desktop</span>
           </div>
         </div>
       </section>
@@ -233,7 +233,7 @@ export default async function Home() {
       <section id="pathway" className="max-w-[1240px] mx-auto px-5 py-20 md:py-28 scroll-mt-16">
         <p className="lp-eyebrow">Inside the app</p>
         <h2 className={`${head.className} lp-h2 mt-3`}><span className="lp-steel">Your first<br />ninety days.</span></h2>
-        <p className="text-[17px] leading-relaxed text-[#4a4f56] mt-5 max-w-[560px]">
+        <p className="text-body leading-relaxed text-navy2 mt-5 max-w-[560px]">
           The Practice is a 90-day, anatomy-first pathway. It starts the day you join: understand it, apply it, then own it.
         </p>
         <div className="grid md:grid-cols-3 gap-4 mt-10">
@@ -243,10 +243,10 @@ export default async function Home() {
             ["Days 61–90", "Own it", "Re-test in the Ballet Movement Lab, watch your numbers move, and learn to correct your own dancing — so progress keeps going long after the ninety days."],
           ].map(([d, t, s], i) => (
             <Reveal key={t} index={i} className="lp-card p-7 relative overflow-hidden">
-              <span className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#075bb4] to-[#0d72d8]" style={{ opacity: 0.4 + i * 0.3 }} />
-              <p className="text-[11px] font-bold tracking-[.18em] uppercase text-[#075bb4]">{d}</p>
-              <p className={`${head.className} text-[30px] font-bold uppercase mt-2 leading-none`}>{t}</p>
-              <p className="text-[#5b6068] text-[15px] mt-3 leading-relaxed">{s}</p>
+              <span className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal to-teal" style={{ opacity: 0.4 + i * 0.3 }} />
+              <p className="text-2xs font-bold tracking-[.18em] uppercase text-teal">{d}</p>
+              <p className={`${head.className} text-3xl font-bold uppercase mt-2 leading-none`}>{t}</p>
+              <p className="text-[#5b6068] text-subhead mt-3 leading-relaxed">{s}</p>
             </Reveal>
           ))}
         </div>
@@ -262,13 +262,13 @@ export default async function Home() {
           </div>
           <div>
             <p className="lp-eyebrow">Founder and head coach</p>
-            <h2 className={`${head.className} lp-h2 mt-3`}><span className="lp-steel">From first position<br />to </span><span className="text-[#075bb4]">principal artist.</span></h2>
-            <p className="text-[17px] leading-relaxed text-[#4a4f56] mt-5">
+            <h2 className={`${head.className} lp-h2 mt-3`}><span className="lp-steel">From first position<br />to </span><span className="text-teal">principal artist.</span></h2>
+            <p className="text-body leading-relaxed text-navy2 mt-5">
               Shane Wuerthner trained at the Kirov Academy, danced with Vienna State Ballet and San Francisco Ballet, and became a
               Principal Artist with Queensland Ballet. He then moved into strength and conditioning — and built Athletistry to
               combine classical technique, biomechanics and physical preparation.
             </p>
-            <p className="text-[17px] leading-relaxed text-[#4a4f56] mt-4">
+            <p className="text-body leading-relaxed text-navy2 mt-4">
               This app is that system: the way Shane makes complex ballet ideas clear, practical and immediately useful — available every day, not just at a workshop.
             </p>
             <div className="grid grid-cols-2 gap-3 mt-7">
@@ -279,8 +279,8 @@ export default async function Home() {
                 ["Global education", "Classes, workshops and online training"],
               ].map(([t, s]) => (
                 <div key={t} className="lp-card p-4">
-                  <p className="font-bold text-[15px]">{t}</p>
-                  <p className="text-[#70757b] text-[13px] mt-0.5">{s}</p>
+                  <p className="font-bold text-subhead">{t}</p>
+                  <p className="text-grey text-footnote mt-0.5">{s}</p>
                 </div>
               ))}
             </div>
@@ -304,12 +304,12 @@ export default async function Home() {
         <div className="lp-marble absolute inset-0" aria-hidden />
         <div className="relative max-w-[1000px] mx-auto px-5 py-20 md:py-28">
           <p className="lp-eyebrow text-center">Membership</p>
-          <h2 className={`${head.className} lp-h2 mt-3 text-center`}><span className="lp-steel">One membership.</span><br /><span className="text-[#075bb4]">Everything included.</span></h2>
+          <h2 className={`${head.className} lp-h2 mt-3 text-center`}><span className="lp-steel">One membership.</span><br /><span className="text-teal">Everything included.</span></h2>
           <Reveal className="mt-10">
             <PricingToggle included={INCLUDED} headClass={head.className} />
           </Reveal>
-          <p className="text-center text-[#70757b] text-[13px] mt-8">
-            Prices in USD. Run a dance studio? <Link href="/studio/create" className="text-[#075bb4] font-semibold">Set up your studio</Link> — your first 2 dancers are free.
+          <p className="text-center text-grey text-footnote mt-8">
+            Prices in USD. Run a dance studio? <Link href="/studio/create" className="text-teal font-semibold">Set up your studio</Link> — your first 2 dancers are free.
           </p>
         </div>
       </section>
@@ -320,10 +320,10 @@ export default async function Home() {
         <div className="mt-8 space-y-3">
           {FAQ.map(([q, a]) => (
             <details key={q} className="lp-card group p-5 [&_summary::-webkit-details-marker]:hidden">
-              <summary className="flex justify-between items-center gap-4 cursor-pointer font-bold text-[16px] list-none">
-                {q}<span className="text-[#075bb4] text-[22px] leading-none transition group-open:rotate-45">+</span>
+              <summary className="flex justify-between items-center gap-4 cursor-pointer font-bold text-base list-none">
+                {q}<span className="text-teal text-title2 leading-none transition group-open:rotate-45">+</span>
               </summary>
-              <p className="text-[#5b6068] text-[15px] leading-relaxed mt-3">{a}</p>
+              <p className="text-[#5b6068] text-subhead leading-relaxed mt-3">{a}</p>
             </details>
           ))}
         </div>
@@ -334,15 +334,15 @@ export default async function Home() {
         <div className="max-w-[1240px] mx-auto px-5 py-20 md:py-24 text-center">
           <p className="lp-eyebrow !text-[#9cc6f5]">Your next step</p>
           <h2 className={`${head.className} lp-h2 mt-3 lp-silver`}>Train smarter.<br />Dance stronger.</h2>
-          <p className="text-[#c8d8ec] text-[17px] mt-5 max-w-[520px] mx-auto">Create your account in under a minute and start today&apos;s session.</p>
+          <p className="text-[#c8d8ec] text-body mt-5 max-w-[520px] mx-auto">Create your account in under a minute and start today&apos;s session.</p>
           <Link href="/pricing" className="lp-btn-white lp-btn-lg mt-8 inline-flex">Sign up now</Link>
-          <p className="text-[#9fb4cf] text-[13px] mt-4">Remember to practise… for many years.</p>
+          <p className="text-[#9fb4cf] text-footnote mt-4">Remember to practise… for many years.</p>
         </div>
       </section>
 
       {/* ── FOOTER ──────────────────────────────────────── */}
-      <footer className="bg-[#15181d] text-[#9aa1ab] pb-24 sm:pb-0">
-        <div className="max-w-[1240px] mx-auto px-5 py-10 flex flex-col sm:flex-row gap-6 justify-between text-[14px]">
+      <footer className="bg-navy text-[#9aa1ab] pb-24 sm:pb-0">
+        <div className="max-w-[1240px] mx-auto px-5 py-10 flex flex-col sm:flex-row gap-6 justify-between text-sm">
           <p className="max-w-[380px]">Classical ballet values and modern performance science, for dancers who want to understand their technique and keep improving for many years.</p>
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <Link href="/pricing" className="hover:text-white">Membership</Link>
@@ -351,7 +351,7 @@ export default async function Home() {
             <a href="https://athletistry.au" className="hover:text-white">athletistry.au</a>
           </div>
         </div>
-        <p className="text-center text-[12px] pb-8">© {new Date().getFullYear()} Athletistry. All rights reserved.</p>
+        <p className="text-center text-xs pb-8">© {new Date().getFullYear()} Athletistry. All rights reserved.</p>
       </footer>
 
       {/* mobile sticky CTA */}
@@ -366,22 +366,22 @@ export default async function Home() {
 
 function PhoneMockup() {
   return (
-    <div className="w-[250px] rounded-[40px] bg-[#15181d] p-2.5 shadow-[0_30px_70px_rgba(22,33,48,.35)]">
-      <div className="rounded-[32px] overflow-hidden bg-[#f7f7f5]">
-        <div className="bg-gradient-to-br from-[#073464] to-[#075bb4] text-white px-4 pt-7 pb-4">
-          <p className="text-[9px] font-bold tracking-[.25em] text-[#9cc6f5]">ATHLETISTRY</p>
-          <p className="font-bold text-[16px] mt-0.5">Today&apos;s session</p>
+    <div className="w-[250px] rounded-3xl bg-navy p-2.5 shadow-[0_30px_70px_rgba(22,33,48,.35)]">
+      <div className="rounded-3xl overflow-hidden bg-[#f7f7f5]">
+        <div className="bg-gradient-to-br from-tealdark to-teal text-white px-4 pt-7 pb-4">
+          <p className="text-2xs font-bold tracking-[.25em] text-[#9cc6f5]">ATHLETISTRY</p>
+          <p className="font-bold text-base mt-0.5">Today&apos;s session</p>
           <div className="flex gap-1.5 mt-3">
             {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-              <span key={i} className={`w-6 h-6 rounded-full text-[9px] flex items-center justify-center ${i < 3 ? "bg-white text-[#073464] font-bold" : "bg-white/15"}`}>{d}</span>
+              <span key={i} className={`w-6 h-6 rounded-full text-2xs flex items-center justify-center ${i < 3 ? "bg-white text-tealdark font-bold" : "bg-white/15"}`}>{d}</span>
             ))}
           </div>
         </div>
         <div className="p-3 space-y-2.5">
           <div className="bg-white rounded-xl p-3 border border-[rgba(31,39,49,.08)]">
-            <p className="text-[9px] font-bold tracking-[.18em] text-[#075bb4]">MOVEMENT TYPE</p>
-            <p className="font-bold text-[13px] mt-1">The Stabiliser</p>
-            <div className="h-1.5 rounded-full bg-[#e6ecf3] mt-2"><div className="h-full w-[68%] rounded-full bg-[#075bb4]" /></div>
+            <p className="text-2xs font-bold tracking-[.18em] text-teal">MOVEMENT TYPE</p>
+            <p className="font-bold text-footnote mt-1">The Stabiliser</p>
+            <div className="h-1.5 rounded-full bg-[#e6ecf3] mt-2"><div className="h-full w-[68%] rounded-full bg-teal" /></div>
           </div>
           {[
             ["Turnout_Developer_mnankw", "Turnout Developer", "3 × 10 each side"],
@@ -391,10 +391,10 @@ function PhoneMockup() {
             <div key={id} className="bg-white rounded-xl p-2 flex items-center gap-2.5 border border-[rgba(31,39,49,.08)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={frame(id, 96, 96, 2)} alt="" className="w-11 h-11 rounded-lg object-cover" />
-              <div><p className="font-bold text-[12px]">{n}</p><p className="text-[#70757b] text-[10px]">{s}</p></div>
+              <div><p className="font-bold text-xs">{n}</p><p className="text-grey text-2xs">{s}</p></div>
             </div>
           ))}
-          <div className="rounded-xl bg-[#073464] text-white text-center text-[12px] font-bold py-2.5">Start session</div>
+          <div className="rounded-xl bg-tealdark text-white text-center text-xs font-bold py-2.5">Start session</div>
         </div>
       </div>
     </div>

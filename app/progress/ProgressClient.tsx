@@ -27,7 +27,7 @@ export default function ProgressClient({ exercises, programId }: { exercises: Ex
           <option value="">Choose an exercise…</option>
           {exercises.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
         </select>
-        <p className="text-grey text-[10px] leading-relaxed mt-3">Progress is shown from sets logged inside your current program.</p>
+        <p className="text-grey text-2xs leading-relaxed mt-3">Progress is shown from sets logged inside your current program.</p>
       </div>
       <div className="panel panel-pad min-h-[330px]">
         {loading ? <p className="text-grey text-sm">Loading…</p> : data ? <ProgressChart data={data} /> : (

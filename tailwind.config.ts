@@ -28,6 +28,19 @@ const config: Config = {
       opacity: {
         28: ".28", 35: ".35", 42: ".42", 45: ".45", 48: ".48", 55: ".55", 58: ".58", 66: ".66", 85: ".85",
       },
+      // Type scale (Apple text styles). Nothing in the app renders below 11px.
+      fontSize: {
+        "2xs": ["11px", { lineHeight: "1.3" }],      // caption 2
+        footnote: ["13px", { lineHeight: "1.4" }],
+        subhead: ["15px", { lineHeight: "1.45" }],
+        body: ["17px", { lineHeight: "1.5" }],
+        title3: ["20px", { lineHeight: "1.25", letterSpacing: "-0.01em" }],
+        title2: ["22px", { lineHeight: "1.2", letterSpacing: "-0.015em" }],
+        title1: ["28px", { lineHeight: "1.15", letterSpacing: "-0.02em" }],
+        large: ["34px", { lineHeight: "1.1", letterSpacing: "-0.025em" }],
+      },
+      // Five radii: 6 / 8 / 12 / 16 / 20, plus full.
+      borderRadius: { "3xl": "20px" },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],
         display: ["var(--font-display)", "Montserrat", "ui-sans-serif", "system-ui", "sans-serif"],

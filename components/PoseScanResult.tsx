@@ -37,7 +37,7 @@ export default function PoseScanResult({
                 <div className="min-w-0">
                   <p className="text-navy text-sm font-semibold flex items-center gap-2">
                     {p.label}
-                    <span className={`text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded border ${SEV_STYLE[p.severity] ?? "bg-light text-grey border-line"}`}>{p.severity}</span>
+                    <span className={`text-2xs font-bold uppercase tracking-wide px-1.5 py-0.5 rounded border ${SEV_STYLE[p.severity] ?? "bg-light text-grey border-line"}`}>{p.severity}</span>
                   </p>
                   <p className="text-grey text-sm mt-0.5 leading-snug">{p.action}</p>
                 </div>
@@ -60,7 +60,7 @@ export default function PoseScanResult({
       {/* needs a photo / coach */}
       {summary.needsPhoto.length > 0 && (
         <div className="card p-4 mt-4 bg-light animate-in">
-          <p className="text-[11px] font-bold uppercase tracking-wide text-grey">A camera can&apos;t grade these</p>
+          <p className="text-2xs font-bold uppercase tracking-wide text-grey">A camera can&apos;t grade these</p>
           <p className="text-navy text-sm mt-1">
             {summary.needsPhoto.join(", ")} — check these with a side/rear photo or a coach&apos;s eye.
           </p>

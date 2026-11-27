@@ -83,19 +83,19 @@ export default function MemberCheckout({ active, plan, authed, configured, initi
         <p className="eyebrow">Membership</p>
         {cancelAtPeriodEnd ? (
           <>
-            <p className="font-display text-[26px] font-bold text-ink mt-2">Cancellation scheduled</p>
+            <p className="font-display text-title1 font-bold text-ink mt-2">Cancellation scheduled</p>
             <p className="text-grey text-sm mt-1">You keep full access until {date(periodEnd)}, then your membership ends. Changed your mind?</p>
             <button onClick={resume} disabled={busy} className="btn-primary mt-5 px-6">{busy ? "Resuming…" : "Resume my membership"}</button>
           </>
         ) : pausedUntil ? (
           <>
-            <p className="font-display text-[26px] font-bold text-ink mt-2">Billing paused</p>
+            <p className="font-display text-title1 font-bold text-ink mt-2">Billing paused</p>
             <p className="text-grey text-sm mt-1">You won&apos;t be charged until {date(pausedUntil)}. Your access continues in the meantime.</p>
             <button onClick={resume} disabled={busy} className="btn-ghost mt-5 px-5">{busy ? "Resuming…" : "Resume billing now"}</button>
           </>
         ) : (
           <>
-            <p className="font-display text-[26px] font-bold text-ink mt-2">You&apos;re a member ✓</p>
+            <p className="font-display text-title1 font-bold text-ink mt-2">You&apos;re a member ✓</p>
             <p className="text-grey text-sm mt-1">Your {plan === "yearly" ? "annual" : "monthly"} membership is active. Thank you for training with us.</p>
           </>
         )}
@@ -120,12 +120,12 @@ export default function MemberCheckout({ active, plan, authed, configured, initi
           const sel = interval === o.key;
           return (
             <button key={o.key} onClick={() => setInterval(o.key)}
-              className={`text-left rounded-[22px] border p-5 transition ${sel ? "border-teal bg-bluewash" : "border-line bg-white/50 hover:border-teal/40"}`}>
+              className={`text-left rounded-3xl border p-5 transition ${sel ? "border-teal bg-bluewash" : "border-line bg-white/50 hover:border-teal/40"}`}>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-[.14em] text-grey">{o.label}</span>
-                {o.note && <span className="text-[10px] font-bold text-tealdark bg-white rounded-full px-2 py-0.5 border border-line">{o.note}</span>}
+                <span className="text-2xs font-bold uppercase tracking-[.14em] text-grey">{o.label}</span>
+                {o.note && <span className="text-2xs font-bold text-tealdark bg-white rounded-full px-2 py-0.5 border border-line">{o.note}</span>}
               </div>
-              <p className="font-display text-[34px] font-bold text-ink leading-none mt-2">{o.price}</p>
+              <p className="font-display text-large font-bold text-ink leading-none mt-2">{o.price}</p>
               <p className="text-grey text-xs mt-1">{o.sub}</p>
               <span className={`mt-3 inline-flex w-5 h-5 rounded-full border-2 ${sel ? "border-teal bg-teal" : "border-line"}`} />
             </button>
@@ -140,7 +140,7 @@ export default function MemberCheckout({ active, plan, authed, configured, initi
         <form onSubmit={createAndPay} className="panel panel-pad mt-4 space-y-3">
           <div className="flex items-center justify-between">
             <p className="eyebrow">{mode === "create" ? "Step 1 · Create your account" : "Step 1 · Log in"}</p>
-            <span className="text-grey text-[11px]">Step 2 · Payment</span>
+            <span className="text-grey text-2xs">Step 2 · Payment</span>
           </div>
           {mode === "create" && (
             <input className="input" type="text" placeholder="Your name" required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
@@ -162,7 +162,7 @@ export default function MemberCheckout({ active, plan, authed, configured, initi
       )}
       {!configured && <p className="text-grey text-xs mt-2 text-center">Membership billing isn&apos;t switched on yet.</p>}
       {msg && <p className="text-red-600 text-sm mt-2 text-center">{msg}</p>}
-      <p className="text-grey text-[11px] mt-3 text-center">Secure checkout by Stripe · cancel anytime</p>
+      <p className="text-grey text-2xs mt-3 text-center">Secure checkout by Stripe · cancel anytime</p>
     </div>
   );
 }

@@ -71,7 +71,7 @@ export default function SideNav() {
         key={it.href}
         href={it.href}
         aria-current={active ? "page" : undefined}
-        className={`sidebar-link flex items-center gap-3 px-3 ${quiet ? "py-1.5 text-[11px]" : "py-2.5 text-[13px]"} ${active ? "sidebar-link-active font-semibold" : ""}`}
+        className={`sidebar-link flex items-center gap-3 px-3 ${quiet ? "py-1.5 text-2xs" : "py-2.5 text-footnote"} ${active ? "sidebar-link-active font-semibold" : ""}`}
       >
         <Icon name={it.icon} className="w-[18px] h-[18px] shrink-0" strokeWidth={active ? 1.9 : 1.45} />
         <span className="truncate">{it.label}</span>
@@ -100,11 +100,11 @@ export default function SideNav() {
       </nav>
 
       <Link href="/profile" className="sidebar-footer mx-3 mb-2 p-3.5 flex items-center gap-3 hover:bg-white/[.04] transition">
-        <span className="w-8 h-8 rounded-full grid place-items-center bg-white/[.08] border border-white/10 text-white font-display text-[17px] italic">{memberName.charAt(0).toUpperCase()}</span>
-        <span className="min-w-0 flex-1"><span className="block text-[7px] uppercase tracking-[.13em] text-white/30">Welcome back</span><span className="block text-[11px] font-semibold text-white/80 truncate mt-0.5">{memberName}</span></span>
+        <span className="w-8 h-8 rounded-full grid place-items-center bg-white/[.08] border border-white/10 text-white font-display text-body italic">{memberName.charAt(0).toUpperCase()}</span>
+        <span className="min-w-0 flex-1"><span className="block text-2xs uppercase tracking-[.13em] text-white/30">Welcome back</span><span className="block text-2xs font-semibold text-white/80 truncate mt-0.5">{memberName}</span></span>
         <Icon name="chevron" className="w-3.5 h-3.5 text-white/25" />
       </Link>
-      <button onClick={signOut} className="mx-3 mb-4 flex items-center gap-3 px-3 py-2 rounded-xl text-[11px] text-white/42 hover:text-white hover:bg-white/[.05] shrink-0 transition">
+      <button onClick={signOut} className="mx-3 mb-4 flex items-center gap-3 px-3 py-2 rounded-xl text-2xs text-white/42 hover:text-white hover:bg-white/[.05] shrink-0 transition">
         <Icon name="chevron" className="w-[16px] h-[16px] rotate-180" /> Sign out
       </button>
     </aside>

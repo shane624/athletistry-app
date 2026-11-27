@@ -23,10 +23,10 @@ function ChartTooltip({ active, payload, label }: any) {
   return (
     <div className="toast-card px-3.5 py-2.5 text-left">
       <p className="eyebrow">Week {label}</p>
-      <p className="text-ink text-[15px] font-display font-bold leading-none mt-1.5">
-        {top ?? "—"} <span className="text-grey text-[10px] font-sans font-semibold">kg top set</span>
+      <p className="text-ink text-subhead font-display font-bold leading-none mt-1.5">
+        {top ?? "—"} <span className="text-grey text-2xs font-sans font-semibold">kg top set</span>
       </p>
-      <p className="text-grey text-[10px] mt-1.5">{vol != null ? `${Intl.NumberFormat("en-AU").format(vol)} kg total volume` : "No volume logged"}</p>
+      <p className="text-grey text-2xs mt-1.5">{vol != null ? `${Intl.NumberFormat("en-AU").format(vol)} kg total volume` : "No volume logged"}</p>
     </div>
   );
 }
@@ -35,8 +35,8 @@ export default function ProgressChart({ data }: { data: Pt[] }) {
   if (!data.length) {
     return (
       <div className="text-center py-10">
-        <p className="text-ink text-[13px] font-semibold">Nothing logged for this exercise yet</p>
-        <p className="text-grey text-[11px] mt-1.5 max-w-[34ch] mx-auto leading-relaxed">
+        <p className="text-ink text-footnote font-semibold">Nothing logged for this exercise yet</p>
+        <p className="text-grey text-2xs mt-1.5 max-w-[34ch] mx-auto leading-relaxed">
           Log a set on today&apos;s session and your top weight will start plotting here week by week.
         </p>
       </div>

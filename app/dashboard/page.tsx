@@ -87,7 +87,7 @@ export default async function Dashboard() {
           <Greeting name={displayName} programName={today.programName} />
           <div className="flex items-center gap-4 pb-1 whitespace-nowrap">
             <TourButton />
-            <Link href="/programs" className="inline-flex items-center gap-1 text-teal text-[12px] font-bold tracking-wide hover:text-tealdark transition">
+            <Link href="/programs" className="inline-flex items-center gap-1 text-teal text-xs font-bold tracking-wide hover:text-tealdark transition">
               Change program <span aria-hidden>↗</span>
             </Link>
           </div>
@@ -104,7 +104,7 @@ export default async function Dashboard() {
                   alt=""
                   className="absolute inset-y-0 right-0 h-full w-[48%] object-cover object-center opacity-[.48] grayscale-[.15] hidden md:block"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#15181d] via-[#15181d]/95 to-[#15181d]/20 hidden md:block" />
+                <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/95 to-navy/20 hidden md:block" />
               </>
             )}
             <div className="relative z-[1]">
@@ -130,7 +130,7 @@ export default async function Dashboard() {
 
               {totalEx > 0 && (
                 <div className="max-w-2xl mb-5">
-                  <div className="flex items-center justify-between text-[10px] uppercase tracking-[.12em] text-white/55 mb-2">
+                  <div className="flex items-center justify-between text-2xs uppercase tracking-[.12em] text-white/55 mb-2">
                     <span>Session progress</span><span>{pct}%</span>
                   </div>
                   <div className="hero-progress-track"><div className="hero-progress-fill transition-all duration-700" style={{ width: `${pct}%` }} /></div>
@@ -156,7 +156,7 @@ export default async function Dashboard() {
             <div className="relative z-[1] flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <p className="eyebrow">{assessment.taper ? "Taper week" : "Training calendar"}</p>
-                <p className="font-display text-[23px] leading-tight font-bold text-navy mt-1.5">{assessment.message}</p>
+                <p className="font-display text-2xl leading-tight font-bold text-navy mt-1.5">{assessment.message}</p>
               </div>
               <span className="w-10 h-10 rounded-full border border-line bg-white/55 flex items-center justify-center text-teal shrink-0">→</span>
             </div>
@@ -166,7 +166,7 @@ export default async function Dashboard() {
         {today.principle && (
           <div className="principle-panel animate-in">
             <p className="eyebrow">The principle</p>
-            <p className="font-display text-[25px] sm:text-[29px] text-navy mt-2 max-w-4xl leading-[1.08] font-bold">{today.principle}</p>
+            <p className="font-display text-title1 sm:text-3xl text-navy mt-2 max-w-4xl leading-[1.08] font-bold">{today.principle}</p>
           </div>
         )}
 
@@ -179,7 +179,7 @@ export default async function Dashboard() {
                 <p className="eyebrow">Prepare</p>
                 <h2 className="dashboard-section-title mt-1">Before you begin.</h2>
               </div>
-              <Link href="/warmups" className="text-[12px] font-bold text-teal hover:text-tealdark">All warm-ups →</Link>
+              <Link href="/warmups" className="text-xs font-bold text-teal hover:text-tealdark">All warm-ups →</Link>
             </div>
             <div data-tour="warmup"><WarmUp /></div>
             <EquipmentNeeded names={today.exercises.map((ex) => ex.name)} className="mb-4" />
@@ -189,7 +189,7 @@ export default async function Dashboard() {
                 <p className="eyebrow">Your practice</p>
                 <h2 className="dashboard-section-title mt-1">Today&apos;s exercises.</h2>
               </div>
-              <p className="hidden sm:block text-[12px] text-grey">Quality over quantity.</p>
+              <p className="hidden sm:block text-xs text-grey">Quality over quantity.</p>
             </div>
           </>
         )}

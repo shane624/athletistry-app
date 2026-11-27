@@ -69,7 +69,7 @@ export default async function MovementMapPage({ searchParams }: { searchParams: 
                 <span className="absolute top-4 left-4 w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-white">
                   <Icon name="target" className="w-5 h-5" />
                 </span>
-                <span className="text-white/70 text-[11px] font-bold uppercase tracking-widest">Recommended</span>
+                <span className="text-white/70 text-2xs font-bold uppercase tracking-widest">Recommended</span>
                 <span className="text-white font-bold text-lg leading-tight">Camera posture scan</span>
                 <span className="text-white/85 text-xs mt-1">Your camera tracks your body points from 3 angles. ~1 min.</span>
               </Link>
@@ -79,7 +79,7 @@ export default async function MovementMapPage({ searchParams }: { searchParams: 
                 <span className="w-10 h-10 rounded-xl bg-light flex items-center justify-center text-teal mb-auto">
                   <Icon name="sparkle" className="w-5 h-5" />
                 </span>
-                <span className="text-grey text-[11px] font-bold uppercase tracking-widest">Quick</span>
+                <span className="text-grey text-2xs font-bold uppercase tracking-widest">Quick</span>
                 <span className="text-navy font-bold text-lg leading-tight">Self-assessment quiz</span>
                 <span className="text-grey text-xs mt-1">Answer 5 movement questions. ~7 min, no camera.</span>
               </Link>

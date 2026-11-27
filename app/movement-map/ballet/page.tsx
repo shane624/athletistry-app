@@ -63,7 +63,7 @@ export default async function BalletLabPage({ searchParams }: { searchParams: { 
                   <span className="w-9 h-9 rounded-xl bg-light flex items-center justify-center text-teal">
                     <Icon name="target" className="w-5 h-5" />
                   </span>
-                  {complete && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal text-white">Done ✓</span>}
+                  {complete && <span className="text-2xs font-bold px-1.5 py-0.5 rounded bg-teal text-white">Done ✓</span>}
                 </div>
                 <p className="text-navy font-bold mt-2">{m.name}</p>
                 <p className="text-grey text-xs mt-1 flex-1">{m.tip}</p>

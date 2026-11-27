@@ -95,7 +95,7 @@ export default function OnboardingClient() {
             <span className="w-11 h-11 rounded-2xl grad-navy text-white flex items-center justify-center shrink-0">
               <Icon name="sparkle" className="w-6 h-6" />
             </span>
-            <h2 className="font-display text-[21px] leading-tight font-bold text-ink">{rec.name}</h2>
+            <h2 className="font-display text-title2 leading-tight font-bold text-ink">{rec.name}</h2>
           </div>
           <p className="text-grey text-sm mt-3">{rec.why}</p>
         </div>
@@ -144,7 +144,7 @@ export default function OnboardingClient() {
               </span>
             )}
             <span>
-              <span className="block font-semibold text-ink text-[13px]">{c.label}</span>
+              <span className="block font-semibold text-ink text-footnote">{c.label}</span>
               {c.sub && <span className="block text-grey text-sm">{c.sub}</span>}
             </span>
             <Icon name="chevron" className="w-5 h-5 text-teal ml-auto shrink-0" />

@@ -6,6 +6,7 @@ import { getAchievements } from "@/lib/achievements-data";
 import { getMovementMap } from "@/lib/movement-map-data";
 import { MOVEMENT_TYPES } from "@/lib/movement-map";
 import { PROGRAMS } from "@/lib/programs";
+import { LEARN_TOOLS } from "@/lib/nav-items";
 
 export const dynamic = "force-dynamic";
 
@@ -40,28 +41,28 @@ export default async function ProfilePage() {
             <h1>Profile</h1>
             <p className="mt-3">Your training identity, progress, and current path through Athletistry.</p>
           </div>
-          <Link href="/settings" className="btn-ghost !min-h-[38px] !px-4 !text-[11px]"><Icon name="settings" className="w-4 h-4 mr-2" /> Settings</Link>
+          <Link href="/settings" className="btn-ghost !min-h-[38px] !px-4 !text-2xs"><Icon name="settings" className="w-4 h-4 mr-2" /> Settings</Link>
         </header>
 
         <section className="profile-grid">
           {/* left — identity + rank */}
           <div className="panel profile-card-main animate-in">
             <div className="profile-avatar"><span>{initial}</span></div>
-            <h2 className="font-display text-[34px] leading-none font-bold text-ink">{displayName}</h2>
-            <span className="inline-flex mt-3 items-center rounded-full bg-bluewash px-3 py-1 text-[9px] font-bold text-tealdark uppercase tracking-[.1em]">{achievements.level.name}</span>
-            {user?.email && <p className="text-grey text-[10px] mt-3 break-all">{user.email}</p>}
-            {memberSince && <p className="text-grey text-[10px] mt-1">Member since {new Date(memberSince).toLocaleDateString("en-AU", { month: "long", year: "numeric" })}</p>}
+            <h2 className="font-display text-large leading-none font-bold text-ink">{displayName}</h2>
+            <span className="inline-flex mt-3 items-center rounded-full bg-bluewash px-3 py-1 text-2xs font-bold text-tealdark uppercase tracking-[.1em]">{achievements.level.name}</span>
+            {user?.email && <p className="text-grey text-2xs mt-3 break-all">{user.email}</p>}
+            {memberSince && <p className="text-grey text-2xs mt-1">Member since {new Date(memberSince).toLocaleDateString("en-AU", { month: "long", year: "numeric" })}</p>}
 
             {/* rank progress */}
             <div className="mt-6 text-left">
-              <div className="flex items-center justify-between text-[9px] uppercase tracking-[.1em] text-grey">
+              <div className="flex items-center justify-between text-2xs uppercase tracking-[.1em] text-grey">
                 <span>{achievements.level.name}</span>
                 {achievements.nextLevel && <span>{achievements.nextLevel.name}</span>}
               </div>
               <div className="mt-1.5 h-2 rounded-full bg-line overflow-hidden">
                 <div className="h-full rounded-full bg-teal" style={{ width: `${achievements.nextLevel ? rankPct : 100}%` }} />
               </div>
-              <p className="text-grey text-[10px] mt-1.5">
+              <p className="text-grey text-2xs mt-1.5">
                 {achievements.nextLevel ? `${achievements.toNextLevel} more training day${achievements.toNextLevel === 1 ? "" : "s"} to ${achievements.nextLevel.name}` : "Top rank reached — keep it up."}
               </p>
             </div>
@@ -79,7 +80,7 @@ export default async function ProfilePage() {
             <section className="panel panel-pad animate-in">
               <div className="flex items-center justify-between">
                 <p className="panel-title">This week</p>
-                <span className="text-[10px] text-grey">{achievements.weekCount} / {achievements.weeklyGoal} training days</span>
+                <span className="text-2xs text-grey">{achievements.weekCount} / {achievements.weeklyGoal} training days</span>
               </div>
               <div className="mt-3 h-2.5 rounded-full bg-line overflow-hidden">
                 <div className="h-full rounded-full bg-teal" style={{ width: `${weekPct}%` }} />
@@ -100,7 +101,7 @@ export default async function ProfilePage() {
             <section className="panel animate-in">
               <div className="px-4 pt-4 pb-2 flex items-center justify-between">
                 <p className="panel-title">Achievements</p>
-                <Link href="/achievements" className="text-[10px] text-teal font-semibold">{earned.length} of {achievements.badges.length} · View all</Link>
+                <Link href="/achievements" className="text-2xs text-teal font-semibold">{earned.length} of {achievements.badges.length} · View all</Link>
               </div>
               <div className="px-4 pb-4">
                 {earned.length ? (
@@ -108,12 +109,12 @@ export default async function ProfilePage() {
                     {earned.slice(0, 6).map((b) => (
                       <div key={b.id} className="rounded-xl border border-line bg-white/40 px-3 py-2.5 flex items-center gap-2">
                         <span className="w-7 h-7 rounded-lg bg-bluewash flex items-center justify-center text-tealdark shrink-0"><Icon name="trophy" className="w-4 h-4" /></span>
-                        <span className="min-w-0"><span className="block text-[11px] font-semibold text-ink truncate">{b.name}</span><span className="block text-[9px] text-grey truncate">{b.desc}</span></span>
+                        <span className="min-w-0"><span className="block text-2xs font-semibold text-ink truncate">{b.name}</span><span className="block text-2xs text-grey truncate">{b.desc}</span></span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-grey text-[11px]">No badges yet — log your first workout to start earning them.</p>
+                  <p className="text-grey text-2xs">No badges yet — log your first workout to start earning them.</p>
                 )}
               </div>
             </section>
@@ -127,10 +128,24 @@ export default async function ProfilePage() {
               </div>
             </section>
 
+            {/* Learn lives here on phones (five tabs is the limit), so it needs a door. */}
+            <section className="panel animate-in">
+              <div className="px-4 pt-4 pb-2"><p className="panel-title">Learn</p></div>
+              <div className="profile-list">
+                {LEARN_TOOLS.map((t) => (
+                  <Link key={t.href} href={t.href} className="profile-list-row profile-list-row-nav">
+                    <span className="flex items-center gap-3 text-subhead text-ink"><Icon name={t.icon} className="w-5 h-5 text-teal" />{t.label}</span>
+                    <span />
+                    <Icon name="chevron" className="w-4 h-4 text-grey" />
+                  </Link>
+                ))}
+              </div>
+            </section>
+
             <section className="panel panel-pad animate-in">
               <p className="panel-title">Your practice</p>
-              <blockquote className="font-display text-[28px] leading-[1.02] font-bold text-ink mt-3">&ldquo;Technique gives you choices. Practice turns them into freedom.&rdquo;</blockquote>
-              <p className="text-grey text-[10px] mt-3">Keep the standards high. Keep the body adaptable. Practice for many years.</p>
+              <blockquote className="font-display text-title1 leading-[1.02] font-bold text-ink mt-3">&ldquo;Technique gives you choices. Practice turns them into freedom.&rdquo;</blockquote>
+              <p className="text-grey text-2xs mt-3">Keep the standards high. Keep the body adaptable. Practice for many years.</p>
             </section>
           </div>
         </section>
@@ -143,11 +158,11 @@ function Stat({ n, label }: { n: number; label: string }) {
   return (
     <div className="rounded-xl border border-line py-3 text-center">
       <p className="font-display text-2xl font-bold text-ink leading-none">{n}</p>
-      <p className="text-[8px] uppercase tracking-[.1em] text-grey mt-1">{label}</p>
+      <p className="text-2xs uppercase tracking-[.1em] text-grey mt-1">{label}</p>
     </div>
   );
 }
 
 function ProfileRow({ label, value, href }: { label: string; value: string; href: string }) {
-  return <Link href={href} className="profile-list-row hover:bg-white/30 transition"><span className="text-[9px] uppercase tracking-[.1em] text-grey">{label}</span><span className="text-[11px] font-medium text-ink text-right sm:text-left truncate">{value}</span><Icon name="chevron" className="w-3.5 h-3.5 text-grey" /></Link>;
+  return <Link href={href} className="profile-list-row"><span className="text-footnote text-grey">{label}</span><span className="text-subhead text-ink text-right sm:text-left truncate">{value}</span><Icon name="chevron" className="w-4 h-4 text-grey" /></Link>;
 }

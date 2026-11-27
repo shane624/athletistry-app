@@ -50,8 +50,8 @@ export default async function StudentOverviewPage({ params }: { params: { id: st
           <div className="flex items-center justify-between">
             <p className="eyebrow">Training load</p>
             {!o.load.tracking
-              ? <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-700">Not tracking</span>
-              : <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${LOAD_STYLE[o.load.status] ?? "bg-light text-grey"}`}>{o.load.label}</span>}
+              ? <span className="text-2xs font-bold px-2 py-0.5 rounded bg-red-100 text-red-700">Not tracking</span>
+              : <span className={`text-2xs font-bold px-2 py-0.5 rounded ${LOAD_STYLE[o.load.status] ?? "bg-light text-grey"}`}>{o.load.label}</span>}
           </div>
           {!o.load.tracking ? (
             <p className="text-navy text-sm mt-2">
@@ -69,7 +69,7 @@ export default async function StudentOverviewPage({ params }: { params: { id: st
                   </div>
                 ))}
               </div>
-              <div className="flex justify-between text-grey text-[11px] mt-1">
+              <div className="flex justify-between text-grey text-2xs mt-1">
                 <span>{o.load.weeks.length}-week load</span>
                 {o.load.changePct !== null && <span>{o.load.changePct >= 0 ? "+" : ""}{o.load.changePct}% vs last week</span>}
               </div>
@@ -120,7 +120,7 @@ function Stat({ value, label, alert }: { value: string; label: string; alert?: b
   return (
     <div className="card p-3 text-center">
       <div className={`text-lg font-extrabold ${alert ? "text-red-600" : "text-navy"}`}>{value}</div>
-      <div className="text-grey text-[11px] mt-0.5">{label}</div>
+      <div className="text-grey text-2xs mt-0.5">{label}</div>
     </div>
   );
 }

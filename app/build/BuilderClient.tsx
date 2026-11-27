@@ -133,7 +133,7 @@ export default function BuilderClient({ allExercises, initial }: { allExercises:
             <h3 className="font-semibold text-navy">Day {activeDay + 1} — your routine</h3>
             {selected.size >= 2
               ? <button onClick={makeSuperset} className="text-teal text-xs font-bold">Make superset ({selected.size})</button>
-              : day.items.length >= 2 && <span className="text-grey text-[11px]">Tick 2+ to superset</span>}
+              : day.items.length >= 2 && <span className="text-grey text-2xs">Tick 2+ to superset</span>}
           </div>
           {day.items.length === 0 && <p className="text-grey text-sm mt-2">No exercises yet. Tap from the library to add them (you can add the same one more than once).</p>}
           <ul className="mt-2 space-y-2">
@@ -149,10 +149,10 @@ export default function BuilderClient({ allExercises, initial }: { allExercises:
                   <input type="checkbox" className="accent-teal w-4 h-4 mx-1 shrink-0"
                     checked={selected.has(it.key)} onChange={() => toggleSelect(it.key)} aria-label={`Select ${e.name} for a superset`} />
                   <span className="flex-1 text-sm min-w-0">
-                    {grouped && !prevGrouped && <span className="block text-[10px] font-bold uppercase tracking-wide" style={{ color: supersetColor(it.group!) }}>Superset · do back to back</span>}
+                    {grouped && !prevGrouped && <span className="block text-2xs font-bold uppercase tracking-wide" style={{ color: supersetColor(it.group!) }}>Superset · do back to back</span>}
                     {e.name} <span className="text-grey text-xs">· L{e.level}</span>
                   </span>
-                  {grouped && <button onClick={() => ungroup(it.group!)} className="text-grey text-[11px] px-1 shrink-0" aria-label="Ungroup superset">ungroup</button>}
+                  {grouped && <button onClick={() => ungroup(it.group!)} className="text-grey text-2xs px-1 shrink-0" aria-label="Ungroup superset">ungroup</button>}
                   <button onClick={() => move(i, -1)} className="text-grey w-9 h-9 inline-flex items-center justify-center" aria-label={`Move ${e.name} up`}>↑</button>
                   <button onClick={() => move(i, 1)} className="text-grey w-9 h-9 inline-flex items-center justify-center" aria-label={`Move ${e.name} down`}>↓</button>
                   <button onClick={() => removeAt(i)} className="text-red-600 w-9 h-9 inline-flex items-center justify-center" aria-label={`Remove ${e.name}`}>✕</button>

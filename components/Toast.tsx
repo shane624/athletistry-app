@@ -102,8 +102,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 <VariantIcon variant={t.variant} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-ink text-[13px] font-semibold tracking-[-.01em]">{t.title}</span>
-                {t.message && <span className="block text-grey text-[11px] leading-snug mt-0.5">{t.message}</span>}
+                <span className="block text-ink text-footnote font-semibold tracking-[-.01em]">{t.title}</span>
+                {t.message && <span className="block text-grey text-2xs leading-snug mt-0.5">{t.message}</span>}
               </span>
             </motion.div>
           ))}

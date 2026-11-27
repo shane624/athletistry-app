@@ -28,8 +28,8 @@ function Bar({ label, value, average, unit }: { label: string; value: number; av
   return (
     <div className="rhythm-bar-row">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-ink text-[11px] font-semibold">{label}</span>
-        <span className="text-grey text-[10px]">
+        <span className="text-ink text-2xs font-semibold">{label}</span>
+        <span className="text-grey text-2xs">
           <b className="text-ink">{value}</b>
           {unit}
           {average !== null && <> · usually {average}{unit}</>}
@@ -55,17 +55,17 @@ export default function WeekRhythm({ rhythm }: { rhythm: Rhythm }) {
           <p className="eyebrow">This week</p>
           <h2 className="dashboard-section-title mt-1">What you&apos;ve done.</h2>
         </div>
-        <Link href="/load" className="text-[12px] font-bold text-teal hover:text-tealdark">Training calendar →</Link>
+        <Link href="/load" className="text-xs font-bold text-teal hover:text-tealdark">Training calendar →</Link>
       </div>
 
       <div className="panel overflow-hidden">
         {trained.length === 0 ? (
           <div className="px-4 py-7 text-center">
-            <p className="text-ink text-[12px] font-semibold">Nothing logged this week yet</p>
-            <p className="text-grey text-[10px] mt-1.5 max-w-[36ch] mx-auto leading-relaxed">
+            <p className="text-ink text-xs font-semibold">Nothing logged this week yet</p>
+            <p className="text-grey text-2xs mt-1.5 max-w-[36ch] mx-auto leading-relaxed">
               Log a class or rehearsal on the calendar and the week fills in here.
             </p>
-            <Link href="/load" className="btn-ghost !min-h-[38px] !text-[11px] mt-4">Log a class</Link>
+            <Link href="/load" className="btn-ghost !min-h-[38px] !text-2xs mt-4">Log a class</Link>
           </div>
         ) : (
           rhythm.days.map((d) =>
@@ -100,7 +100,7 @@ export default function WeekRhythm({ rhythm }: { rhythm: Rhythm }) {
             <Bar label="Minutes trained" value={rhythm.minutes} average={rhythm.avgMinutes} unit=" min" />
           </div>
           {!rhythm.hasHistory && (
-            <p className="text-grey text-[9px] leading-relaxed mt-3">
+            <p className="text-grey text-2xs leading-relaxed mt-3">
               Once you have a few weeks logged, these compare against your own average.
             </p>
           )}

@@ -22,18 +22,18 @@ export default async function AchievementStrip() {
             <circle cx="18" cy="18" r={R} fill="none" stroke="var(--c-teal)" strokeWidth="2.7" strokeLinecap="round" strokeDasharray={C} strokeDashoffset={offset} className="ring-draw" style={{ ["--ring-c" as string]: String(C) }} />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="font-display text-[26px] font-bold text-navy leading-none">{a.weekCount}</span>
-            <span className="text-[9px] tracking-wide text-grey">of {a.weeklyGoal}</span>
+            <span className="font-display text-title1 font-bold text-navy leading-none">{a.weekCount}</span>
+            <span className="text-2xs tracking-wide text-grey">of {a.weeklyGoal}</span>
           </div>
         </div>
 
         <div className="min-w-0 flex-1">
           <p className="eyebrow">Your week</p>
-          <p className="font-display text-[24px] leading-none font-bold text-navy mt-1.5">Keep building.</p>
-          <p className="text-grey text-[12px] mt-2 leading-snug">{nudge}</p>
+          <p className="font-display text-2xl leading-none font-bold text-navy mt-1.5">Keep building.</p>
+          <p className="text-grey text-xs mt-2 leading-snug">{nudge}</p>
           <div className="flex items-center gap-3 mt-2.5 flex-wrap">
-            {a.currentStreak > 0 && <span className="text-[11px] font-semibold text-navy">{a.currentStreak}-week streak</span>}
-            <span className="text-[11px] font-bold text-teal">{a.level.name}</span>
+            {a.currentStreak > 0 && <span className="text-2xs font-semibold text-navy">{a.currentStreak}-week streak</span>}
+            <span className="text-2xs font-bold text-teal">{a.level.name}</span>
           </div>
         </div>
       </div>
