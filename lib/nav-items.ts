@@ -43,6 +43,7 @@ export const TRAIN_TOOLS: NavItem[] = [
 
 export const PROGRESS_TOOLS: NavItem[] = [
   { href: "/progress", label: "Trend", icon: "chart" },
+  { href: "/self-tests", label: "Self-Tests", icon: "target" },
   { href: "/achievements", label: "Achievements", icon: "trophy" },
 ];
 
