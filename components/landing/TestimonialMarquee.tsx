@@ -11,13 +11,13 @@ export default function TestimonialMarquee({ items }: { items: T[] }) {
           <div key={k} aria-hidden={k === 1} className="lp-marquee flex shrink-0 gap-[var(--gap)] group-hover:[animation-play-state:paused]">
             {loop.map((t, i) => (
               <figure key={`${k}-${i}`} className="lp-card w-[320px] shrink-0 p-6 flex flex-col">
-                <p className="text-[#075bb4] tracking-[.2em] text-[13px]">★★★★★</p>
-                <blockquote className="text-[15px] leading-relaxed mt-3 flex-1 text-[#24272c]">&ldquo;{t.quote}&rdquo;</blockquote>
+                <p className="text-teal tracking-[.2em] text-footnote">★★★★★</p>
+                <blockquote className="text-subhead leading-relaxed mt-3 flex-1 text-ink">&ldquo;{t.quote}&rdquo;</blockquote>
                 <figcaption className="mt-4 flex items-center gap-3">
-                  <span className="w-9 h-9 rounded-full bg-gradient-to-br from-[#073464] to-[#0d72d8] text-white text-[13px] font-bold flex items-center justify-center">
+                  <span className="w-9 h-9 rounded-full bg-gradient-to-br from-tealdark to-teal text-white text-footnote font-bold flex items-center justify-center">
                     {t.name.charAt(0)}
                   </span>
-                  <span><span className="block font-bold text-[14px]">{t.name}</span><span className="block text-[#70757b] text-[12px]">{t.role}</span></span>
+                  <span><span className="block font-bold text-sm">{t.name}</span><span className="block text-grey text-xs">{t.role}</span></span>
                 </figcaption>
               </figure>
             ))}

@@ -46,13 +46,13 @@ export default async function PricingPage({ searchParams }: { searchParams?: { r
           {PERKS.map((p) => (
             <div key={p.title} className="panel panel-pad">
               <span className="w-10 h-10 rounded-2xl bg-bluewash flex items-center justify-center text-tealdark"><Icon name={p.icon} className="w-5 h-5" /></span>
-              <h3 className="font-display text-[19px] font-bold text-ink mt-3">{p.title}</h3>
+              <h3 className="font-display text-title3 font-bold text-ink mt-3">{p.title}</h3>
               <p className="text-grey text-sm mt-1">{p.body}</p>
             </div>
           ))}
         </section>
 
-        <p className="text-grey text-[11px] text-center mt-8">
+        <p className="text-grey text-2xs text-center mt-8">
           Prices in USD. Your membership renews automatically until cancelled — manage or cancel anytime from this page.
           {!user && <> Already a member? <a href="/login" className="text-teal">Log in</a>.</>}
         </p>

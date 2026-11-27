@@ -1,12 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Oswald, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/Toast";
 
-// Editorial serif + clean UI sans: ballet publication, not generic fitness SaaS.
-const sans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-sans", display: "swap" });
-// Display face matches the landing page / athletistry.au: condensed, bold, uppercase headlines.
-const display = Oswald({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-display", display: "swap" });
+// Type is the platform system font (SF on Apple devices): optical sizing and
+// tracking tables come for free, and no web font blocks first paint.
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://athletistry.app"),
@@ -42,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f4f4f2",
+  themeColor: [{ media: "(prefers-color-scheme: light)", color: "#f5f5f7" }, { media: "(prefers-color-scheme: dark)", color: "#000000" }],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -63,7 +60,7 @@ const SPLASH: { media: string; href: string }[] = [
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${display.variable}`}>
+    <html lang="en">
       <body className="font-sans">
         {SPLASH.map((s) => (
           <link key={s.href} rel="apple-touch-startup-image" media={s.media} href={s.href} />

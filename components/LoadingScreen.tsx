@@ -46,7 +46,7 @@ export default function LoadingScreen({
           alt="Athletistry"
           width={92}
           height={92}
-          className="rounded-[22px] shadow-2xl"
+          className="rounded-3xl shadow-2xl"
         />
       </div>
 

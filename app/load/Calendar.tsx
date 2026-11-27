@@ -197,21 +197,21 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
         className={`relative flex flex-col items-center justify-start rounded-2xl transition-colors ${big ? "py-2.5 gap-1" : "pt-1.5 pb-2 gap-1"} ${outside ? "opacity-35" : ""}`}
         style={{ minHeight: big ? 86 : 54, background: isSel ? undefined : heatBg(load) }}
       >
-        {isSel && <motion.span layoutId="cal-sel" transition={SPRING} className="absolute inset-0 rounded-2xl bg-gradient-to-b from-[#0d72d8] to-[#075bb4] shadow-[0_8px_18px_rgba(7,91,180,.35)]" />}
-        {big && <span className={`relative text-[10px] font-bold uppercase tracking-[.12em] ${isSel ? "text-white/75" : "text-grey"}`}>{DOW_LONG[(d.getDay() + 6) % 7]}</span>}
-        <span className={`relative leading-none ${big ? "text-[20px] font-display font-bold" : "text-[13px] font-semibold"} ${isSel ? "text-white" : isToday ? "text-teal" : "text-ink"}`}>
+        {isSel && <motion.span layoutId="cal-sel" transition={SPRING} className="absolute inset-0 rounded-2xl bg-gradient-to-b from-teal to-teal shadow-[0_8px_18px_rgba(7,91,180,.35)]" />}
+        {big && <span className={`relative text-2xs font-bold uppercase tracking-[.12em] ${isSel ? "text-white/75" : "text-grey"}`}>{DOW_LONG[(d.getDay() + 6) % 7]}</span>}
+        <span className={`relative leading-none ${big ? "text-title3 font-display font-bold" : "text-footnote font-semibold"} ${isSel ? "text-white" : isToday ? "text-teal" : "text-ink"}`}>
           {d.getDate()}
           {isToday && !isSel && <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-teal" />}
         </span>
         <span className="relative flex items-center justify-center gap-[3px] flex-wrap max-w-[90%] mt-0.5">
-          {ev.length > 0 && <span className={`text-[9px] leading-none ${isSel ? "text-white" : "text-[#d4a017]"}`}>★</span>}
+          {ev.length > 0 && <span className={`text-2xs leading-none ${isSel ? "text-white" : "text-[#d4a017]"}`}>★</span>}
           {plan && plan.sessionType !== "rest" && (
-            <span className="w-[7px] h-[7px] rotate-45 rounded-[1px]" style={{ background: isSel ? "#fff" : PLAN_COLOR[plan.sessionType] ?? "#075bb4" }} />
+            <span className="w-[7px] h-[7px] rotate-45 rounded" style={{ background: isSel ? "#fff" : PLAN_COLOR[plan.sessionType] ?? "#075bb4" }} />
           )}
           {s.slice(0, 3).map((x) => (
             <span key={x.id} className="w-[6px] h-[6px] rounded-full" style={{ background: isSel ? "rgba(255,255,255,.9)" : classColor(x.kind) }} />
           ))}
-          {s.length > 3 && <span className={`text-[8px] font-bold leading-none ${isSel ? "text-white" : "text-grey"}`}>+{s.length - 3}</span>}
+          {s.length > 3 && <span className={`text-2xs font-bold leading-none ${isSel ? "text-white" : "text-grey"}`}>+{s.length - 3}</span>}
         </span>
       </button>
     );
@@ -223,13 +223,13 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <p className="eyebrow">{view === "month" ? year : weekCells[0].getFullYear()}</p>
-          <p className="font-display text-[26px] leading-none font-bold text-ink mt-1 truncate">
-            {title}{view === "week" && <span className="text-grey text-[13px] font-sans font-semibold normal-case ml-2">{Math.round(weekLoad)} load</span>}
+          <p className="font-display text-title1 leading-none font-bold text-ink mt-1 truncate">
+            {title}{view === "week" && <span className="text-grey text-footnote font-sans font-semibold normal-case ml-2">{Math.round(weekLoad)} load</span>}
           </p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           {selected !== todayISO && (
-            <button onClick={goToday} className="h-9 px-3 rounded-xl text-[12px] font-bold text-teal border border-line bg-surface">Today</button>
+            <button onClick={goToday} className="h-9 px-3 rounded-xl text-xs font-bold text-teal border border-line bg-surface">Today</button>
           )}
           <button aria-label="Previous" onClick={() => step(-1)} className="w-9 h-9 rounded-xl border border-line bg-surface text-ink grid place-items-center">&#8249;</button>
           <button aria-label="Next" onClick={() => step(1)} className="w-9 h-9 rounded-xl border border-line bg-surface text-ink grid place-items-center">&#8250;</button>
@@ -239,7 +239,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
       {/* ── month / week toggle (21st.dev Day Picker spring pill) ── */}
       <div className="relative mt-4 grid grid-cols-2 p-1 rounded-full bg-light w-full max-w-[240px]">
         {(["month", "week"] as View[]).map((v) => (
-          <button key={v} onClick={() => { setDir(0); setView(v); }} className={`relative z-10 py-1.5 text-[12px] font-bold capitalize transition-colors ${view === v ? "text-ink" : "text-grey"}`}>
+          <button key={v} onClick={() => { setDir(0); setView(v); }} className={`relative z-10 py-1.5 text-xs font-bold capitalize transition-colors ${view === v ? "text-ink" : "text-grey"}`}>
             {view === v && <motion.span layoutId="cal-view" transition={SPRING} className="absolute inset-0 -z-10 rounded-full bg-surface shadow-[0_2px_8px_rgba(22,33,48,.12)]" />}
             {v}
           </button>
@@ -250,7 +250,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
       <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} className="mt-4 overflow-hidden">
         {view === "month" && (
           <div className="grid grid-cols-7 gap-1 text-center mb-1">
-            {DOW.map((d, i) => <div key={i} className="text-[10px] text-grey font-bold uppercase tracking-[.12em]">{d}</div>)}
+            {DOW.map((d, i) => <div key={i} className="text-2xs text-grey font-bold uppercase tracking-[.12em]">{d}</div>)}
           </div>
         )}
         <AnimatePresence mode="wait" initial={false}>
@@ -264,22 +264,22 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
       <div className="mt-4 pt-4 border-t border-line">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="font-bold text-ink text-[15px] truncate">{selected === todayISO ? "Today" : selLabel}</p>
-            <p className="text-grey text-[12px]">
+            <p className="font-bold text-ink text-subhead truncate">{selected === todayISO ? "Today" : selLabel}</p>
+            <p className="text-grey text-xs">
               {selected === todayISO && <>{selLabel} · </>}
               {dayLoad > 0 ? <>{Math.round(dayLoad)} load · {effortWord(Math.round(daySessions.reduce((a, s) => a + s.rpe, 0) / daySessions.length))}</> : "Nothing logged"}
             </p>
           </div>
-          <button onClick={openAdd} className="btn-primary !min-h-0 h-10 px-4 text-[13px] shrink-0">+ Add</button>
+          <button onClick={openAdd} className="btn-primary !min-h-0 h-10 px-4 text-footnote shrink-0">+ Add</button>
         </div>
 
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={selected} initial={reduce ? false : { opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={reduce ? undefined : { opacity: 0, y: -6 }} transition={{ duration: 0.18 }} className="mt-3 flex flex-col gap-2">
             {dayEvents.map((e) => (
               <div key={"e" + e.id} className="flex items-center gap-3 rounded-2xl px-3.5 py-3" style={{ background: "rgba(212,160,23,.1)" }}>
-                <span className="text-[#d4a017] text-[14px]">★</span>
-                <span className="flex-1 min-w-0 truncate text-[14px] font-semibold text-ink">{e.name || e.kind}</span>
-                <span className="text-[11px] font-bold uppercase tracking-[.1em] text-[#a67c00]">Event</span>
+                <span className="text-[#d4a017] text-sm">★</span>
+                <span className="flex-1 min-w-0 truncate text-sm font-semibold text-ink">{e.name || e.kind}</span>
+                <span className="text-2xs font-bold uppercase tracking-[.1em] text-[#a67c00]">Event</span>
               </div>
             ))}
 
@@ -288,16 +288,16 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
                 className="flex items-center gap-3 rounded-2xl px-3.5 py-3 text-left bg-bluewash hover:opacity-90 transition-opacity">
                 <span className="w-2 h-2 rotate-45 shrink-0" style={{ background: PLAN_COLOR[dayPlan.sessionType] ?? "#075bb4" }} />
                 <span className="flex-1 min-w-0">
-                  <span className="block truncate text-[14px] font-semibold text-ink">{dayPlan.title}</span>
-                  <span className="block text-[11px] text-grey">Your plan · {PLAN_LABEL[dayPlan.sessionType] ?? dayPlan.sessionType}{dayPlan.exercises.length ? ` · ${dayPlan.exercises.length} exercises` : ""}</span>
+                  <span className="block truncate text-sm font-semibold text-ink">{dayPlan.title}</span>
+                  <span className="block text-2xs text-grey">Your plan · {PLAN_LABEL[dayPlan.sessionType] ?? dayPlan.sessionType}{dayPlan.exercises.length ? ` · ${dayPlan.exercises.length} exercises` : ""}</span>
                 </span>
-                <span className="text-teal text-[12px] font-bold shrink-0">Open ›</span>
+                <span className="text-teal text-xs font-bold shrink-0">Open ›</span>
               </button>
             )}
             {dayPlan?.sessionType === "rest" && (
               <div className="flex items-center gap-3 rounded-2xl px-3.5 py-3 bg-light">
                 <span className="w-2 h-2 rounded-full bg-[#9aa3b5]" />
-                <span className="text-[14px] font-semibold text-grey">Planned rest day</span>
+                <span className="text-sm font-semibold text-grey">Planned rest day</span>
               </div>
             )}
 
@@ -307,10 +307,10 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
                 <div key={s.id} className="group flex items-center gap-3 rounded-2xl px-3.5 py-3" style={{ background: `color-mix(in srgb, ${c} 10%, transparent)` }}>
                   <span className="w-1 self-stretch rounded-full shrink-0" style={{ background: c }} />
                   <span className="flex-1 min-w-0">
-                    <span className="block truncate text-[14px] font-semibold text-ink">{classLabel(s.kind)}</span>
-                    <span className="block text-[11px] text-grey">{s.duration_min} min · {effortWord(s.rpe)} (RPE {s.rpe}) · {sessionTrimp(s.duration_min, s.rpe)} load</span>
+                    <span className="block truncate text-sm font-semibold text-ink">{classLabel(s.kind)}</span>
+                    <span className="block text-2xs text-grey">{s.duration_min} min · {effortWord(s.rpe)} (RPE {s.rpe}) · {sessionTrimp(s.duration_min, s.rpe)} load</span>
                   </span>
-                  {fmtTime(s.start_time) && <span className="text-[12px] font-bold shrink-0" style={{ color: c }}>{fmtTime(s.start_time)}</span>}
+                  {fmtTime(s.start_time) && <span className="text-xs font-bold shrink-0" style={{ color: c }}>{fmtTime(s.start_time)}</span>}
                   <button aria-label={`Remove ${classLabel(s.kind)}`} disabled={busy} onClick={() => removeSession(s.id)}
                     className="w-7 h-7 rounded-full grid place-items-center text-grey hover:text-red-600 hover:bg-white/60 shrink-0">✕</button>
                 </div>
@@ -318,7 +318,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
             })}
 
             {daySessions.length === 0 && dayEvents.length === 0 && !dayPlan && (
-              <button onClick={openAdd} className="rounded-2xl border border-dashed border-line px-4 py-5 text-center text-grey text-[13px] hover:border-teal hover:text-teal transition-colors">
+              <button onClick={openAdd} className="rounded-2xl border border-dashed border-line px-4 py-5 text-center text-grey text-footnote hover:border-teal hover:text-teal transition-colors">
                 No training logged. <b>Add a class</b> — or enjoy the rest.
               </button>
             )}
@@ -328,13 +328,13 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
 
       {/* legend */}
       <div className="flex items-center justify-between gap-3 flex-wrap mt-5">
-        <p className="text-grey text-[10px] leading-relaxed">● class &nbsp; ◆ plan &nbsp; ★ event · swipe to change {view}</p>
+        <p className="text-grey text-2xs leading-relaxed">● class &nbsp; ◆ plan &nbsp; ★ event · swipe to change {view}</p>
         <div className="flex items-center gap-1.5">
-          <span className="text-[9px] text-grey font-bold uppercase tracking-[.1em]">Lighter</span>
+          <span className="text-2xs text-grey font-bold uppercase tracking-[.1em]">Lighter</span>
           {[0, .25, .5, .75, 1].map((h) => (
-            <span key={h} className="w-3.5 h-3.5 rounded-[5px]" style={{ background: h === 0 ? "var(--c-surface)" : `color-mix(in srgb, var(--c-teal) ${(6 + h * 26).toFixed(1)}%, var(--c-surface))`, boxShadow: "inset 0 0 0 1px rgba(28,33,40,.08)" }} />
+            <span key={h} className="w-3.5 h-3.5 rounded-md" style={{ background: h === 0 ? "var(--c-surface)" : `color-mix(in srgb, var(--c-teal) ${(6 + h * 26).toFixed(1)}%, var(--c-surface))`, boxShadow: "inset 0 0 0 1px rgba(28,33,40,.08)" }} />
           ))}
-          <span className="text-[9px] text-grey font-bold uppercase tracking-[.1em]">Heavier</span>
+          <span className="text-2xs text-grey font-bold uppercase tracking-[.1em]">Heavier</span>
         </div>
       </div>
 
@@ -345,7 +345,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="eyebrow">{fromYmd(viewPlan.date).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</p>
-                <p className="font-display text-[24px] font-bold text-ink leading-tight mt-1">{viewPlan.title}</p>
+                <p className="font-display text-2xl font-bold text-ink leading-tight mt-1">{viewPlan.title}</p>
               </div>
               <button className="w-8 h-8 rounded-full grid place-items-center text-grey bg-light" onClick={() => setViewPlan(null)}>✕</button>
             </div>
@@ -359,7 +359,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
                         <p className="font-semibold text-ink text-sm truncate">{ex.name}</p>
                         <p className="text-xs text-grey mt-0.5">Level {ex.level} · {ex.category}</p>
                       </div>
-                      {openVid !== ex.id && <button className="btn-ghost !min-h-0 h-8 px-3 text-[12px]" onClick={() => setOpenVid(ex.id)}>Watch ▸</button>}
+                      {openVid !== ex.id && <button className="btn-ghost !min-h-0 h-8 px-3 text-xs" onClick={() => setOpenVid(ex.id)}>Watch ▸</button>}
                     </div>
                     {openVid === ex.id && <div className="mt-2"><ExerciseVideo cloudinaryId={ex.cloudinary_id} youtubeId={ex.youtube_id} title={ex.name} /></div>}
                   </div>
@@ -383,7 +383,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="eyebrow">Add training</p>
-                <p className="font-display text-[24px] font-bold text-ink leading-tight mt-1">{selDate.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</p>
+                <p className="font-display text-2xl font-bold text-ink leading-tight mt-1">{selDate.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</p>
               </div>
               <button className="w-8 h-8 rounded-full grid place-items-center text-grey bg-light" onClick={closeAdd}>✕</button>
             </div>
@@ -392,7 +392,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
             <div className="mt-3 space-y-3">
               {filteredGroups.map((g) => (
                 <div key={g.title}>
-                  <p className="text-grey text-[11px] font-semibold uppercase tracking-wide">{g.title}</p>
+                  <p className="text-grey text-2xs font-semibold uppercase tracking-wide">{g.title}</p>
                   <div className="flex flex-wrap gap-1.5 mt-1.5">
                     {g.items.map((p) => (
                       <button key={p.kind} onClick={() => pickKind(p.kind)}
@@ -421,7 +421,7 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
             </div>
             <div className="flex gap-1.5 mt-2">
               {[45, 60, 90, 120].map((m) => (
-                <button key={m} onClick={() => setDur(String(m))} className={`flex-1 rounded-xl py-1.5 text-[12px] font-bold border ${Number(dur) === m ? "bg-bluewash border-teal text-teal" : "border-line text-grey"}`}>{m}m</button>
+                <button key={m} onClick={() => setDur(String(m))} className={`flex-1 rounded-xl py-1.5 text-xs font-bold border ${Number(dur) === m ? "bg-bluewash border-teal text-teal" : "border-line text-grey"}`}>{m}m</button>
               ))}
             </div>
 
@@ -433,16 +433,16 @@ export default function Calendar({ sessions, events, planDays = [] }: { sessions
               <div className="grid grid-cols-10 gap-1 mt-2">
                 {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
                   <button key={n} onClick={() => setRpe(n)} aria-label={`Effort ${n}`}
-                    className={`h-9 rounded-lg text-[12px] font-bold transition-colors ${n === rpe ? "text-white" : n < rpe ? "text-teal" : "text-grey"}`}
+                    className={`h-9 rounded-lg text-xs font-bold transition-colors ${n === rpe ? "text-white" : n < rpe ? "text-teal" : "text-grey"}`}
                     style={{ background: n === rpe ? "var(--c-teal)" : n < rpe ? "var(--c-bluewash)" : "var(--c-light)" }}>{n}</button>
                 ))}
               </div>
-              <div className="flex justify-between text-[10px] text-grey mt-1"><span>easy</span><span>max</span></div>
+              <div className="flex justify-between text-2xs text-grey mt-1"><span>easy</span><span>max</span></div>
             </div>
 
             <div className="flex items-center justify-between rounded-2xl bg-light px-4 py-3 mt-4">
               <span className="text-sm text-grey">Training load</span>
-              <span className="font-display text-[22px] font-bold text-ink">{sessionTrimp(Number(dur) || 0, rpe)}</span>
+              <span className="font-display text-title2 font-bold text-ink">{sessionTrimp(Number(dur) || 0, rpe)}</span>
             </div>
 
             <label className="flex items-center justify-between gap-3 mt-4 cursor-pointer">
@@ -478,7 +478,7 @@ function Sheet({ children, onClose }: { children: React.ReactNode; onClose: () =
       <motion.div
         initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }}
         transition={{ type: "spring", damping: 32, stiffness: 380 }}
-        className="w-full sm:max-w-md bg-surface rounded-t-[28px] sm:rounded-[28px] p-5 pb-[calc(20px+env(safe-area-inset-bottom))] max-h-[88vh] overflow-y-auto shadow-[0_-10px_40px_rgba(0,0,0,.2)]"
+        className="w-full sm:max-w-md bg-surface rounded-t-3xl sm:rounded-3xl p-5 pb-[calc(20px+env(safe-area-inset-bottom))] max-h-[88vh] overflow-y-auto shadow-[0_-10px_40px_rgba(0,0,0,.2)]"
         onClick={(e) => e.stopPropagation()}>
         <div className="sm:hidden mx-auto -mt-1 mb-3 w-10 h-1.5 rounded-full bg-line" />
         {children}

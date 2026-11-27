@@ -309,7 +309,7 @@ export default function PoseCamera() {
           {ORDER.map((v) => {
             const got = capturedViews.includes(v);
             return (
-              <span key={v} className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${got ? "bg-teal text-white" : target === v ? "bg-white text-navy" : "bg-white/25 text-white"}`}>
+              <span key={v} className={`text-2xs font-bold px-1.5 py-0.5 rounded ${got ? "bg-teal text-white" : target === v ? "bg-white text-navy" : "bg-white/25 text-white"}`}>
                 {VIEW_LABEL[v]}{got ? " ✓" : ""}
               </span>
             );

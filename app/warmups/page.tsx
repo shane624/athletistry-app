@@ -21,13 +21,13 @@ export default function WarmupsPage() {
               <div className="workout-cover-media">
                 <img src={`https://i.ytimg.com/vi/${w.yid}/hqdefault.jpg`} alt="" />
                 <span className="workout-play"><Icon name="play" className="w-5 h-5 ml-0.5" /></span>
-                <span className="absolute z-[2] left-4 bottom-3 text-[8px] uppercase tracking-[.16em] text-white/60">{w.level} · follow along</span>
+                <span className="absolute z-[2] left-4 bottom-3 text-2xs uppercase tracking-[.16em] text-white/60">{w.level} · follow along</span>
               </div>
-              <div className="p-5"><h2 className="font-display text-[31px] leading-none font-bold text-white">{w.title}</h2><p className="text-white/50 text-[10px] leading-relaxed mt-3">{w.desc}</p><span className="text-[#7ea8eb] text-[9px] font-bold mt-5 inline-flex items-center gap-1">Start warm-up <Icon name="chevron" className="w-3.5 h-3.5" /></span></div>
+              <div className="p-5"><h2 className="font-display text-large leading-none font-bold text-white">{w.title}</h2><p className="text-white/50 text-2xs leading-relaxed mt-3">{w.desc}</p><span className="text-[#7ea8eb] text-2xs font-bold mt-5 inline-flex items-center gap-1">Start warm-up <Icon name="chevron" className="w-3.5 h-3.5" /></span></div>
             </Link>
           ))}
         </section>
-        <section className="panel panel-pad mt-6 animate-in"><p className="panel-title">When to use these</p><h2 className="font-display text-[26px] leading-none font-bold text-ink mt-3">Before class. Before training. Before it matters.</h2><p className="text-grey text-[10px] leading-relaxed mt-3 max-w-2xl">Use a warm-up before strength work, ballet class, rehearsal, performance, or an exam. The point is not to exhaust yourself. It is to arrive at the first real task ready to move.</p></section>
+        <section className="panel panel-pad mt-6 animate-in"><p className="panel-title">When to use these</p><h2 className="font-display text-title1 leading-none font-bold text-ink mt-3">Before class. Before training. Before it matters.</h2><p className="text-grey text-2xs leading-relaxed mt-3 max-w-2xl">Use a warm-up before strength work, ballet class, rehearsal, performance, or an exam. The point is not to exhaust yourself. It is to arrive at the first real task ready to move.</p></section>
       </main>
     </div>
   );

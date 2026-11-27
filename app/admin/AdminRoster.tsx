@@ -60,8 +60,8 @@ export default function AdminRoster({ initial }: { initial: MemberRow[] }) {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-bold text-navy">{m.name || "—"}</span>
                   {m.disabled
-                    ? <span className="badge bg-grey text-white text-[11px]">Disabled</span>
-                    : <span className="badge bg-teal text-white text-[11px]">{m.rank}</span>}
+                    ? <span className="badge bg-grey text-white text-2xs">Disabled</span>
+                    : <span className="badge bg-teal text-white text-2xs">{m.rank}</span>}
                 </div>
                 <div className="text-grey text-xs mt-0.5 break-all">{m.email}</div>
               </div>
@@ -97,7 +97,7 @@ function Cell({ label, value, alert }: { label: string; value: string; alert?: b
   return (
     <div className="rounded-lg bg-rowalt py-2 px-1">
       <div className={`text-sm font-semibold ${alert ? "text-red-600" : "text-navy"}`}>{value}</div>
-      <div className="text-grey text-[11px]">{label}</div>
+      <div className="text-grey text-2xs">{label}</div>
     </div>
   );
 }

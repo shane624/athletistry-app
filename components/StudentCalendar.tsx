@@ -61,7 +61,7 @@ export default function StudentCalendar({ sessions, events }: { sessions: Sessio
       </div>
 
       <div className="grid grid-cols-7 gap-1 mt-3 text-center">
-        {WEEK.map((w) => <div key={w} className="text-grey text-[10px] font-bold uppercase py-1">{w}</div>)}
+        {WEEK.map((w) => <div key={w} className="text-grey text-2xs font-bold uppercase py-1">{w}</div>)}
         {cells.map((d, i) => {
           if (d === null) return <div key={i} />;
           const key = iso(y, m, d);
@@ -83,7 +83,7 @@ export default function StudentCalendar({ sessions, events }: { sessions: Sessio
         })}
       </div>
 
-      <div className="flex items-center gap-3 mt-2 text-[11px] text-grey">
+      <div className="flex items-center gap-3 mt-2 text-2xs text-grey">
         <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-teal" /> Session</span>
         <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" /> Event</span>
       </div>

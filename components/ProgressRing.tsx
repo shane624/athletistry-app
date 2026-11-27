@@ -10,7 +10,7 @@ export default function ProgressRing({ value, size = 126, label }: { value: numb
         <circle cx="56" cy="56" r={r} fill="none" stroke="var(--c-teal)" strokeWidth="7" strokeLinecap="round" strokeDasharray={`${dash} ${c}`} />
       </svg>
       <div className="absolute inset-0 grid place-items-center text-center">
-        <div><span className="font-display text-[28px] font-bold leading-none text-ink">{clamped}%</span>{label && <span className="block mt-1 text-[9px] uppercase tracking-[.14em] text-grey">{label}</span>}</div>
+        <div><span className="font-display text-title1 font-bold leading-none text-ink">{clamped}%</span>{label && <span className="block mt-1 text-2xs uppercase tracking-[.14em] text-grey">{label}</span>}</div>
       </div>
     </div>
   );

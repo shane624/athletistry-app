@@ -118,7 +118,7 @@ export default function EventPlanDay({ plan, upcoming = [], levelIndex = 0, leve
                   <Icon name={SESSION_ICON[nextWorkout.sessionType] ?? "dumbbell"} className="w-4 h-4" />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[11px] text-grey uppercase tracking-wide">Next workout · {nextWorkout.weekday}</p>
+                  <p className="text-2xs text-grey uppercase tracking-wide">Next workout · {nextWorkout.weekday}</p>
                   <p className="font-bold text-navy text-sm">{nextWorkout.title}</p>
                 </div>
               </div>

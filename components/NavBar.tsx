@@ -47,7 +47,7 @@ export default function NavBar() {
           <div className="h-[58px] flex items-center gap-3">
             <Link href="/dashboard" className="mobile-brand shrink-0" aria-label="Athletistry home">{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/icon-192.png" alt="" className="w-7 h-7 rounded-lg" /></Link>
             <div className="min-w-0 flex-1 text-center">
-              <span className="font-display text-[18px] font-bold text-ink leading-none">{current}</span>
+              <span className="font-display text-lg font-bold text-ink leading-none">{current}</span>
             </div>
             <span data-tour="menu" className="shrink-0"><GlobalSearch compact /></span>
             <button onClick={() => setOpen((v) => !v)} className="mobile-menu-button" aria-expanded={open} aria-label="Open menu">
@@ -63,12 +63,12 @@ export default function NavBar() {
               <nav className="px-3 py-4">
                 {groups.map((g) => (
                   <div key={g.title} className="mb-4 last:mb-0">
-                    <p className="text-teal text-[8px] font-bold tracking-[.2em] uppercase px-2 mb-1.5">{g.title}</p>
+                    <p className="text-teal text-2xs font-bold tracking-[.2em] uppercase px-2 mb-1.5">{g.title}</p>
                     <div className="grid grid-cols-2 gap-1">
                       {g.items.map((l) => {
                         const active = l.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(l.href);
                         return (
-                          <Link key={l.href} href={l.href} className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-[12px] transition ${active ? "bg-navy text-white" : "text-ink hover:bg-light"}`}>
+                          <Link key={l.href} href={l.href} className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs transition ${active ? "bg-navy text-white" : "text-ink hover:bg-light"}`}>
                             <Icon name={l.icon} className="w-4 h-4" /> {l.label}
                           </Link>
                         );
@@ -77,8 +77,8 @@ export default function NavBar() {
                   </div>
                 ))}
                 <div className="border-t border-black/[.06] mt-2 pt-2 space-y-1">
-                  <button onClick={() => { setOpen(false); setTimeout(() => window.dispatchEvent(new Event("athl:start-tour")), 250); }} className="px-3 py-2.5 rounded-xl text-[12px] text-left text-teal hover:bg-light w-full">Show me around this page</button>
-                  <button onClick={signOut} className="px-3 py-2.5 rounded-xl text-[12px] text-left text-grey hover:bg-light w-full">Sign out</button>
+                  <button onClick={() => { setOpen(false); setTimeout(() => window.dispatchEvent(new Event("athl:start-tour")), 250); }} className="px-3 py-2.5 rounded-xl text-xs text-left text-teal hover:bg-light w-full">Show me around this page</button>
+                  <button onClick={signOut} className="px-3 py-2.5 rounded-xl text-xs text-left text-grey hover:bg-light w-full">Sign out</button>
                 </div>
               </nav>
             </div>

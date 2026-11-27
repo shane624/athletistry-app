@@ -5,8 +5,11 @@ import { usePathname } from "next/navigation";
 import Icon from "@/components/Icon";
 import { PRIMARY_NAV } from "@/lib/nav-items";
 
-// Same five destinations as the desktop sidebar, in the same order, so the two
-// never drift apart and a member's mental model survives changing device.
+// Phones get five tabs, which is the most a thumb can tell apart without
+// reading. Learn folds into Profile here (and stays one tap away in the menu
+// and search); the desktop sidebar has the room to show all six.
+const MOBILE_TABS = PRIMARY_NAV.filter((t) => t.href !== "/guide");
+
 const SECTION_OF: Record<string, string> = {
   "/programs": "/explore",
   "/workouts": "/explore",
@@ -20,11 +23,15 @@ const SECTION_OF: Record<string, string> = {
   "/exercises": "/explore",
   "/session": "/explore",
   "/build": "/explore",
+  "/tools": "/explore",
   "/achievements": "/progress",
-  "/anatomy": "/guide",
-  "/training-science": "/guide",
-  "/training-styles": "/guide",
+  "/self-tests": "/progress",
+  "/guide": "/profile",
+  "/anatomy": "/profile",
+  "/training-science": "/profile",
+  "/training-styles": "/profile",
   "/settings": "/profile",
+  "/pricing": "/profile",
   "/menu": "/profile",
 };
 
@@ -38,20 +45,18 @@ export default function BottomTabBar() {
   const section = sectionFor(pathname);
   return (
     <nav aria-label="Primary" className="mobile-tab-shell sm:hidden fixed z-40">
-      <ul className="flex px-1 py-1">
-        {PRIMARY_NAV.map((t) => {
+      <ul className="flex">
+        {MOBILE_TABS.map((t) => {
           const active = section === t.href;
           return (
             <li key={t.href} className="flex-1 min-w-0">
               <Link
                 href={t.href}
                 aria-current={active ? "page" : undefined}
-                className={`tab-press flex flex-col items-center gap-0.5 py-1.5 transition-colors ${active ? "mobile-tab-active" : "text-white/58"}`}
+                className={`mobile-tab tab-press flex flex-col items-center justify-center gap-1 pt-1.5 pb-1 ${active ? "mobile-tab-active" : ""}`}
               >
-                <span className={`w-9 h-7 rounded-full flex items-center justify-center transition-all duration-200 ${active ? "mobile-tab-icon-active -translate-y-0.5" : ""}`}>
-                  <Icon name={t.icon} className="w-[18px] h-[18px]" strokeWidth={active ? 2 : 1.55} />
-                </span>
-                <span className={`text-[9px] leading-none truncate max-w-full ${active ? "font-bold" : "font-medium"}`}>{t.label}</span>
+                <Icon name={t.icon} className="w-6 h-6" strokeWidth={active ? 2.1 : 1.6} />
+                <span className={`mobile-tab-label truncate max-w-full ${active ? "font-semibold" : ""}`}>{t.label}</span>
               </Link>
             </li>
           );

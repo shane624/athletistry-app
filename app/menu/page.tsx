@@ -35,7 +35,7 @@ export default function MenuPage() {
                     <span className="settings-icon shrink-0">
                       <Icon name={it.icon} className="w-4 h-4" />
                     </span>
-                    <span className="flex-1 min-w-0 text-ink text-[12px] font-semibold truncate">{it.label}</span>
+                    <span className="flex-1 min-w-0 text-ink text-xs font-semibold truncate">{it.label}</span>
                     <Icon name="chevron" className="w-3.5 h-3.5 text-grey shrink-0" />
                   </Link>
                 ))}

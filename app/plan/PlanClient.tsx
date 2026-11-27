@@ -229,8 +229,8 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
               </li>
             ))}
           </ol>
-          <h2 className="font-display text-[28px] leading-[1.04] font-bold text-ink tracking-[-.03em] mt-5">{STEPS[step].title}</h2>
-          <p className="text-grey text-[12px] leading-relaxed mt-1.5">{STEPS[step].subtitle}</p>
+          <h2 className="font-display text-title1 leading-[1.04] font-bold text-ink tracking-[-.03em] mt-5">{STEPS[step].title}</h2>
+          <p className="text-grey text-xs leading-relaxed mt-1.5">{STEPS[step].subtitle}</p>
         </div>
 
         <div key={step} className="animate-in space-y-5">
@@ -521,12 +521,12 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                           title={`${w.label}: ${w.focus}`}
                         />
                       </div>
-                      <span className="text-[10px] text-grey mt-1">{w.index}</span>
+                      <span className="text-2xs text-grey mt-1">{w.index}</span>
                     </div>
                   );
                 })}
               </div>
-              <div className="flex justify-between text-[11px] text-grey mt-2">
+              <div className="flex justify-between text-2xs text-grey mt-2">
                 <span>Build ↗</span>
                 <span>Ease off ↘ · arrive fresh</span>
               </div>
@@ -543,7 +543,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                   const weeksOut = (plan?.weeksOut ?? 0) - (wk.weekIndex - 1);
                   return (
                   <div key={wk.weekIndex} className="animate-in">
-                    <p className="text-[11px] font-bold tracking-widest uppercase text-grey mb-2">
+                    <p className="text-2xs font-bold tracking-widest uppercase text-grey mb-2">
                       Week {wk.weekIndex} · {weeksOut === 0 ? "event week 🩰" : `${weeksOut} ${weeksOut === 1 ? "week" : "weeks"} to go`}
                     </p>
                     <div className="space-y-1.5">
@@ -552,7 +552,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                         return (
                         <div key={d.iso} className={`flex items-start gap-3 rounded-xl border border-line p-2.5 ${rest ? "bg-light/40" : ""}`}>
                           <span className="w-12 text-center shrink-0">
-                            <span className="block text-[11px] text-grey uppercase">{DAYS[d.weekday]}</span>
+                            <span className="block text-2xs text-grey uppercase">{DAYS[d.weekday]}</span>
                             <span className="block text-sm font-bold text-ink">{d.iso.slice(8)}</span>
                           </span>
                           <span className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${SESSION_TONE[d.type]}`}>
@@ -573,7 +573,7 @@ export default function PlanClient({ loggedClasses = [] }: { loggedClasses?: Log
                                   );
                                 })}
                                 {styleExercises[d.type].length > 4 && (
-                                  <span className="w-8 h-8 rounded-lg ring-2 ring-white bg-light flex items-center justify-center text-[11px] font-bold text-tealdark shrink-0">
+                                  <span className="w-8 h-8 rounded-lg ring-2 ring-white bg-light flex items-center justify-center text-2xs font-bold text-tealdark shrink-0">
                                     +{styleExercises[d.type].length - 4}
                                   </span>
                                 )}

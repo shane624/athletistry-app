@@ -102,7 +102,7 @@ export default function ExercisePicker({
           )}
           {sections.map((sec) => (
             <div key={sec.key} data-sec={sec.key}>
-              <p className="sticky top-0 bg-surface/95 backdrop-blur text-[11px] font-bold uppercase tracking-wide text-grey py-1.5 z-[1]">{sec.key}</p>
+              <p className="sticky top-0 bg-surface/95 backdrop-blur text-2xs font-bold uppercase tracking-wide text-grey py-1.5 z-[1]">{sec.key}</p>
               {sec.rows.map((e) => {
                 const n = counts[e.id] ?? 0;
                 const t = thumb(e);
@@ -116,7 +116,7 @@ export default function ExercisePicker({
                       <span className="block text-sm text-navy truncate">{e.name}</span>
                       <span className="block text-xs text-grey">L{e.level} · {e.category}</span>
                     </span>
-                    {n > 0 && <span className="text-[11px] font-bold text-tealdark shrink-0">×{n}</span>}
+                    {n > 0 && <span className="text-2xs font-bold text-tealdark shrink-0">×{n}</span>}
                     <span className="w-7 h-7 rounded-full border border-teal text-teal flex items-center justify-center shrink-0 text-lg leading-none" aria-label={`Add ${e.name}`}>+</span>
                   </button>
                 );
@@ -130,7 +130,7 @@ export default function ExercisePicker({
           <div className="absolute right-0 top-0 bottom-0 flex flex-col justify-center gap-0.5 py-1">
             {letters.map((l) => (
               <button key={l} onClick={() => jumpTo(l)}
-                className="text-[11px] leading-none text-grey hover:text-teal font-semibold w-4 text-center">
+                className="text-2xs leading-none text-grey hover:text-teal font-semibold w-4 text-center">
                 {l}
               </button>
             ))}

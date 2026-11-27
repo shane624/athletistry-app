@@ -145,8 +145,8 @@ export default function StudioRoster({ studio, students }: { studio: StudioSumma
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-bold text-navy">{s.name}</span>
                   {!s.tracking
-                    ? <span className="text-[11px] font-bold px-1.5 py-0.5 rounded border bg-red-100 text-red-700 border-red-200">Not tracking</span>
-                    : <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded border ${LOAD_STYLE[s.loadStatus] ?? "bg-light text-grey border-line"}`}>{s.loadLabel}</span>}
+                    ? <span className="text-2xs font-bold px-1.5 py-0.5 rounded border bg-red-100 text-red-700 border-red-200">Not tracking</span>
+                    : <span className={`text-2xs font-bold px-1.5 py-0.5 rounded border ${LOAD_STYLE[s.loadStatus] ?? "bg-light text-grey border-line"}`}>{s.loadLabel}</span>}
                 </div>
                 <p className="text-grey text-xs mt-0.5 break-all">{s.email}</p>
               </Link>
@@ -187,7 +187,7 @@ function Cell({ label, value, alert }: { label: string; value: string; alert?: b
   return (
     <div className="rounded-lg bg-light py-2 px-1">
       <div className={`text-sm font-semibold ${alert ? "text-red-600" : "text-navy"}`}>{value}</div>
-      <div className="text-grey text-[11px]">{label}</div>
+      <div className="text-grey text-2xs">{label}</div>
     </div>
   );
 }

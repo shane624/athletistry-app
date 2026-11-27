@@ -74,16 +74,16 @@ export default function GlobalSearch({ compact = false }: { compact?: boolean })
           onChange={(e) => { setQ(e.target.value); setOpen(true); }}
           onFocus={() => { ensureExercises(); setOpen(true); }}
           placeholder="Search Athletistry"
-          className="bg-transparent text-ink text-[13px] placeholder:text-grey outline-none w-full"
+          className="bg-transparent text-ink text-footnote placeholder:text-grey outline-none w-full"
           aria-label="Search the app"
         />
-        {q ? <button onClick={() => setQ("")} className="text-grey text-xs shrink-0" aria-label="Clear">✕</button> : compact ? <button onClick={() => { setExpanded(false); setOpen(false); }} className="text-grey text-[10px] font-semibold">Close</button> : null}
+        {q ? <button onClick={() => setQ("")} className="text-grey text-xs shrink-0" aria-label="Clear">✕</button> : compact ? <button onClick={() => { setExpanded(false); setOpen(false); }} className="text-grey text-2xs font-semibold">Close</button> : null}
       </div>
       {open && (q || compact) && (
-        <div className={`${compact ? "relative" : "absolute left-0 right-0"} mt-2 z-40 bg-white/95 rounded-[20px] shadow-2xl border border-black/[.07] max-h-[60vh] overflow-y-auto backdrop-blur-xl`} style={{ minWidth: compact ? undefined : 300 }}>
+        <div className={`${compact ? "relative" : "absolute left-0 right-0"} mt-2 z-40 bg-white/95 rounded-3xl shadow-2xl border border-black/[.07] max-h-[60vh] overflow-y-auto backdrop-blur-xl`} style={{ minWidth: compact ? undefined : 300 }}>
           {!q ? <p className="text-grey text-xs p-4">Search programs, exercises, ballet moves, and app pages.</p> : grouped.length === 0 ? <p className="text-grey text-sm p-4">No matches for “{q}”.</p> : grouped.map((g) => (
             <div key={g.kind} className="py-1.5">
-              <p className="px-4 pt-2 pb-1 text-[9px] font-bold uppercase tracking-[.18em] text-grey">{KIND_LABEL[g.kind]}</p>
+              <p className="px-4 pt-2 pb-1 text-2xs font-bold uppercase tracking-[.18em] text-grey">{KIND_LABEL[g.kind]}</p>
               {g.items.map((it, i) => (
                 <button key={g.kind + i} onClick={() => go(it)} className="w-full text-left px-4 py-2.5 hover:bg-light flex items-center justify-between gap-2 transition">
                   <span className="min-w-0"><span className="block text-navy text-sm font-medium truncate">{it.title}</span>{it.subtitle && <span className="block text-grey text-xs truncate">{it.subtitle}</span>}</span><span className="text-teal text-xs shrink-0">→</span>

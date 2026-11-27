@@ -48,9 +48,9 @@ export default async function ProgressPage() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="panel-title">Monthly activity</p>
-                <p className="text-grey text-[11px] mt-1">Distinct days you trained</p>
+                <p className="text-grey text-2xs mt-1">Distinct days you trained</p>
               </div>
-              <span className="text-[10px] text-grey border border-line rounded-full px-3 py-1.5">Last 8 months</span>
+              <span className="text-2xs text-grey border border-line rounded-full px-3 py-1.5">Last 8 months</span>
             </div>
             <ActivityTrend data={overview.monthly} />
           </div>
@@ -60,10 +60,10 @@ export default async function ProgressPage() {
             <div className="progress-phase mt-4">
               <ProgressRing value={overview.phasePercent} label="complete" />
               <div>
-                <p className="font-display text-[25px] font-bold leading-none text-ink">{overview.phaseLabel}</p>
-                <p className="text-grey text-[11px] mt-1">{overview.phaseDetail}</p>
+                <p className="font-display text-title1 font-bold leading-none text-ink">{overview.phaseLabel}</p>
+                <p className="text-grey text-2xs mt-1">{overview.phaseDetail}</p>
                 <div className="progress-bar-thin mt-5"><span style={{ width: `${overview.phasePercent}%` }} /></div>
-                <div className="flex justify-between gap-3 mt-2 text-[9px] text-grey">
+                <div className="flex justify-between gap-3 mt-2 text-2xs text-grey">
                   <span>{overview.phaseProgressLabel}</span><span>{overview.phasePercent}%</span>
                 </div>
               </div>
@@ -75,15 +75,15 @@ export default async function ProgressPage() {
           <div id="muscle-focus" className="scroll-mt-24"><MuscleBalance /></div>
           <div className="panel panel-pad animate-in">
             <div className="flex items-center justify-between gap-3">
-              <div><p className="panel-title">Recent workouts</p><p className="text-grey text-[10px] mt-1">Your latest training days</p></div>
+              <div><p className="panel-title">Recent workouts</p><p className="text-grey text-2xs mt-1">Your latest training days</p></div>
               <Icon name="check" className="w-4 h-4 text-teal" />
             </div>
             <div className="mt-3">
               {overview.recent.length ? overview.recent.map((r) => (
                 <div key={r.date} className="recent-row">
                   <span className="recent-thumb"><Icon name="ballet" className="w-4 h-4" /></span>
-                  <div className="min-w-0 flex-1"><p className="text-[11px] font-semibold text-ink truncate">{r.label}</p><p className="text-[9px] text-grey truncate">{r.detail}</p></div>
-                  <time className="text-[9px] text-grey" dateTime={r.date}>{new Date(`${r.date}T12:00:00`).toLocaleDateString("en-AU", { day: "numeric", month: "short" })}</time>
+                  <div className="min-w-0 flex-1"><p className="text-2xs font-semibold text-ink truncate">{r.label}</p><p className="text-2xs text-grey truncate">{r.detail}</p></div>
+                  <time className="text-2xs text-grey" dateTime={r.date}>{new Date(`${r.date}T12:00:00`).toLocaleDateString("en-AU", { day: "numeric", month: "short" })}</time>
                 </div>
               )) : <p className="text-grey text-xs py-5">Your recent sessions will appear here as you log training.</p>}
             </div>
@@ -93,8 +93,8 @@ export default async function ProgressPage() {
         <section id="lift-progress" className="mt-9 scroll-mt-24 animate-in">
           <p className="eyebrow">Strength history</p>
           <div className="flex items-end justify-between gap-4 flex-wrap mt-1">
-            <h2 className="font-display text-[34px] leading-none font-bold text-ink">Exercise progress.</h2>
-            <p className="text-grey text-[11px] max-w-md">Choose an exercise to see top-set load and training volume across your current program.</p>
+            <h2 className="font-display text-large leading-none font-bold text-ink">Exercise progress.</h2>
+            <p className="text-grey text-2xs max-w-md">Choose an exercise to see top-set load and training volume across your current program.</p>
           </div>
           <ProgressClient exercises={exercises} programId={programId} />
         </section>

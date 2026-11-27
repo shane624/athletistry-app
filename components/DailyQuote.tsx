@@ -39,8 +39,8 @@ export default function DailyQuote() {
     <div className="card quote-card animate-in">
       <span className="quote-mark" aria-hidden>“</span>
       <p className="eyebrow mt-1">For today</p>
-      <p className="font-display text-[25px] md:text-[28px] font-bold leading-[1.03] text-navy mt-3">{q.text}</p>
-      <p className="text-grey text-[11px] mt-4 tracking-wide">{q.author}</p>
+      <p className="font-display text-title1 md:text-title1 font-bold leading-[1.03] text-navy mt-3">{q.text}</p>
+      <p className="text-grey text-2xs mt-4 tracking-wide">{q.author}</p>
     </div>
   );
 }
